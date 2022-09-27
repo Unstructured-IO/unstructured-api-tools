@@ -77,6 +77,11 @@ multiple string parameters. A `curl` request against such an API could look like
       -F 'subject=math' \
       -F 'name=feynman'
 
+## Security Policy
+
+See our [security policy](https://github.com/Unstructured-IO/unstructured-api-tools/security/policy) for
+information on how to report security vulnerabilities.
+
 ## Learn more
 
 | Section | Description |
