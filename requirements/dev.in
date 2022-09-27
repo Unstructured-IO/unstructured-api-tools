@@ -1,4 +1,4 @@
 # NOTE(robinson) - Pinning version due to the NotOneFoundException crash described here.
 # ref: https://github.com/ipython/ipython/issues/13598
-ipython==8.1.1
+ipython==8.5.0
 pip-tools
