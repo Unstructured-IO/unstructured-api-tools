@@ -13,7 +13,6 @@ from slowapi.errors import RateLimitExceeded
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 
-import pandas as pd
 
 limiter = Limiter(key_func=get_remote_address)
 app = FastAPI()
@@ -39,13 +38,14 @@ response_type: str = "{{response_type}}",
     text = file.file.read().decode("utf-8")
     response = pipeline_api(text, {% for param in multi_string_param_names %}{{param}}, {% endfor %})
     
-    media_type = request.headers.get("accept") or response_type
-    if media_type == "application/json" or media_type == "*/*":
-        return response
-    elif media_type == "text/csv":
-        # need a better way to format CVS file
-        pd_obj = pd.DataFrame(response)
-        response = pd_obj.to_csv(index=False)
+    media_type = request.headers.get("accept")
+    if media_type != "*/*":
+        response_type = media_type
+    elif "response_type" not in locals():
+        response_type = "*/*"
+
+    valid_response_types = ["application/json", "text/csv", "*/*"]
+    if response_type in valid_response_types:
         return response
     else:
         return PlainTextResponse(
