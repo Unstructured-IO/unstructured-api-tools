@@ -5,6 +5,7 @@ import inspect
 import os
 from pathlib import Path
 import re
+import string
 from typing import List, Optional
 
 from jinja2 import Environment, FileSystemLoader
@@ -41,7 +42,7 @@ def generate_pipeline_api(
         semver=semver,
         config_filename=config_filename,
     )
-    multi_string_param_names = _infer_params_from_pipeline_api(script)
+    multi_string_param_names, response_type = _infer_params_from_pipeline_api(script)
 
     environment = Environment(loader=FileSystemLoader(TEMPLATE_PATH))
     template = environment.get_template("pipeline_api.txt")
@@ -49,6 +50,7 @@ def generate_pipeline_api(
         pipeline_path=pipeline_path,
         script=script,
         multi_string_param_names=multi_string_param_names,
+        response_type=response_type,
     )
     content = lint.format_black(content)
     lint.check_flake8(content, opts=flake8_opts)
@@ -74,6 +76,7 @@ def _infer_params_from_pipeline_api(script: str) -> List[str]:
         # (which would imply updating pipeline_api.txt for either)
         raise ValueError("First parameter must be named text and not have a default value")
 
+    response_type = None
     first_param = True
     for param in params:
         if first_param:
@@ -88,12 +91,17 @@ def _infer_params_from_pipeline_api(script: str) -> List[str]:
                 # NOTE(crag): "m_" is stripped from the FastAPI API params.
                 # E.g., the pipeline param m_my_param implies a FastAPI param of my_param
                 multi_string_param_names.append(param[2:])
+        elif param == "response_type":
+            if params[param].default is inspect._empty or type(params[param].default) != str:
+                raise ValueError(f"Default argument for {param} must be string")
+            else:
+                response_type = params[param].default
         else:
             raise ValueError(
                 f"Unsupported parameter name {param}, must either be text or begin with m_"
             )
 
-    return multi_string_param_names
+    return multi_string_param_names, response_type
 
 
 def notebook_file_to_script(
