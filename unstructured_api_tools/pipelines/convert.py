@@ -5,7 +5,7 @@ import inspect
 import os
 from pathlib import Path
 import re
-from typing import List, Optional
+from typing import List, Optional, Tuple, Any
 
 from jinja2 import Environment, FileSystemLoader
 from nbconvert import ScriptExporter
@@ -57,7 +57,7 @@ def generate_pipeline_api(
     return content
 
 
-def _infer_params_from_pipeline_api(script: str) -> List[str]:
+def _infer_params_from_pipeline_api(script: str) -> Tuple[List[str], Optional[Any]]:
     """A helper function to prepare jinja interpolation.
     Returns a list of string (multi-value) parameters to expose in the FastAPI route.
     """
@@ -97,7 +97,8 @@ def _infer_params_from_pipeline_api(script: str) -> List[str]:
                 response_type = params[param].default
         else:
             raise ValueError(
-                f"Unsupported parameter name {param}, must either be text or begin with m_"
+                f"Unsupported parameter name {param}, must either be text, \
+                    response_type or begin with m_"
             )
 
     return multi_string_param_names, response_type
