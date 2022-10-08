@@ -43,13 +43,20 @@ response_type: str = "{{response_type}}",
     elif "response_type" not in locals():
         response_type = "*/*"
 
+    if (response_type == "application/json" and type(response) != dict) or (
+        response_type == "text/csv" and type(response) != str
+    ):
+        return PlainTextResponse(
+            content=f"Conflict in response type {response_type}.\n",
+            status_code=status.HTTP_409_CONFLICT,
+        )
     valid_response_types = ["application/json", "text/csv", "*/*"]
     if response_type in valid_response_types:
         return response
     else:
         return PlainTextResponse(
-            content=f"Unsupported media type {media_type}.\n",
-            status_code=status.HTTP_406_NOT_ACCEPTABLE,
+            content=f"Unsupported response type {response_type}.\n",
+            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
         )
 
 @app.get("/healthcheck", status_code=status.HTTP_200_OK)
