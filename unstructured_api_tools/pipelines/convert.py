@@ -97,8 +97,8 @@ def _infer_params_from_pipeline_api(script: str) -> Tuple[List[str], Optional[An
                 response_type = params[param].default
         else:
             raise ValueError(
-                f"Unsupported parameter name {param}, must either be text, \
-                    response_type or begin with m_"
+                f"Unsupported parameter name {param}, must either be text"
+                ', response_type or begin with m_"'
             )
 
     return multi_string_param_names, response_type
