@@ -91,7 +91,9 @@ def _infer_params_from_pipeline_api(script: str) -> Tuple[List[str], Optional[An
                 # E.g., the pipeline param m_my_param implies a FastAPI param of my_param
                 multi_string_param_names.append(param[2:])
         elif param == "response_type":
-            if params[param].default is inspect._empty or type(params[param].default) != str:
+            if params[param].default is inspect._empty:
+                response_type = "application/json"
+            elif type(params[param].default) != str:
                 raise ValueError(f"Default argument for {param} must be string")
             else:
                 response_type = params[param].default
