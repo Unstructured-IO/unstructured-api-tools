@@ -63,13 +63,13 @@ mistune==2.0.4
     # via nbconvert
 nbclient==0.6.8
     # via nbconvert
-nbconvert==7.1.0
+nbconvert==7.2.1
     # via unstructured-api-tools (setup.py)
 nbformat==5.6.1
     # via
     #   nbclient
     #   nbconvert
-nest-asyncio==1.5.5
+nest-asyncio==1.5.6
     # via
     #   jupyter-client
     #   nbclient
