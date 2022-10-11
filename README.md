@@ -80,16 +80,12 @@ multiple string parameters. A `curl` request against such an API could look like
 In addition, you can specify the response type if `pipeline_api` can support both "application/json" 
 and "text/csv" as return types.
 
-For example, in a notebook containing:
+For example, in a notebook containing a kwarg `response_type`:
 
-    def pipeline_api(text, response_type, m_subject=[], m_name=[]):
+    def pipeline_api(text, response_type="text/csv", m_subject=[], m_name=[]):
 
 You can specify "text/csv" as the return type in the Accept header with -H 'accept: text/csv', or choosing
 "application/json" as the return type with -H 'accept: application/json'.
-
-The default response type can also be specified in a notebook such as:
-
-    def pipeline_api(text, response_type="text/csv", m_subject=[], m_name=[]):
 
 ## Security Policy
 
