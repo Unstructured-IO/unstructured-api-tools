@@ -129,7 +129,7 @@ def tests_notebook_to_script(sample_notebook):
         ("def pipeline_api(bad_arg,text): pass", "First parameter must be named text"),
         ("def pipeline_api(text, m_var): pass", "Default argument for m_var must be empty list"),
         (
-            "def pipeline_api(text, response_type, m_var=[], m_var2=[]): pass",
+            "def pipeline_api(text, response_type=1, m_var=[], m_var2=[]): pass",
             "Default argument for response_type must be string",
         ),
         (
@@ -161,6 +161,14 @@ def test_infer_m_params():
         """
         )
         == (["var", "var2"], None)
+    )
+    assert (
+        convert._infer_params_from_pipeline_api(
+            """def pipeline_api(text, response_type, m_var=[], m_var2=[], ):
+        pass
+        """
+        )
+        == (["var", "var2"], "application/json")
     )
     assert (
         convert._infer_params_from_pipeline_api(
