@@ -65,7 +65,7 @@ For example, in a notebook containing:
 
 `text` represents the content of a file posted to the FastAPI API, and the `m_subject` and `m_name`
 keyword args represent optional parameters that may be posted to the API as well, both allowing
-multiple string parameters. A `curl` request against such an API could look like:
+multiple string parameters. A `curl` request against such an API could look like this:
 
     curl -X 'POST' \
       'https://<hostname>/<pipeline-family-name>/<pipeline-family-version>/<api-name>' \
@@ -76,6 +76,20 @@ multiple string parameters. A `curl` request against such an API could look like
       -F 'subject=history'
       -F 'subject=math' \
       -F 'name=feynman'
+
+In addition, you can specify the response type if `pipeline_api` can support both "application/json" 
+and "text/csv" as return types.
+
+For example, in a notebook containing:
+
+    def pipeline_api(text, response_type, m_subject=[], m_name=[]):
+
+You can specify "text/csv" as the return type in the Accept header with -H 'accept: text/csv', or choosing
+"application/json" as the return type with -H 'accept: application/json'.
+
+The default response type can also be specified in a notebook such as:
+
+    def pipeline_api(text, response_type="text/csv", m_subject=[], m_name=[]):
 
 ## Security Policy
 
