@@ -4,7 +4,6 @@
 #####################################################################
 
 import os
-import inspect
 from typing import List
 
 from fastapi import status, FastAPI, File, Form, Request, UploadFile
