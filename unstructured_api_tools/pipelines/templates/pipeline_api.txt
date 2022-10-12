@@ -57,7 +57,7 @@ async def pipeline_1(request: Request, file: UploadFile = File(),
     if _is_confict_response_type(media_type, type(response)):
         return PlainTextResponse(
             content=f"Conflict in media type {media_type} with response type {type(response)}.\n",
-            status_code=status.HTTP_409_CONFLICT,
+            status_code=status.HTTP_406_NOT_ACCEPTABLE,
         )
     valid_response_types = ["application/json", "text/csv", "*/*"]
     if media_type in valid_response_types:
@@ -65,7 +65,7 @@ async def pipeline_1(request: Request, file: UploadFile = File(),
     else:
         return PlainTextResponse(
             content=f"Unsupported media type {media_type}.\n",
-            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            status_code=status.HTTP_406_NOT_ACCEPTABLE,
         )
 
 @app.get("/healthcheck", status_code=status.HTTP_200_OK)
