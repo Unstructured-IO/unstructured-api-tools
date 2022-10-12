@@ -20,7 +20,7 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 RATE_LIMIT = os.environ.get("PIPELINE_API_RATE_LIMIT", "1/second")
 {% if response_type %}
 def is_expected_response_type(media_type, response_type):
-    if media_type == "application/json" and response_type != dict:
+    if media_type == "application/json" and response_type not in [dict, list]:
         return True
     elif media_type == "text/csv" and response_type != str:
         return True
@@ -44,7 +44,7 @@ async def pipeline_1(request: Request, file: UploadFile = File(),
     {% endif %}
 
     text = file.file.read().decode("utf-8")
-    
+
     {% if response_type %}
     response = pipeline_api(text, {% for param in multi_string_param_names %}m_{{param}}={{param}}, {% endfor %} response_type=media_type,)
     {% else %}
