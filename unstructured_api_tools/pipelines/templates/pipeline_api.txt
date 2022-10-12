@@ -8,18 +8,16 @@ import inspect
 from typing import List
 
 from fastapi import status, FastAPI, File, Form, Request, UploadFile
-from fastapi.responses import PlainTextResponse
 from slowapi.errors import RateLimitExceeded
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
-
+{% if response_type %}from fastapi.responses import PlainTextResponse{% endif %}
 limiter = Limiter(key_func=get_remote_address)
 app = FastAPI()
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 RATE_LIMIT = os.environ.get("PIPELINE_API_RATE_LIMIT", "1/second")
-
 {% if response_type %}
 def is_expected_response_type(media_type, response_type):
     if media_type == "application/json" and response_type != dict:
@@ -29,7 +27,6 @@ def is_expected_response_type(media_type, response_type):
     else:
         return False
 {% endif %}
-
 {{script}}
 
 
@@ -40,14 +37,14 @@ async def pipeline_1(request: Request, file: UploadFile = File(),
 {{param}}: List[str] = Form(default=[]),
 {% endfor %}
 ):
-    
     {% if response_type %}
     media_type = request.headers.get("Accept")
     default_response_type = "{{response_type}}"
     media_type = default_response_type if media_type == "*/*" else media_type
     {% endif %}
-    text = file.file.read().decode("utf-8")
 
+    text = file.file.read().decode("utf-8")
+    
     {% if response_type %}
     response = pipeline_api(text, {% for param in multi_string_param_names %}m_{{param}}={{param}}, {% endfor %} response_type=media_type,)
     {% else %}
