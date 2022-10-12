@@ -21,7 +21,7 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 RATE_LIMIT = os.environ.get("PIPELINE_API_RATE_LIMIT", "1/second")
 
 
-def _is_confict_response_type(media_type, response_type):
+def is_expected_response_type(media_type, response_type):
     if media_type == "application/json" and response_type != dict:
         return True
     elif media_type == "text/csv" and response_type != str:
@@ -54,7 +54,7 @@ async def pipeline_1(request: Request, file: UploadFile = File(),
     response = pipeline_api(text, {% for param in multi_string_param_names %}{{param}}, {% endfor %})
     {% endif %}
 
-    if _is_confict_response_type(media_type, type(response)):
+    if is_expected_response_type(media_type, type(response)):
         return PlainTextResponse(
             content=f"Conflict in media type {media_type} with response type {type(response)}.\n",
             status_code=status.HTTP_406_NOT_ACCEPTABLE,
