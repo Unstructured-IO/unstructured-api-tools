@@ -128,6 +128,14 @@ def tests_notebook_to_script(sample_notebook):
         ),
         ("def pipeline_api(bad_arg,text): pass", "First parameter must be named text"),
         ("def pipeline_api(text, m_var): pass", "Default argument for m_var must be empty list"),
+        (
+            "def pipeline_api(text, response_type, m_var=[], m_var2=[]): pass",
+            "Default argument for response_type must be string",
+        ),
+        (
+            "def pipeline_api(text, m_var=[], m_var2=[], var3=[]): pass",
+            "Unsupported parameter name var3, must either be text, response_type or begin with m_",
+        ),
     ],
 )
 def test_infer_params_catches_bad_args(api_definition, error_match):
@@ -144,7 +152,7 @@ def test_infer_m_params():
         pass
         """
         )
-        == ["var"]
+        == (["var"], None)
     )
     assert (
         convert._infer_params_from_pipeline_api(
@@ -152,7 +160,15 @@ def test_infer_m_params():
         pass
         """
         )
-        == ["var", "var2"]
+        == (["var", "var2"], None)
+    )
+    assert (
+        convert._infer_params_from_pipeline_api(
+            """def pipeline_api(text, m_var=[], m_var2=[], response_type="text/csv"):
+        pass
+        """
+        )
+        == (["var", "var2"], "text/csv")
     )
 
 
