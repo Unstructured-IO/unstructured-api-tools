@@ -1,6 +1,6 @@
 ## 0.2.1-dev2
 
-* Add the ability to specify MIME types
+* Add the ability to pass Accept MIME type headers to pipeline API's
 * Dependency bumps
 
 ## 0.2.0

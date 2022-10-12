@@ -41,7 +41,7 @@ async def pipeline_1(request: Request, file: UploadFile = File(),
 {% endfor %}
 ):
     
-    media_type = request.headers.get("accept")
+    media_type = request.headers.get("Accept")
     {% if response_type %}
     default_response_type = "{{response_type}}"
     media_type = default_response_type if media_type == "*/*" else media_type
