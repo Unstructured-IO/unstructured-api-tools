@@ -20,7 +20,7 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 RATE_LIMIT = os.environ.get("PIPELINE_API_RATE_LIMIT", "1/second")
 
-
+{% if response_type %}
 def is_expected_response_type(media_type, response_type):
     if media_type == "application/json" and response_type != dict:
         return True
@@ -28,7 +28,7 @@ def is_expected_response_type(media_type, response_type):
         return True
     else:
         return False
-
+{% endif %}
 
 {{script}}
 
@@ -41,8 +41,8 @@ async def pipeline_1(request: Request, file: UploadFile = File(),
 {% endfor %}
 ):
     
-    media_type = request.headers.get("Accept")
     {% if response_type %}
+    media_type = request.headers.get("Accept")
     default_response_type = "{{response_type}}"
     media_type = default_response_type if media_type == "*/*" else media_type
     {% endif %}
@@ -54,6 +54,7 @@ async def pipeline_1(request: Request, file: UploadFile = File(),
     response = pipeline_api(text, {% for param in multi_string_param_names %}{{param}}, {% endfor %})
     {% endif %}
 
+    {% if response_type %}
     if is_expected_response_type(media_type, type(response)):
         return PlainTextResponse(
             content=f"Conflict in media type {media_type} with response type {type(response)}.\n",
@@ -67,6 +68,9 @@ async def pipeline_1(request: Request, file: UploadFile = File(),
             content=f"Unsupported media type {media_type}.\n",
             status_code=status.HTTP_406_NOT_ACCEPTABLE,
         )
+    {% else %}
+    return response
+    {% endif %}
 
 @app.get("/healthcheck", status_code=status.HTTP_200_OK)
 @limiter.limit(RATE_LIMIT)
