@@ -1,4 +1,4 @@
-## 0.3.0
+## 0.3.0-dev0
 
 * Add the ability to pass Accept MIME type headers to pipeline API's
 
