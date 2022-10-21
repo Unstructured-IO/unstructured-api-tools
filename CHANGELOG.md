@@ -1,5 +1,6 @@
-## 0.3.1-dev0
+## 0.3.1-dev1
 
+* Removed the ratelimit on healthchecks
 * Dependency bumps
 
 ## 0.3.0
