@@ -5,7 +5,7 @@ import inspect
 import os
 from pathlib import Path
 import re
-from typing import List, Optional, Tuple, Any
+from typing import List, Optional, Any, Dict
 
 from jinja2 import Environment, FileSystemLoader
 from nbconvert import ScriptExporter
@@ -41,23 +41,18 @@ def generate_pipeline_api(
         semver=semver,
         config_filename=config_filename,
     )
-    multi_string_param_names, response_type = _infer_params_from_pipeline_api(script)
+    pipeline_api_params = _infer_params_from_pipeline_api(script)
 
     environment = Environment(loader=FileSystemLoader(TEMPLATE_PATH))
     template = environment.get_template("pipeline_api.txt")
-    content = template.render(
-        pipeline_path=pipeline_path,
-        script=script,
-        multi_string_param_names=multi_string_param_names,
-        response_type=response_type,
-    )
+    content = template.render(pipeline_path=pipeline_path, script=script, **pipeline_api_params)
     content = lint.format_black(content)
     lint.check_flake8(content, opts=flake8_opts)
     lint.check_mypy(content)
     return content
 
 
-def _infer_params_from_pipeline_api(script: str) -> Tuple[List[str], Optional[Any]]:
+def _infer_params_from_pipeline_api(script: str) -> Dict[str, Optional[Any]]:
     """A helper function to prepare jinja interpolation.
     Returns a list of string (multi-value) parameters to expose in the FastAPI route.
     """
@@ -77,10 +72,12 @@ def _infer_params_from_pipeline_api(script: str) -> Tuple[List[str], Optional[An
 
     response_type = None
     first_param = True
+    accepts_text = False
     for param in params:
         if first_param:
             if param != "text":
                 raise ValueError("First parameter must be named text")
+            accepts_text = True
             first_param = False
         elif param.startswith("m_"):
             # NOTE(crag) string parameter that may have multiple values
@@ -101,7 +98,11 @@ def _infer_params_from_pipeline_api(script: str) -> Tuple[List[str], Optional[An
                 ', response_type or begin with m_"'
             )
 
-    return multi_string_param_names, response_type
+    return {
+        "multi_string_param_names": multi_string_param_names,
+        "response_type": response_type,
+        "accepts_text": accepts_text,
+    }
 
 
 def notebook_file_to_script(
