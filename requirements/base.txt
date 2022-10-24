@@ -142,7 +142,7 @@ webencodings==0.5.1
     #   tinycss2
 websockets==10.3
     # via uvicorn
-zipp==3.8.1
+zipp==3.10.0
     # via
     #   importlib-metadata
     #   importlib-resources
