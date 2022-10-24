@@ -111,7 +111,7 @@ soupsieve==2.3.2.post1
     # via beautifulsoup4
 starlette==0.20.4
     # via fastapi
-tinycss2==1.1.1
+tinycss2==1.2.1
     # via nbconvert
 tornado==6.2
     # via jupyter-client
