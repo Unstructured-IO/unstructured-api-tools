@@ -42,7 +42,7 @@ jinja2==3.1.2
     #   unstructured-api-tools (setup.py)
 jsonschema==4.16.0
     # via nbformat
-jupyter-client==7.3.5
+jupyter-client==7.4.3
     # via nbclient
 jupyter-core==4.11.1
     # via
@@ -142,7 +142,7 @@ webencodings==0.5.1
     #   tinycss2
 websockets==10.3
     # via uvicorn
-zipp==3.8.1
+zipp==3.10.0
     # via
     #   importlib-metadata
     #   importlib-resources
