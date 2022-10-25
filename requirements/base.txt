@@ -130,7 +130,7 @@ typing-extensions==4.4.0
     # via
     #   pydantic
     #   starlette
-uvicorn[standard]==0.18.3
+uvicorn[standard]==0.19.0
     # via unstructured-api-tools (setup.py)
 uvloop==0.17.0
     # via uvicorn
