@@ -152,7 +152,11 @@ def test_infer_m_params():
         pass
         """
         )
-        == (["var"], None)
+        == {
+            "accepts_text": True,
+            "multi_string_param_names": ["var"],
+            "response_type": None,
+        }
     )
     assert (
         convert._infer_params_from_pipeline_api(
@@ -160,7 +164,11 @@ def test_infer_m_params():
         pass
         """
         )
-        == (["var", "var2"], None)
+        == {
+            "accepts_text": True,
+            "multi_string_param_names": ["var", "var2"],
+            "response_type": None,
+        }
     )
     assert (
         convert._infer_params_from_pipeline_api(
@@ -168,7 +176,11 @@ def test_infer_m_params():
         pass
         """
         )
-        == (["var", "var2"], "text/csv")
+        == {
+            "accepts_text": True,
+            "multi_string_param_names": ["var", "var2"],
+            "response_type": "text/csv",
+        }
     )
 
 
