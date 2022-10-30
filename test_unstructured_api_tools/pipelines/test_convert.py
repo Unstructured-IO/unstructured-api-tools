@@ -1,6 +1,7 @@
 import json
 import os
 import pytest
+import re
 
 from nbformat import NotebookNode
 
@@ -124,17 +125,21 @@ def tests_notebook_to_script(sample_notebook):
         ("def pipeline_api(): pass", "pipeline_api must have at least one parameter named text"),
         (
             "def pipeline_api(text=[]): pass",
-            "First parameter must be named text and not have a default value",
+            "First parameter must be named either text or file and not have a default value",
         ),
-        ("def pipeline_api(bad_arg,text): pass", "First parameter must be named text"),
+        ("def pipeline_api(bad_arg,text): pass", re.escape("The first parameter(s) must be named either text or file.")),
         ("def pipeline_api(text, m_var): pass", "Default argument for m_var must be empty list"),
         (
             "def pipeline_api(text, response_type, m_var=[], m_var2=[]): pass",
-            "Default argument for response_type must be string",
+            "Default argument for response_type must be of type: <class 'str'>",
         ),
         (
             "def pipeline_api(text, m_var=[], m_var2=[], var3=[]): pass",
-            "Unsupported parameter name var3, must either be text, response_type or begin with m_",
+            "Unsupported parameter name var3, must either be text, file, response_type, or begin with m_",
+        ),
+        (
+            "def pipeline_api(text, m_var=[], file=None, m_var2=[], var3=[]): pass",
+            "The parameters text or file must be specified before any keyword parameters.",
         ),
     ],
 )
@@ -154,8 +159,9 @@ def test_infer_m_params():
         )
         == {
             "accepts_text": True,
+            "accepts_file": False,
             "multi_string_param_names": ["var"],
-            "response_type": None,
+            "optional_param_value_map": {}
         }
     )
     assert (
@@ -166,8 +172,9 @@ def test_infer_m_params():
         )
         == {
             "accepts_text": True,
+            "accepts_file": False,
             "multi_string_param_names": ["var", "var2"],
-            "response_type": None,
+            "optional_param_value_map": {}
         }
     )
     assert (
@@ -178,8 +185,23 @@ def test_infer_m_params():
         )
         == {
             "accepts_text": True,
+            "accepts_file": False,
             "multi_string_param_names": ["var", "var2"],
-            "response_type": "text/csv",
+            "optional_param_value_map": {"response_type": "text/csv"}
+        }
+    )
+
+    assert (
+        convert._infer_params_from_pipeline_api(
+            """def pipeline_api(file, m_var=[], m_var2=[], response_type="text/csv", file_content_type=None):
+        pass
+        """
+        )
+        == {
+            "accepts_text": False,
+            "accepts_file": True,
+            "multi_string_param_names": ["var", "var2"],
+            "optional_param_value_map": {"response_type": "text/csv", "file_content_type": None}
         }
     )
 
