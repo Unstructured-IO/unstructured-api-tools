@@ -5,7 +5,7 @@ import inspect
 import os
 from pathlib import Path
 import re
-from typing import List, Optional, Any, Dict
+from typing import List, Optional, Any, Dict, Union, Tuple, Type
 
 from jinja2 import Environment, FileSystemLoader
 from nbconvert import ScriptExporter
@@ -66,9 +66,12 @@ def _infer_params_from_pipeline_api(script: str) -> Dict[str, Optional[Any]]:
     if len(params) < 1:
         raise ValueError("pipeline_api must have at least one parameter named text")
 
-    if ("text" not in params or params["text"].default is not inspect._empty)  \
-            and ("file" not in params or params["file"].default is not inspect._empty):
-        raise ValueError("First parameter must be named either text or file and not have a default value")
+    if ("text" not in params or params["text"].default is not inspect._empty) and (
+        "file" not in params or params["file"].default is not inspect._empty
+    ):
+        raise ValueError(
+            "First parameter must be named either text or file and not have a default value"
+        )
 
     accepts_text = False
     accepts_file = False
@@ -76,9 +79,7 @@ def _infer_params_from_pipeline_api(script: str) -> Dict[str, Optional[Any]]:
     expect_text_or_file = True
     expect_other_params = False
 
-    supported_optional_params = {
-        "response_type": str
-    }
+    supported_optional_params: Dict[str, Union[Type, Tuple]] = {"response_type": str}
 
     for param in params:
         if expect_text_or_file:
@@ -96,7 +97,9 @@ def _infer_params_from_pipeline_api(script: str) -> Dict[str, Optional[Any]]:
                 raise ValueError("The first parameter(s) must be named either text or file.")
 
         elif param in ["text", "file"]:
-            raise ValueError("The parameters text or file must be specified before any keyword parameters.")
+            raise ValueError(
+                "The parameters text or file must be specified before any keyword parameters."
+            )
 
         if expect_other_params:
             if param.startswith("m_"):
@@ -110,8 +113,13 @@ def _infer_params_from_pipeline_api(script: str) -> Dict[str, Optional[Any]]:
                     multi_string_param_names.append(param[2:])
             elif param in supported_optional_params:
                 expect_text_or_file = False
-                if params[param].default is inspect._empty or not isinstance(params[param].default, supported_optional_params[param]):
-                    raise ValueError(f"Default argument for {param} must be of type: {supported_optional_params[param]}")
+                if params[param].default is inspect._empty or not isinstance(
+                    params[param].default, supported_optional_params[param]
+                ):
+                    supported_types_str: str = str(supported_optional_params[param])
+                    raise ValueError(
+                        f"Default argument type for {param} must be one of: {supported_types_str}"
+                    )
                 else:
                     optional_param_value_map[param] = params[param].default
             else:
@@ -124,7 +132,7 @@ def _infer_params_from_pipeline_api(script: str) -> Dict[str, Optional[Any]]:
         "multi_string_param_names": multi_string_param_names,
         "optional_param_value_map": optional_param_value_map,
         "accepts_text": accepts_text,
-        "accepts_file": accepts_file
+        "accepts_file": accepts_file,
     }
 
 
