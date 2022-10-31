@@ -210,6 +210,21 @@ def test_infer_m_params():
         }
     )
 
+    assert (
+        convert._infer_params_from_pipeline_api(
+            """def pipeline_api(file, text, m_var2=[], response_type="application/json",
+                                 filename=None):
+        pass
+        """
+        )
+        == {
+            "accepts_text": True,
+            "accepts_file": True,
+            "multi_string_param_names": ["var2"],
+            "optional_param_value_map": {"response_type": "application/json", "filename": None},
+        }
+    )
+
 
 def test_notebook_file_to_script(sample_notebook, tmpdir):
     input_filename = os.path.join(tmpdir.dirname, "pipeline-this-is-a-test.ipynb")
