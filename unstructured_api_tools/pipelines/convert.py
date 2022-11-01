@@ -5,7 +5,7 @@ import inspect
 import os
 from pathlib import Path
 import re
-from typing import List, Optional, Any, Dict
+from typing import List, Optional, Any, Dict, Union, Tuple, Type
 
 from jinja2 import Environment, FileSystemLoader
 from nbconvert import ScriptExporter
@@ -61,47 +61,78 @@ def _infer_params_from_pipeline_api(script: str) -> Dict[str, Optional[Any]]:
     params = inspect.signature(infer_module.pipeline_api).parameters
 
     multi_string_param_names = []
+    optional_param_value_map = {}
 
     if len(params) < 1:
         raise ValueError("pipeline_api must have at least one parameter named text")
 
-    if "text" not in params or params["text"].default is not inspect._empty:
-        # NOTE(crag) coming soon: first argument may instead represent binary content
-        # (which would imply updating pipeline_api.txt for either)
-        raise ValueError("First parameter must be named text and not have a default value")
+    if ("text" not in params or params["text"].default is not inspect._empty) and (
+        "file" not in params or params["file"].default is not inspect._empty
+    ):
+        raise ValueError(
+            "First parameter must be named either text or file and not have a default value"
+        )
 
-    response_type = None
-    first_param = True
     accepts_text = False
+    accepts_file = False
+
+    expect_text_or_file = True
+    expect_other_params = False
+
+    supported_optional_params: Dict[str, Union[Type, Tuple]] = {"response_type": str}
+
     for param in params:
-        if first_param:
-            if param != "text":
-                raise ValueError("First parameter must be named text")
-            accepts_text = True
-            first_param = False
-        elif param.startswith("m_"):
-            # NOTE(crag) string parameter that may have multiple values
-            if params[param].default is inspect._empty or params[param].default != []:
-                raise ValueError(f"Default argument for {param} must be empty list")
-            else:
-                # NOTE(crag): "m_" is stripped from the FastAPI API params.
-                # E.g., the pipeline param m_my_param implies a FastAPI param of my_param
-                multi_string_param_names.append(param[2:])
-        elif param == "response_type":
-            if params[param].default is inspect._empty or type(params[param].default) != str:
-                raise ValueError(f"Default argument for {param} must be string")
-            else:
-                response_type = params[param].default
-        else:
+        if expect_text_or_file:
+            if param == "text":
+                accepts_text = True
+                expect_other_params = True
+                continue
+            elif param == "file":
+                accepts_file = True
+                supported_optional_params["filename"] = (str, type(None))
+                supported_optional_params["file_content_type"] = (str, type(None))
+                expect_other_params = True
+                continue
+            elif not expect_other_params:
+                raise ValueError("The first parameter(s) must be named either text or file.")
+
+        elif param in ["text", "file"]:
             raise ValueError(
-                f"Unsupported parameter name {param}, must either be text"
-                ', response_type or begin with m_"'
+                "The parameters text or file must be specified before any keyword parameters."
             )
+
+        if expect_other_params:
+            if param.startswith("m_"):
+                expect_text_or_file = False
+                # NOTE(crag) string parameter that may have multiple values
+                if params[param].default is inspect._empty or params[param].default != []:
+                    raise ValueError(f"Default argument for {param} must be empty list")
+                else:
+                    # NOTE(crag): "m_" is stripped from the FastAPI API params.
+                    # E.g., the pipeline param m_my_param implies a FastAPI param of my_param
+                    multi_string_param_names.append(param[2:])
+            elif param in supported_optional_params:
+                expect_text_or_file = False
+                if params[param].default is inspect._empty or not isinstance(
+                    params[param].default, supported_optional_params[param]
+                ):
+                    supported_types_str: str = str(supported_optional_params[param])
+                    raise ValueError(
+                        f"Default argument type for {param} must be one of: {supported_types_str}"
+                    )
+                else:
+                    optional_param_value_map[param] = params[param].default
+            else:
+                raise ValueError(
+                    f"Unsupported parameter name {param}, must either be text, file"
+                    f', {", ".join(list(supported_optional_params.keys()))}, or begin with m_'
+                )
 
     return {
         "multi_string_param_names": multi_string_param_names,
-        "response_type": response_type,
+        "optional_param_value_map": optional_param_value_map,
         "accepts_text": accepts_text,
+        "accepts_file": accepts_file,
     }
 
 
