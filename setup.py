@@ -41,8 +41,9 @@ setup(
         "Jinja2",
         "nbconvert",
         "python-multipart",
+        "types-requests",
+        "types-ujson",
         "uvicorn[standard]",
-        "types-requests"
     ],
     extras_require={},
 )
