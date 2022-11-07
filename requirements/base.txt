@@ -42,7 +42,7 @@ jinja2==3.1.2
     #   unstructured-api-tools (setup.py)
 jsonschema==4.16.0
     # via nbformat
-jupyter-client==7.4.3
+jupyter-client==7.4.4
     # via nbclient
 jupyter-core==4.11.2
     # via
@@ -134,7 +134,7 @@ uvicorn[standard]==0.19.0
     # via unstructured-api-tools (setup.py)
 uvloop==0.17.0
     # via uvicorn
-watchfiles==0.18.0
+watchfiles==0.18.1
     # via uvicorn
 webencodings==0.5.1
     # via
