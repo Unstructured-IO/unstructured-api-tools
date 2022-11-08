@@ -39,6 +39,7 @@ setup(
         "fastapi",
         "slowapi",
         "Jinja2",
+        "mypy>=0.99",
         "nbconvert",
         "python-multipart",
         "types-requests",
