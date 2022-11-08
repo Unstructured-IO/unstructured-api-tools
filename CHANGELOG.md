@@ -1,3 +1,7 @@
+# 0.4.3
+
+* Updates `mypy` type checking code to use `--implicit-optional`
+
 ## 0.4.2
 
 * Add types-ujson dependency

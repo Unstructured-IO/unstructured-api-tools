@@ -81,7 +81,7 @@ def validate_flake8_ignore(flake8_ignore: str) -> bool:
 def check_mypy(file_text: str):
     """Runs mypy type checking on the file text."""
     tmp = _create_tempfile(file_text)
-    cmd = ["mypy", tmp.name, "--ignore-missing-imports"]
+    cmd = ["mypy", tmp.name, "--ignore-missing-imports", "--implicit-optional"]
     try:
         _run_lint_cmd(cmd, tmp.name, MYPY_PREFIX_RE)
     except Exception as e:
