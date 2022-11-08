@@ -1,5 +1,8 @@
 <h3 align="center">
-  <img src="img/unstructured_logo.png" height="200">
+  <img
+    src="https://raw.githubusercontent.com/Unstructured-IO/unstructured-api-tools/main/img/unstructured_logo.png"
+    height="200"
+  >
 </h3>
 
 <h3 align="center">
@@ -77,14 +80,14 @@ multiple string parameters. A `curl` request against such an API could look like
       -F 'subject=math' \
       -F 'name=feynman'
 
-In addition, you can specify the response type if `pipeline_api` can support both "application/json" 
+In addition, you can specify the response type if `pipeline_api` can support both "application/json"
 and "text/csv" as return types.
 
 For example, in a notebook containing a kwarg `response_type`:
 
     def pipeline_api(text, response_type="text/csv", m_subject=[], m_name=[]):
 
-The consumer of the API may then specify "text/csv" as the requested response content type with the usual 
+The consumer of the API may then specify "text/csv" as the requested response content type with the usual
 HTTP Accept header, e.g. `Accept: application/json` or `Accept: text/csv`.
 
 ## Security Policy
