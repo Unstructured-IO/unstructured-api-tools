@@ -2,6 +2,7 @@
 from copy import deepcopy
 import imp
 import inspect
+import logging
 import os
 from pathlib import Path
 import re
@@ -18,7 +19,8 @@ INPUT_LINES_RE = re.compile(r"\n\n# In\[.+\]:")
 PIPELINE_API_RE = re.compile(r"\n\n# pipeline-api")
 HEADERS_RE = re.compile(r"#(!/usr/bin/env python| coding: utf-8)")
 
-PIPELINE_FILENAME_RE = re.compile("pipeline-.*\\.ipynb")
+PIPELINE_FILENAME_RE = re.compile("pipeline-(.*)\\.ipynb")
+RESERVED_API_NAMES = ["app"]
 
 PATH = Path(__file__).resolve().parent
 TEMPLATE_PATH = os.path.join(PATH, "templates")
@@ -56,6 +58,11 @@ def _infer_params_from_pipeline_api(script: str) -> Dict[str, Optional[Any]]:
     """A helper function to prepare jinja interpolation.
     Returns a list of string (multi-value) parameters to expose in the FastAPI route.
     """
+    if script.count('def pipeline_api(') > 1:
+        logging.warn("Function pipeline_api was redefined in the pipeline API definition.")
+    elif script.count('def pipeline_api(') < 1:
+        logging.warn("Function pipeline_api was not defined in the pipeline API definition.")
+
     infer_module = imp.new_module("infer_module")
     exec(script, infer_module.__dict__)
     params = inspect.signature(infer_module.pipeline_api).parameters
@@ -159,6 +166,52 @@ def notebook_file_to_script(
         f.write(script)
 
 
+def build_root_app_module(
+    module_names: List[str],
+    output_directory: str,
+    flake8_opts: List[str] = lint.FLAKE8_DEFAULT_OPTS,
+):
+    environment = Environment(loader=FileSystemLoader(TEMPLATE_PATH))
+    template = environment.get_template("pipeline_app.txt")
+    content = template.render(module_names=module_names)
+    content = lint.format_black(content)
+    lint.check_flake8(content, opts=flake8_opts)
+    lint.check_mypy(content)
+    
+    module_filepath = os.path.join(output_directory, "app.py")
+    with open(module_filepath, "w") as f:
+        f.write(content)
+
+
+def convert_notebook_files_to_api(
+    notebook_filenames: List[str], 
+    input_directory: str,
+    output_directory: str,
+    pipeline_family: Optional[str] = None,
+    semver: Optional[str] = None,
+    config_filename: Optional[str] = None,
+    flake8_opts: List[str] = lint.FLAKE8_DEFAULT_OPTS,
+):
+    """Converts a list of notebook files to Python FastAPI scripts and saves it as
+    a FastAPI app module with the appropriate module names."""
+    for notebook_filename in notebook_filenames:
+        input_filename = os.path.join(input_directory, notebook_filename)
+        notebook_file_to_script(
+            input_filename,
+            output_directory,
+            pipeline_family=pipeline_family,
+            semver=semver,
+            config_filename=config_filename,
+            flake8_opts=flake8_opts
+        )
+    api_module_names = [get_api_name(notebook_filename) for notebook_filename in notebook_filenames]
+    build_root_app_module(
+        api_module_names, 
+        output_directory, 
+        flake8_opts=flake8_opts
+    )
+
+
 def read_notebook(filename: str) -> nbformat.NotebookNode:
     """Reads in a Jupyter notebook as a Python dictionary."""
     with open(filename, "r") as f:
@@ -225,8 +278,15 @@ def get_api_name(notebook_filename: str) -> str:
 
 def _validate_notebook_filename(notebook_filename: str):
     """Raises an error if the notebook filename is not valid."""
-    if PIPELINE_FILENAME_RE.match(notebook_filename) is None:
+    api_name_match = PIPELINE_FILENAME_RE.match(notebook_filename)
+    if api_name_match is None:
         raise ValueError(
-            f"Notebook filename is invalid: {notebook_filename} . "
-            "Must follow the format: pipeline-<api-name>.ipynb ."
+            f"Notebook filename is invalid: {notebook_filename}. "
+            "Must follow the format: pipeline-<api-name>.ipynb."
+        )
+    api_name = api_name_match.group(1)
+    if api_name in RESERVED_API_NAMES:
+        raise ValueError(
+            f"Notebook filename is invalid: {notebook_filename}. "
+            f"{api_name} is a reserved name for unstructured API generation."
         )
