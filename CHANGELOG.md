@@ -1,3 +1,7 @@
+# 0.4.4
+
+* Implement generation of an app-level FastAPI module.
+
 # 0.4.3
 
 * Updates `mypy` type checking code to use `--implicit-optional`
