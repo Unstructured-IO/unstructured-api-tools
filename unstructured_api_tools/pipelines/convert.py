@@ -58,9 +58,9 @@ def _infer_params_from_pipeline_api(script: str) -> Dict[str, Optional[Any]]:
     """A helper function to prepare jinja interpolation.
     Returns a list of string (multi-value) parameters to expose in the FastAPI route.
     """
-    if script.count('def pipeline_api(') > 1:
+    if script.count("def pipeline_api(") > 1:
         logging.warn("Function pipeline_api was redefined in the pipeline API definition.")
-    elif script.count('def pipeline_api(') < 1:
+    elif script.count("def pipeline_api(") < 1:
         logging.warn("Function pipeline_api was not defined in the pipeline API definition.")
 
     infer_module = imp.new_module("infer_module")
@@ -177,14 +177,14 @@ def build_root_app_module(
     content = lint.format_black(content)
     lint.check_flake8(content, opts=flake8_opts)
     lint.check_mypy(content)
-    
+
     module_filepath = os.path.join(output_directory, "app.py")
     with open(module_filepath, "w") as f:
         f.write(content)
 
 
 def convert_notebook_files_to_api(
-    notebook_filenames: List[str], 
+    notebook_filenames: List[str],
     input_directory: str,
     output_directory: str,
     pipeline_family: Optional[str] = None,
@@ -202,14 +202,10 @@ def convert_notebook_files_to_api(
             pipeline_family=pipeline_family,
             semver=semver,
             config_filename=config_filename,
-            flake8_opts=flake8_opts
+            flake8_opts=flake8_opts,
         )
     api_module_names = [get_api_name(notebook_filename) for notebook_filename in notebook_filenames]
-    build_root_app_module(
-        api_module_names, 
-        output_directory, 
-        flake8_opts=flake8_opts
-    )
+    build_root_app_module(api_module_names, output_directory, flake8_opts=flake8_opts)
 
 
 def read_notebook(filename: str) -> nbformat.NotebookNode:

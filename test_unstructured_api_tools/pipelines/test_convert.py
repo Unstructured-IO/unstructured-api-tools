@@ -284,10 +284,7 @@ def test_convert_notebook_files_to_api(sample_notebook, tmpdir):
 
 @pytest.mark.parametrize(
     "bad_filename",
-    [
-        ("crocodile.ipynb",),
-        ("pipeline-app.ipynb",)
-    ],
+    [("crocodile.ipynb",), ("pipeline-app.ipynb",)],
 )
 def test_validate_raises_with_bad_filename(bad_filename):
     for bad_filename in bad_filename:
