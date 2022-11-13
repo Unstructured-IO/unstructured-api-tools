@@ -3,7 +3,7 @@ from typing import Optional
 
 import click
 
-from unstructured_api_tools.pipelines.convert import notebook_file_to_script
+from unstructured_api_tools.pipelines.convert import convert_notebook_files_to_api
 from unstructured_api_tools.pipelines.lint import (
     FLAKE8_DEFAULT_OPTS,
     validate_flake8_ignore,
@@ -42,16 +42,15 @@ def convert_pipeline_notebooks(
     else:
         flake8_opts = FLAKE8_DEFAULT_OPTS
 
-    for notebook_filename in notebook_filenames:
-        input_filename = os.path.join(input_directory, notebook_filename)
-        notebook_file_to_script(
-            input_filename,
-            output_directory,
-            pipeline_family=pipeline_family,
-            semver=semver,
-            config_filename=config_filename,
-            flake8_opts=flake8_opts,
-        )
+    convert_notebook_files_to_api(
+        notebook_filenames,
+        input_directory,
+        output_directory,
+        pipeline_family=pipeline_family,
+        semver=semver,
+        config_filename=config_filename,
+        flake8_opts=flake8_opts,
+    )
 
 
 if __name__ == "__main__":

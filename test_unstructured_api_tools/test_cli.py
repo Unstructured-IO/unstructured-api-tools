@@ -92,6 +92,7 @@ def test_convert_pipeline_notebooks(sample_notebook, tmpdir):
     files = os.listdir(tmpdir.dirname)
     for i in range(5):
         assert f"this_is_a_test_{i}.py" in files
+    assert "app.py" in files
 
 
 def test_convert_pipeline_notebooks_passing_flake8_ignore(sample_notebook, tmpdir):
@@ -122,3 +123,4 @@ def test_convert_pipeline_notebooks_passing_flake8_ignore(sample_notebook, tmpdi
     files = os.listdir(tmpdir.dirname)
     for i in range(5):
         assert f"this_is_a_test_{i}.py" in files
+    assert "app.py" in files
