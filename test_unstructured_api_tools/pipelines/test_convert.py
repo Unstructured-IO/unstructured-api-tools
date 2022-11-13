@@ -154,6 +154,38 @@ def test_infer_params_catches_bad_args(api_definition, error_match):
         convert._infer_params_from_pipeline_api(api_definition)
 
 
+@pytest.mark.parametrize(
+    "api_definition,warning_message,raises_exc",
+    [
+        ("def pipeline_api(text): pass", None, False),
+        (
+            "def pipeline_api(text): pass\ndef pipeline_api(text): pass",
+            "Function pipeline_api was redefined in the pipeline API definition.",
+            False,
+        ),
+        (
+            "def bad_function(text): pass",
+            "Function pipeline_api was not defined in the pipeline API definition.",
+            True,
+        ),
+    ],
+)
+def test_infer_params_logs_warnings(api_definition, warning_message, raises_exc, caplog):
+    """Make sure warnings are logged when pipeline_api does not exist or is redefined."""
+
+    if raises_exc:
+        with pytest.raises(Exception):
+            convert._infer_params_from_pipeline_api(api_definition)
+    else:
+        convert._infer_params_from_pipeline_api(api_definition)
+
+    if warning_message is None:
+        assert len(caplog.records) == 0
+    else:
+        assert caplog.records[0].msg == warning_message
+        assert caplog.records[0].levelname == "WARNING"
+
+
 def test_infer_m_params():
     assert (
         convert._infer_params_from_pipeline_api(

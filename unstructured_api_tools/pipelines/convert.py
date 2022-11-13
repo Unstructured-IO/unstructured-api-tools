@@ -59,9 +59,9 @@ def _infer_params_from_pipeline_api(script: str) -> Dict[str, Optional[Any]]:
     Returns a list of string (multi-value) parameters to expose in the FastAPI route.
     """
     if script.count("def pipeline_api(") > 1:
-        logging.warn("Function pipeline_api was redefined in the pipeline API definition.")
+        logging.warning("Function pipeline_api was redefined in the pipeline API definition.")
     elif script.count("def pipeline_api(") < 1:
-        logging.warn("Function pipeline_api was not defined in the pipeline API definition.")
+        logging.warning("Function pipeline_api was not defined in the pipeline API definition.")
 
     infer_module = imp.new_module("infer_module")
     exec(script, infer_module.__dict__)
