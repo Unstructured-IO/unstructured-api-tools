@@ -4,7 +4,7 @@
 #
 #    pip-compile --output-file=requirements/base.txt
 #
-anyio==3.6.1
+anyio==3.6.2
     # via
     #   starlette
     #   watchfiles
@@ -44,7 +44,7 @@ jsonschema==4.17.0
     # via nbformat
 jupyter-client==7.4.4
     # via nbclient
-jupyter-core==4.11.2
+jupyter-core==5.0.0
     # via
     #   jupyter-client
     #   nbconvert
@@ -87,7 +87,7 @@ pygments==2.13.0
     # via nbconvert
 pyparsing==3.0.9
     # via packaging
-pyrsistent==0.18.1
+pyrsistent==0.19.2
     # via jsonschema
 python-dateutil==2.8.2
     # via jupyter-client
@@ -119,7 +119,7 @@ tomli==2.0.1
     # via mypy
 tornado==6.2
     # via jupyter-client
-traitlets==5.4.0
+traitlets==5.5.0
     # via
     #   jupyter-client
     #   jupyter-core
