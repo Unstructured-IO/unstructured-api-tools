@@ -19,6 +19,7 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 router = APIRouter()
 
 RATE_LIMIT = os.environ.get("PIPELINE_API_RATE_LIMIT", "1/second")
+{% set response_type = optional_param_value_map.pop("response_type", None) %}
 {% if response_type %}
 def is_expected_response_type(media_type, response_type):
     if media_type == "application/json" and response_type not in [dict, list]:
@@ -93,7 +94,6 @@ class MultipartMixedResponse(StreamingResponse):
 {% endif %}
 
 
-{% set response_type = optional_param_value_map.pop("response_type", None) %}
 @router.post("{{pipeline_path}}")
 @limiter.limit(RATE_LIMIT)
 async def pipeline_1(request: Request, 
