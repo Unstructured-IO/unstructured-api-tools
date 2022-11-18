@@ -1,3 +1,7 @@
+# 0.4.5
+
+* fix bug to get `response_type` value before first call of it in template
+
 # 0.4.4
 
 * Implement generation of an app-level FastAPI module.
