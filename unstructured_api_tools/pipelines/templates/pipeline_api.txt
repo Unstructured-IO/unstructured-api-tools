@@ -19,8 +19,8 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 router = APIRouter()
 
 RATE_LIMIT = os.environ.get("PIPELINE_API_RATE_LIMIT", "1/second")
-{% set response_type = optional_param_value_map.pop("response_type", None) %}
-{% if response_type %}
+{% set default_response_type = optional_param_value_map.pop("response_type", None) %}
+{% if default_response_type %}
 def is_expected_response_type(media_type, response_type):
     if media_type == "application/json" and response_type not in [dict, list]:
         return True
@@ -99,14 +99,14 @@ class MultipartMixedResponse(StreamingResponse):
 async def pipeline_1(request: Request, 
 {% if accepts_file %}files: Union[List[UploadFile], None] = File(default=None),{% endif %}
 {% if accepts_text %}text_files: Union[List[UploadFile], None] = File(default=None),{% endif %}
-{% if response_type %}output_format: Union[str, None] = Form(default=None),{% endif %}
+{% if default_response_type %}output_format: Union[str, None] = Form(default=None),{% endif %}
 {% for param in multi_string_param_names %}
 {{param}}: List[str] = Form(default=[]),
 {% endfor %}
 ):
     content_type = request.headers.get("Accept")
-{% if response_type %}
-    default_response_type = output_format or "{{response_type}}"
+{% if default_response_type %}
+    default_response_type = output_format or "{{default_response_type}}"
     if not content_type or content_type == "*/*" or content_type == "multipart/mixed":
         media_type = default_response_type
     else:
@@ -139,7 +139,7 @@ async def pipeline_1(request: Request,
                     text=text,
                     file=None,
                     {% for param in multi_string_param_names %}m_{{param}}={{param}}, {% endfor %}
-                    {% if response_type %}response_type=media_type, {% endif %}
+                    {% if default_response_type %}response_type=media_type, {% endif %}
                 )
                 if type(response) not in [str, bytes]:
                     response = json.dumps(response)
@@ -152,7 +152,7 @@ async def pipeline_1(request: Request,
                     text=None,
                     file=_file,
                     {% for param in multi_string_param_names %}m_{{param}}={{param}}, {% endfor %}
-                    {% if response_type %}response_type=media_type, {% endif %}
+                    {% if default_response_type %}response_type=media_type, {% endif %}
                     {% if "filename" in optional_param_value_map %}filename=file.filename, {%endif%}
                     {% if "file_content_type" in optional_param_value_map %}file_content_type=file.content_type, {%endif%}
                 )
@@ -162,7 +162,7 @@ async def pipeline_1(request: Request,
 
         return MultipartMixedResponse(
             response_generator(), 
-            {% if response_type %}content_type=media_type{% endif %}
+            {% if default_response_type %}content_type=media_type{% endif %}
         )
     else:
         if has_text:
@@ -172,7 +172,7 @@ async def pipeline_1(request: Request,
                 text=text,
                 file=None,
                 {% for param in multi_string_param_names %}m_{{param}}={{param}}, {% endfor %}
-                {% if response_type %}response_type=media_type,{% endif %}
+                {% if default_response_type %}response_type=media_type,{% endif %}
             )
         elif has_files:
             file = files_list[0]
@@ -181,12 +181,12 @@ async def pipeline_1(request: Request,
                 text=None,
                 file=_file,
                 {% for param in multi_string_param_names %}m_{{param}}={{param}}, {% endfor %}
-                {% if response_type %}response_type=media_type,{% endif %}
+                {% if default_response_type %}response_type=media_type,{% endif %}
                 {% if "filename" in optional_param_value_map %}filename=file.filename, {%endif%}
                 {% if "file_content_type" in optional_param_value_map %}file_content_type=file.content_type, {%endif%}
             )
 
-    {% if response_type %}
+    {% if default_response_type %}
         if is_expected_response_type(media_type, type(response)):
             return PlainTextResponse(
                 content=(f"Conflict in media type {media_type}"
@@ -225,7 +225,7 @@ async def pipeline_1(request: Request,
                     response = pipeline_api(
                         {% if accepts_text %}text, {% elif accepts_file%}_file, {% endif %}
                         {% for param in multi_string_param_names %}m_{{param}}={{param}}, {% endfor %}
-                        {% if response_type %}response_type=media_type, {% endif %}
+                        {% if default_response_type %}response_type=media_type, {% endif %}
                         {% if accepts_file %}
                             {% if "filename" in optional_param_value_map %}filename=file.filename, {%endif%}
                             {% if "file_content_type" in optional_param_value_map %}file_content_type=file.content_type, {%endif%}
@@ -237,7 +237,7 @@ async def pipeline_1(request: Request,
             
             return MultipartMixedResponse(
                 response_generator(), 
-                {% if response_type %}content_type=media_type{% endif %}
+                {% if default_response_type %}content_type=media_type{% endif %}
             )
         else:
             {% if accepts_text %}
@@ -251,14 +251,14 @@ async def pipeline_1(request: Request,
             response = pipeline_api(
                 {% if accepts_text %}text, {% elif accepts_file %}_file, {% endif %}
                 {% for param in multi_string_param_names %}m_{{param}}={{param}}, {% endfor %}
-                {% if response_type %}response_type=media_type,{% endif %}
+                {% if default_response_type %}response_type=media_type,{% endif %}
                 {% if accepts_file %}
                     {% if "filename" in optional_param_value_map %}filename=file.filename, {%endif%}
                     {% if "file_content_type" in optional_param_value_map %}file_content_type=file.content_type, {%endif%}
                 {% endif %}
             )
 
-            {% if response_type %}
+            {% if default_response_type %}
             if is_expected_response_type(media_type, type(response)):
                 return PlainTextResponse(
                     content=(f"Conflict in media type {media_type}"
@@ -282,13 +282,13 @@ async def pipeline_1(request: Request,
             status_code=status.HTTP_400_BAD_REQUEST
         )
 {% else %}
-    {% if response_type %}
+    {% if default_response_type %}
     response = pipeline_api({% for param in multi_string_param_names %}m_{{param}}={{param}}, {% endfor %} response_type=media_type,)
     {% else %}
     response = pipeline_api({% for param in multi_string_param_names %}{{param}}, {% endfor %})
     {% endif %}
 
-    {% if response_type %}
+    {% if default_response_type %}
     valid_response_types = ["application/json", "text/csv", "*/*"]
     if media_type in valid_response_types:
         return response
