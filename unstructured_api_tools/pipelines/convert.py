@@ -87,7 +87,6 @@ def _infer_params_from_pipeline_api(script: str) -> Dict[str, Optional[Any]]:
     expect_other_params = False
 
     supported_optional_params: Dict[str, Union[Type, Tuple]] = {"response_type": str}
-
     for param in params:
         if expect_text_or_file:
             if param == "text":
@@ -134,13 +133,13 @@ def _infer_params_from_pipeline_api(script: str) -> Dict[str, Optional[Any]]:
                     f"Unsupported parameter name {param}, must either be text, file"
                     f', {", ".join(list(supported_optional_params.keys()))}, or begin with m_'
                 )
-
-    return {
+    param_value_map = {
         "multi_string_param_names": multi_string_param_names,
-        "optional_param_value_map": optional_param_value_map,
         "accepts_text": accepts_text,
         "accepts_file": accepts_file,
     }
+    param_value_map = {**param_value_map, **optional_param_value_map}
+    return param_value_map
 
 
 def notebook_file_to_script(
