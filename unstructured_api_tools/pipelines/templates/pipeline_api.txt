@@ -93,7 +93,7 @@ class MultipartMixedResponse(StreamingResponse):
 {% endif %}
 
 
-
+{% set response_type = optional_param_value_map.pop("response_type", None) %}
 @router.post("{{pipeline_path}}")
 @limiter.limit(RATE_LIMIT)
 async def pipeline_1(request: Request, 
