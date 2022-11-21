@@ -86,7 +86,10 @@ def _infer_params_from_pipeline_api(script: str) -> Dict[str, Optional[Any]]:
     expect_text_or_file = True
     expect_other_params = False
 
-    supported_optional_params: Dict[str, Union[Type, Tuple]] = {"response_type": str}
+    supported_optional_params: Dict[str, Union[Type, Tuple]] = {
+        "response_type": str,
+        "response_schema": str,
+    }
 
     for param in params:
         if expect_text_or_file:

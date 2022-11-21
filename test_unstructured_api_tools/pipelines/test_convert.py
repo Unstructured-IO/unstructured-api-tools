@@ -137,9 +137,13 @@ def tests_notebook_to_script(sample_notebook):
             "Default argument type for response_type must be one of: <class 'str'>",
         ),
         (
+            "def pipeline_api(text, response_schema=None, m_var=[], m_var2=[]): pass",
+            "Default argument type for response_schema must be one of: <class 'str'>",
+        ),
+        (
             "def pipeline_api(text, m_var=[], m_var2=[], var3=[]): pass",
             "Unsupported parameter name var3, must either be text, file, response_type,"
-            " or begin with m_",
+            " response_schema, or begin with m_",
         ),
         (
             "def pipeline_api(text, m_var=[], file=None, m_var2=[], var3=[]): pass",
@@ -224,6 +228,20 @@ def test_infer_m_params():
             "accepts_file": False,
             "multi_string_param_names": ["var", "var2"],
             "optional_param_value_map": {"response_type": "text/csv"},
+        }
+    )
+
+    assert (
+        convert._infer_params_from_pipeline_api(
+            """def pipeline_api(text, m_var=[], m_var2=[], response_schema="label_studio"):
+        pass
+        """
+        )
+        == {
+            "accepts_text": True,
+            "accepts_file": False,
+            "multi_string_param_names": ["var", "var2"],
+            "optional_param_value_map": {"response_schema": "label_studio"},
         }
     )
 

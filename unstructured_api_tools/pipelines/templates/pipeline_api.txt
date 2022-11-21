@@ -93,13 +93,14 @@ class MultipartMixedResponse(StreamingResponse):
         await send({"type": "http.response.body", "body": b"", "more_body": False})
 {% endif %}
 
-
+{% set response_schema = optional_param_value_map.pop("response_schema", None) %}
 @router.post("{{pipeline_path}}")
 @limiter.limit(RATE_LIMIT)
 async def pipeline_1(request: Request, 
 {% if accepts_file %}files: Union[List[UploadFile], None] = File(default=None),{% endif %}
 {% if accepts_text %}text_files: Union[List[UploadFile], None] = File(default=None),{% endif %}
 {% if default_response_type %}output_format: Union[str, None] = Form(default=None),{% endif %}
+{% if response_schema %}output_schema: str = Form(default=None),{% endif %}
 {% for param in multi_string_param_names %}
 {{param}}: List[str] = Form(default=[]),
 {% endfor %}
@@ -111,6 +112,9 @@ async def pipeline_1(request: Request,
         media_type = default_response_type
     else:
         media_type = content_type
+{% endif %}
+{% if response_schema %}
+    default_response_schema = output_schema or "{{response_schema}}"
 {% endif %}
 
 {% if accepts_text and accepts_file %}
@@ -140,6 +144,7 @@ async def pipeline_1(request: Request,
                     file=None,
                     {% for param in multi_string_param_names %}m_{{param}}={{param}}, {% endfor %}
                     {% if default_response_type %}response_type=media_type, {% endif %}
+                    {% if response_schema %}response_schema=default_response_schema, {% endif %}
                 )
                 if type(response) not in [str, bytes]:
                     response = json.dumps(response)
@@ -153,6 +158,7 @@ async def pipeline_1(request: Request,
                     file=_file,
                     {% for param in multi_string_param_names %}m_{{param}}={{param}}, {% endfor %}
                     {% if default_response_type %}response_type=media_type, {% endif %}
+                    {% if response_schema %}response_schema=default_response_schema, {% endif %}
                     {% if "filename" in optional_param_value_map %}filename=file.filename, {%endif%}
                     {% if "file_content_type" in optional_param_value_map %}file_content_type=file.content_type, {%endif%}
                 )
@@ -173,6 +179,7 @@ async def pipeline_1(request: Request,
                 file=None,
                 {% for param in multi_string_param_names %}m_{{param}}={{param}}, {% endfor %}
                 {% if default_response_type %}response_type=media_type,{% endif %}
+                {% if response_schema %}response_schema=default_response_schema, {% endif %}
             )
         elif has_files:
             file = files_list[0]
@@ -182,6 +189,7 @@ async def pipeline_1(request: Request,
                 file=_file,
                 {% for param in multi_string_param_names %}m_{{param}}={{param}}, {% endfor %}
                 {% if default_response_type %}response_type=media_type,{% endif %}
+                {% if response_schema %}response_schema=default_response_schema, {% endif %}
                 {% if "filename" in optional_param_value_map %}filename=file.filename, {%endif%}
                 {% if "file_content_type" in optional_param_value_map %}file_content_type=file.content_type, {%endif%}
             )
@@ -226,6 +234,7 @@ async def pipeline_1(request: Request,
                         {% if accepts_text %}text, {% elif accepts_file%}_file, {% endif %}
                         {% for param in multi_string_param_names %}m_{{param}}={{param}}, {% endfor %}
                         {% if default_response_type %}response_type=media_type, {% endif %}
+                        {% if response_schema %}response_schema=default_response_schema, {% endif %}
                         {% if accepts_file %}
                             {% if "filename" in optional_param_value_map %}filename=file.filename, {%endif%}
                             {% if "file_content_type" in optional_param_value_map %}file_content_type=file.content_type, {%endif%}
@@ -252,6 +261,7 @@ async def pipeline_1(request: Request,
                 {% if accepts_text %}text, {% elif accepts_file %}_file, {% endif %}
                 {% for param in multi_string_param_names %}m_{{param}}={{param}}, {% endfor %}
                 {% if default_response_type %}response_type=media_type,{% endif %}
+                {% if response_schema %}response_schema=default_response_schema, {% endif %}
                 {% if accepts_file %}
                     {% if "filename" in optional_param_value_map %}filename=file.filename, {%endif%}
                     {% if "file_content_type" in optional_param_value_map %}file_content_type=file.content_type, {%endif%}
