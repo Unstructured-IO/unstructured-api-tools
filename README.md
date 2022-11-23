@@ -24,12 +24,12 @@ To install the library, run `pip install unstructured_api_tools`.
 * Using `pyenv` to manage virtualenv's is recommended
 	* Mac install instructions. See [here](https://github.com/Unstructured-IO/community#mac--homebrew) for more detailed instructions.
 		* `brew install pyenv-virtualenv`
-	  * `pyenv install 3.8.13`
+	  * `pyenv install 3.8.15`
   * Linux instructions are available [here](https://github.com/Unstructured-IO/community#linux).
 
 * Create a virtualenv to work in and activate it, e.g. for one named `unstructured_api_tools`:
 
-	`pyenv  virtualenv 3.8.13 unstructured_api_tools` <br />
+	`pyenv  virtualenv 3.8.15 unstructured_api_tools` <br />
 	`pyenv activate unstructured_api_tools`
 
 * Run `make install-project-local`
