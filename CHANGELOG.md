@@ -1,3 +1,7 @@
+# 0.4.6
+
+* Add support for `response_schema` parameter in Pipeline API functions.
+
 # 0.4.5
 
 * fix bug to get `response_type` value before first call of it in template
