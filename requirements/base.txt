@@ -126,7 +126,7 @@ traitlets==5.5.0
     #   nbclient
     #   nbconvert
     #   nbformat
-types-requests==2.28.11.4
+types-requests==2.28.11.5
     # via unstructured-api-tools (setup.py)
 types-ujson==5.5.0
     # via unstructured-api-tools (setup.py)
