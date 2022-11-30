@@ -15,6 +15,8 @@ import nbformat
 from unstructured_api_tools.pipelines.api_conventions import get_pipeline_path
 import unstructured_api_tools.pipelines.lint as lint
 
+IMPORT_PATTERN = r"(^import(\s+(\w|\.)+\s+as\s+\w+|\s+\w+)?|from\s+(\w|\.)+\s+import\s+\w+)"
+IMPORT_RE = re.compile(IMPORT_PATTERN)
 INPUT_LINES_RE = re.compile(r"\n\n# In\[.+\]:")
 PIPELINE_API_RE = re.compile(r"\n\n# pipeline-api")
 HEADERS_RE = re.compile(r"#(!/usr/bin/env python| coding: utf-8)")
@@ -255,7 +257,24 @@ def _cleanup_script(script: str) -> str:
     script = INPUT_LINES_RE.sub("", script)
     script = PIPELINE_API_RE.sub("", script)
     script = HEADERS_RE.sub("", script)
+    script = _organize_imports(script)
     return script.strip()
+
+
+def _organize_imports(script: str) -> str:
+    """Organizes all of the import statements at the top of the script."""
+    imports: List[str] = []
+    lines: List[str] = []
+
+    for line in script.split("\n"):
+        if IMPORT_RE.search(line) is None:
+            lines.append(line)
+        else:
+            imports.append(line)
+    imports.append("")
+
+    clean_script = "\n".join(imports + lines)
+    return clean_script
 
 
 def get_script_filename(notebook_filename: str) -> str:

@@ -344,3 +344,33 @@ def test_validate_raises_with_bad_filename(bad_filename):
 
 def test_get_api_name():
     assert convert.get_api_name("pipeline-dummy-api.ipynb") == "dummy_api"
+
+
+def test_organize_imports():
+    script = """def hello_word():
+    pass
+
+import numpy as np
+from unstructured.cleaners.core import clean
+
+def another_function():
+    pass
+
+import unstructured
+"""
+    reordered_script = convert._organize_imports(script)
+    assert (
+        reordered_script
+        == """import numpy as np
+from unstructured.cleaners.core import clean
+import unstructured
+
+def hello_word():
+    pass
+
+
+def another_function():
+    pass
+
+"""
+    )
