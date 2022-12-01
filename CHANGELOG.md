@@ -1,6 +1,7 @@
-# 0.4.7-dev0
+# 0.4.7-dev1
 
 * Notebook conversion organizes module level imports at the top of the file
+* Allow for FastAPI metadata to be read from the config file
 
 # 0.4.6
 
