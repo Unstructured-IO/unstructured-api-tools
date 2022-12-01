@@ -9,6 +9,8 @@ import re
 class PipelineConfig:
     name: str
     version: str
+    description: str
+    long_description: str
     filename: str
 
     def __init__(self, filename: Optional[str] = None):
@@ -36,6 +38,8 @@ class PipelineConfig:
 
         self.name = config["name"]
         self.version = config["version"]
+        self.description = config.get("description", "Unstructured Pipeline API")
+        self.long_description = config.get("long_description", "")
 
 
 def raise_for_invalid_semver_string(semver: str):
