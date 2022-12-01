@@ -34,12 +34,11 @@ def hello_world():
 
 def test_flake8_passes_with_unsued_import():
     file_text = """# A test file
+import os
+
 
 def hello_world():
     pass
-
-
-import os
 """
     assert lint.check_flake8(file_text) is True
 
