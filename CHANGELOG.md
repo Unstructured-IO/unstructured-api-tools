@@ -1,3 +1,7 @@
+# 0.4.7-dev0
+
+* Notebook conversion organizes module level imports at the top of the file
+
 # 0.4.6
 
 * Add support for `response_schema` parameter in Pipeline API functions.

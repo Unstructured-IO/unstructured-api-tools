@@ -7,11 +7,8 @@ from typing import List
 
 from black import format_str, FileMode
 
-# NOTE(robinson) - We can remove E402 from the defaults following completion of CORE-109
-# ref: https://unstructured-ai.atlassian.net/browse/CORE-109
-#   E402 - module level import not at top of file
-#   F401 - unsued import
-FLAKE8_DEFAULT_OPTS: List[str] = ["--max-line-length", "100", "--ignore", "E402,F401"]
+# NOTE(robinson) - F401 is for unused imports
+FLAKE8_DEFAULT_OPTS: List[str] = ["--max-line-length", "100", "--ignore", "F401"]
 FLAKE8_PREFIX_RE = re.compile(r".+:\d+:\d+:\s")
 FLAKE8_ERROR_CODE_RE = re.compile(r"([A-Z]\d{3},?\s?)+")
 
