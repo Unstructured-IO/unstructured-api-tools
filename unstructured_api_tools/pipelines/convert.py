@@ -12,7 +12,7 @@ from jinja2 import Environment, FileSystemLoader
 from nbconvert import ScriptExporter
 import nbformat
 
-from unstructured_api_tools.pipelines.api_conventions import get_pipeline_path
+from unstructured_api_tools.pipelines.api_conventions import get_pipeline_path, PipelineConfig
 import unstructured_api_tools.pipelines.lint as lint
 
 IMPORT_PATTERN = (
@@ -188,10 +188,24 @@ def build_root_app_module(
     module_names: List[str],
     output_directory: str,
     flake8_opts: List[str] = lint.FLAKE8_DEFAULT_OPTS,
+    config_filename: Optional[str] = None,
 ):
     environment = Environment(loader=FileSystemLoader(TEMPLATE_PATH))
     template = environment.get_template("pipeline_app.txt")
-    content = template.render(module_names=module_names)
+
+    if config_filename:
+        pipeline_config = PipelineConfig(filename=config_filename)
+        title = pipeline_config.description
+        description = pipeline_config.long_description
+        version = pipeline_config.version
+    else:
+        title = "Unstructured Pipeline API"
+        description = ""
+        version = ""
+
+    content = template.render(
+        module_names=module_names, title=title, description=description, version=version
+    )
     content = lint.format_black(content)
     lint.check_flake8(content, opts=flake8_opts)
     lint.check_mypy(content)
@@ -223,7 +237,9 @@ def convert_notebook_files_to_api(
             flake8_opts=flake8_opts,
         )
     api_module_names = [get_api_name(notebook_filename) for notebook_filename in notebook_filenames]
-    build_root_app_module(api_module_names, output_directory, flake8_opts=flake8_opts)
+    build_root_app_module(
+        api_module_names, output_directory, config_filename=config_filename, flake8_opts=flake8_opts
+    )
 
 
 def read_notebook(filename: str) -> nbformat.NotebookNode:

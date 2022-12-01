@@ -2,6 +2,7 @@ import json
 import os
 import pytest
 import re
+import yaml
 
 from nbformat import NotebookNode
 
@@ -299,6 +300,16 @@ def test_notebook_file_to_script(sample_notebook, tmpdir):
 
 
 def test_convert_notebook_files_to_api(sample_notebook, tmpdir):
+    fake_config = {
+        "name": "fake",
+        "version": "0.2.1",
+        "description": "The Best API Pipeline!",
+        "long_description": "This is the best API ever!",
+    }
+    config_filename = os.path.join(tmpdir.dirname, "fake-config.yaml")
+    with open(config_filename, "w") as f:
+        yaml.dump(fake_config, f)
+
     notebook_filenames = []
     for i in range(5):
         filename = os.path.join(tmpdir.dirname, f"pipeline-test-notebook-{i}.ipynb")
@@ -312,6 +323,7 @@ def test_convert_notebook_files_to_api(sample_notebook, tmpdir):
         output_directory=tmpdir.dirname,
         pipeline_family="test-family",
         semver="0.2.1",
+        config_filename=config_filename,
     )
 
     for i in range(5):
