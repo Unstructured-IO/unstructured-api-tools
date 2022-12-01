@@ -12,6 +12,13 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from fastapi.responses import PlainTextResponse
 
+import json
+from fastapi.responses import StreamingResponse
+from starlette.types import Send
+from base64 import b64encode
+from typing import Optional, Mapping, Iterator, Tuple
+import secrets
+
 limiter = Limiter(key_func=get_remote_address)
 app = FastAPI()
 app.state.limiter = limiter
@@ -33,12 +40,6 @@ def is_expected_response_type(media_type, response_type):
 
 
 {% if accepts_text or accepts_file %}
-import json
-from fastapi.responses import StreamingResponse
-from starlette.types import Send
-from base64 import b64encode
-from typing import Optional, Mapping, Iterator, Tuple
-import secrets
 
 class MultipartMixedResponse(StreamingResponse):
     CRLF = b"\r\n"
@@ -96,7 +97,7 @@ class MultipartMixedResponse(StreamingResponse):
 {% set default_response_schema = optional_param_value_map.pop("response_schema", None) %}
 @router.post("{{pipeline_path}}")
 @limiter.limit(RATE_LIMIT)
-async def pipeline_1(request: Request, 
+async def pipeline_1(request: Request,
 {% if accepts_file %}files: Union[List[UploadFile], None] = File(default=None),{% endif %}
 {% if accepts_text %}text_files: Union[List[UploadFile], None] = File(default=None),{% endif %}
 {% if default_response_type %}output_format: Union[str, None] = Form(default=None),{% endif %}
@@ -167,7 +168,7 @@ async def pipeline_1(request: Request,
                 yield response
 
         return MultipartMixedResponse(
-            response_generator(), 
+            response_generator(),
             {% if default_response_type %}content_type=media_type{% endif %}
         )
     else:
@@ -243,9 +244,9 @@ async def pipeline_1(request: Request,
                     if type(response) not in [str, bytes]:
                         response = json.dumps(response)
                     yield response
-            
+
             return MultipartMixedResponse(
-                response_generator(), 
+                response_generator(),
                 {% if default_response_type %}content_type=media_type{% endif %}
             )
         else:
@@ -256,7 +257,7 @@ async def pipeline_1(request: Request,
             file = files[0]
             _file = file.file
             {% endif %}
-            
+
             response = pipeline_api(
                 {% if accepts_text %}text, {% elif accepts_file %}_file, {% endif %}
                 {% for param in multi_string_param_names %}m_{{param}}={{param}}, {% endfor %}

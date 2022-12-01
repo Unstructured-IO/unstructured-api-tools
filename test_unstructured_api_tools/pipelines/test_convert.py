@@ -352,6 +352,10 @@ def test_organize_imports():
 
 import numpy as np
 from unstructured.cleaners.core import clean
+from unstructured.cleaners.core import (
+    clean_whitespace,
+    replace_unicode_quotes,
+)
 
 def another_function():
     pass
@@ -363,6 +367,10 @@ import unstructured
         reordered_script
         == """import numpy as np
 from unstructured.cleaners.core import clean
+from unstructured.cleaners.core import (
+    clean_whitespace,
+    replace_unicode_quotes,
+)
 import unstructured
 
 def hello_word():
@@ -374,3 +382,27 @@ def another_function():
 
 """
     )
+
+
+def test_get_multiline_import():
+    lines = ["from unstructured import (", "func1,", "func2", ")", "", "def hello(): pass"]
+    multiline_import, length = convert._get_multiline_import(lines)
+    assert length == 4
+    assert (
+        multiline_import
+        == """from unstructured import (
+func1,
+func2
+)"""
+    )
+
+
+def test_get_multiline_import_raises_with_no_import():
+    with pytest.raises(ValueError):
+        convert._get_multiline_import(["def hello(): pass"])
+
+
+def test_get_multiline_raises_with_no_parens():
+    lines = ["from unstructured import func1", "func1,", "func2", ")", "", "def hello(): pass"]
+    with pytest.raises(ValueError):
+        convert._get_multiline_import(lines)
