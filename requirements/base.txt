@@ -42,7 +42,7 @@ jinja2==3.1.2
     #   unstructured-api-tools (setup.py)
 jsonschema==4.17.1
     # via nbformat
-jupyter-client==7.4.4
+jupyter-client==7.4.8
     # via nbclient
 jupyter-core==5.1.0
     # via
