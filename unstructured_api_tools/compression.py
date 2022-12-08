@@ -18,8 +18,24 @@ def is_tarfile(upload_file: UploadFile) -> bool:
     return _is_tarfile
 
 
+def _process_file(
+    filename: str, pipeline_api: Callable, accepts: str = "file"
+):
+    if accepts == "file":
+        with open(filename, "rb") as f:
+            response = pipeline_api(f, filename=filename)
+    elif accepts == "text":
+        with open(filename, "r") as f:
+            text = f.read()
+            response = pipeline_api(text)
+    else:
+        raise ValueError(f"{accepts} is an invalid value for accepts."
+                            "Choose 'file' or 'text'.")
+    return response
+
+
 def process_tarred_files(
-    file: UploadFile, pipeline_api: Callable, pipeline_kwargs: dict
+    file: UploadFile, pipeline_api: Callable, accepts: str = "file"
 ):
     response = []
     tar = tarfile.open(fileobj=file.file, mode="r:gz")
@@ -28,8 +44,7 @@ def process_tarred_files(
 
         for _file in os.listdir(tmpdir):
             filename = os.path.join(tmpdir, _file)
-            with open(filename, "rb") as f:
-                _response = pipeline_api(f, filename=filename, **pipeline_kwargs)
+            _response = _process_file(filename, pipeline_api, accepts)
 
         response.append(_response)
 
@@ -37,7 +52,7 @@ def process_tarred_files(
 
 
 def process_zipped_files(
-    file: UploadFile, pipeline_api, pipeline_kwargs
+    file: UploadFile, pipeline_api: Callable, accepts: str = "file"
 ) -> List[UploadFile]:
     """If an UploadFile object is a zipfile, this function will unpack the files
     within the zip as a list of UploadFiles."""
@@ -50,8 +65,7 @@ def process_zipped_files(
         zf.extractall(tmpdir)
         for _file in os.listdir(tmpdir):
             filename = os.path.join(tmpdir, _file)
-            with open(filename, "rb") as f:
-                _response = pipeline_api(f, filename=filename, **pipeline_kwargs)
+            _response = _process_file(filename, pipeline_api, accepts)
 
         response.append(_response)
     return response

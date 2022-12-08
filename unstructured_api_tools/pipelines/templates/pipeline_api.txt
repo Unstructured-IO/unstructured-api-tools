@@ -1,3 +1,4 @@
+from functools import partial
 import os
 from typing import List, Union
 
@@ -13,6 +14,8 @@ from starlette.types import Send
 from base64 import b64encode
 from typing import Optional, Mapping, Iterator, Tuple
 import secrets
+
+import unstructured_api_tools.compression as compression
 
 limiter = Limiter(key_func=get_remote_address)
 app = FastAPI()
@@ -245,24 +248,50 @@ async def pipeline_1(request: Request,
                 {% if default_response_type %}content_type=media_type{% endif %}
             )
         else:
+            _pipeline_api = partial(
+              pipeline_api,
+              {% for param in multi_string_param_names %}m_{{param}}={{param}}, {% endfor %}
+              {% if default_response_type %}response_type=media_type,{% endif %}
+              {% if default_response_schema %}response_schema=default_response_schema, {% endif %}
+            )
+
+
             {% if accepts_text %}
             text_file = text_files[0]
-            text = text_file.file.read().decode("utf-8")
+            if compression.is_tarfile(file):
+                response = compression.process_tarred_files(
+                    text_file,
+                    _pipeline_api,
+                    accepts="text"
+                )
+            elif compression.is_zipfile(file):
+                response = compression.process_zipped_files(
+                    text_file,
+                    _pipeline_api,
+                    accepts="file"
+                )
+            else:
+                text = text_file.file.read().decode("utf-8")
+                response = _pipeline_api(
+                    _file,
+                    filename=file.filename,
+                    file_content_type=file.content_type
+                )
             {% elif accepts_file %}
             file = files[0]
             _file = file.file
-            {% endif %}
 
-            response = pipeline_api(
-                {% if accepts_text %}text, {% elif accepts_file %}_file, {% endif %}
-                {% for param in multi_string_param_names %}m_{{param}}={{param}}, {% endfor %}
-                {% if default_response_type %}response_type=media_type,{% endif %}
-                {% if default_response_schema %}response_schema=default_response_schema, {% endif %}
-                {% if accepts_file %}
-                    {% if "filename" in optional_param_value_map %}filename=file.filename, {%endif%}
-                    {% if "file_content_type" in optional_param_value_map %}file_content_type=file.content_type, {%endif%}
-                {% endif %}
-            )
+            if compression.is_tarfile(file):
+                response = compression.process_tarred_files(file, _pipeline_api)
+            elif compression.is_zipfile(file):
+                response = compression.process_zipped_files(file, _pipeline_api)
+            else:
+                response = _pipeline_api(
+                    _file,
+                    filename=file.filename,
+                    file_content_type=file.content_type
+                )
+            {% endif %}
 
             {% if default_response_type %}
             if is_expected_response_type(media_type, type(response)):
