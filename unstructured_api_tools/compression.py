@@ -18,9 +18,7 @@ def is_tarfile(upload_file: UploadFile) -> bool:
     return _is_tarfile
 
 
-def _process_file(
-    filename: str, pipeline_api: Callable, accepts: str = "file"
-):
+def _process_file(filename: str, pipeline_api: Callable, accepts: str = "file"):
     if accepts == "file":
         with open(filename, "rb") as f:
             response = pipeline_api(f, filename=filename)
@@ -29,14 +27,11 @@ def _process_file(
             text = f.read()
             response = pipeline_api(text)
     else:
-        raise ValueError(f"{accepts} is an invalid value for accepts."
-                            "Choose 'file' or 'text'.")
+        raise ValueError(f"{accepts} is an invalid value for accepts." "Choose 'file' or 'text'.")
     return response
 
 
-def process_tarred_files(
-    file: UploadFile, pipeline_api: Callable, accepts: str = "file"
-):
+def process_tarred_files(file: UploadFile, pipeline_api: Callable, accepts: str = "file"):
     response = []
     tar = tarfile.open(fileobj=file.file, mode="r:gz")
     with tempfile.TemporaryDirectory() as tmpdir:

@@ -258,24 +258,24 @@ async def pipeline_1(request: Request,
 
             {% if accepts_text %}
             text_file = text_files[0]
-            if compression.is_tarfile(file):
+            if compression.is_tarfile(text_file):
                 response = compression.process_tarred_files(
                     text_file,
                     _pipeline_api,
                     accepts="text"
                 )
-            elif compression.is_zipfile(file):
+            elif compression.is_zipfile(text_file):
                 response = compression.process_zipped_files(
                     text_file,
                     _pipeline_api,
-                    accepts="file"
+                    accepts="text"
                 )
             else:
                 text = text_file.file.read().decode("utf-8")
                 response = _pipeline_api(
-                    _file,
-                    filename=file.filename,
-                    file_content_type=file.content_type
+                    text,
+                    filename=text_file.filename,
+                    file_content_type=text_file.content_type
                 )
             {% elif accepts_file %}
             file = files[0]
