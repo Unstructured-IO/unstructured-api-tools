@@ -71,7 +71,7 @@ jobs:
     - name: Test
       run: |
         source .venv/bin/activate
-        make test
+        ls
         make check-coverage
 
   changelog:
