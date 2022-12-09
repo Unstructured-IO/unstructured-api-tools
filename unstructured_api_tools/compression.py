@@ -19,7 +19,7 @@ def is_tarfile(upload_file: UploadFile) -> bool:
 
 
 def is_zipfile(upload_file: UploadFile) -> bool:
-    """Deteremines if the UploadFile is a zip file or not."""
+    """Determines if the UploadFile is a zip file or not."""
     with tempfile.NamedTemporaryFile() as tmp_file:
         tmp_file.write(upload_file.file.read())
         _is_zipfile = zipfile.is_zipfile(tmp_file.name)
