@@ -18,7 +18,18 @@ def is_tarfile(upload_file: UploadFile) -> bool:
     return _is_tarfile
 
 
+def is_zipfile(upload_file: UploadFile) -> bool:
+    """Deteremines if the UploadFile is a zip file or not."""
+    with tempfile.NamedTemporaryFile() as tmp_file:
+        tmp_file.write(upload_file.file.read())
+        _is_zipfile = zipfile.is_zipfile(tmp_file.name)
+
+    upload_file.file.seek(0)
+    return _is_zipfile
+
+
 def _process_file(filename: str, pipeline_api: Callable, accepts: str = "file"):
+    """Processes a single file from the zip or tar through the pipeline API."""
     if accepts == "file":
         with open(filename, "rb") as f:
             response = pipeline_api(f, filename=filename)
@@ -64,13 +75,3 @@ def process_zipped_files(
 
         response.append(_response)
     return response
-
-
-def is_zipfile(upload_file: UploadFile) -> bool:
-    """Deteremines if the UploadFile is a zip file or not."""
-    with tempfile.NamedTemporaryFile() as tmp_file:
-        tmp_file.write(upload_file.file.read())
-        _is_zipfile = zipfile.is_zipfile(tmp_file.name)
-
-    upload_file.file.seek(0)
-    return _is_zipfile
