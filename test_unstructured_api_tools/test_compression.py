@@ -2,7 +2,6 @@ import os
 import pathlib
 import pytest
 import tarfile
-import zipfile
 
 from fastapi import UploadFile
 

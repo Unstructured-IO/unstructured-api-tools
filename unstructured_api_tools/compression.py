@@ -1,7 +1,6 @@
 import os
 import tarfile
 import tempfile
-from tempfile import SpooledTemporaryFile
 from typing import Callable, List
 import zipfile
 
