@@ -274,8 +274,6 @@ async def pipeline_1(request: Request,
                 text = text_file.file.read().decode("utf-8")
                 response = _pipeline_api(
                     text,
-                    filename=text_file.filename,
-                    file_content_type=text_file.content_type
                 )
             {% elif accepts_file %}
             file = files[0]
