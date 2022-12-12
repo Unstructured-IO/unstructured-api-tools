@@ -51,7 +51,7 @@ jupyter-core==5.1.0
     #   nbformat
 jupyterlab-pygments==0.2.2
     # via nbconvert
-limits==1.6
+limits==2.7.2
     # via slowapi
 markupsafe==2.1.1
     # via
