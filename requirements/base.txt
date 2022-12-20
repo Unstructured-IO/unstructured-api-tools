@@ -34,7 +34,7 @@ idna==3.4
     # via anyio
 importlib-metadata==5.0.0
     # via nbconvert
-importlib-resources==5.10.0
+importlib-resources==5.10.1
     # via jsonschema
 jinja2==3.1.2
     # via
