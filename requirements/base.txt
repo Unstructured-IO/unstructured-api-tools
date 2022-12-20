@@ -63,7 +63,7 @@ mypy==0.990
     # via unstructured-api-tools (setup.py)
 mypy-extensions==0.4.3
     # via mypy
-nbclient==0.7.0
+nbclient==0.7.2
     # via nbconvert
 nbconvert==7.2.6
     # via unstructured-api-tools (setup.py)
