@@ -70,7 +70,7 @@ nbclient==0.7.2
     # via nbconvert
 nbconvert==7.2.6
     # via unstructured-api-tools (setup.py)
-nbformat==5.7.0
+nbformat==5.7.1
     # via
     #   nbclient
     #   nbconvert
