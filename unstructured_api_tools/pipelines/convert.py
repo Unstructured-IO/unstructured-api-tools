@@ -211,8 +211,11 @@ def build_root_app_module(
     lint.check_mypy(content)
 
     module_filepath = os.path.join(output_directory, "app.py")
+    init_filepath = os.path.join(output_directory, "__init__.py")
     with open(module_filepath, "w") as f:
         f.write(content)
+    with open(init_filepath, "w") as _:
+        pass
 
 
 def convert_notebook_files_to_api(
