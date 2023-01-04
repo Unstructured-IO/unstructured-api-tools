@@ -7,6 +7,8 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from fastapi.responses import PlainTextResponse
 
+import magic
+import gzip
 import json
 from fastapi.responses import StreamingResponse
 from starlette.types import Send
@@ -90,6 +92,7 @@ class MultipartMixedResponse(StreamingResponse):
 {% endif %}
 
 {% set default_response_schema = optional_param_value_map.pop("response_schema", None) %}
+{% set default_gz_uncompressed_content_type = optional_param_value_map.pop("gz_uncompressed_content_type", None) %}
 @router.post("{{pipeline_path}}")
 @limiter.limit(RATE_LIMIT)
 async def pipeline_1(request: Request,
@@ -97,6 +100,7 @@ async def pipeline_1(request: Request,
 {% if accepts_text %}text_files: Union[List[UploadFile], None] = File(default=None),{% endif %}
 {% if default_response_type %}output_format: Union[str, None] = Form(default=None),{% endif %}
 {% if default_response_schema %}output_schema: str = Form(default=None),{% endif %}
+{% if default_gz_uncompressed_content_type %}gz_uncompressed_content_type: Union[str, None] = Form(default=None),{% endif %}
 {% for param in multi_string_param_names %}
 {{param}}: List[str] = Form(default=[]),
 {% endfor %}
@@ -211,6 +215,7 @@ async def pipeline_1(request: Request,
 {% elif accepts_text or accepts_file %}
     {% if accepts_text%}{% set var_name = "text_files" %}{% elif accepts_file %}{% set var_name = "files" %}{% endif %}
     if isinstance({{var_name}}, list) and len({{var_name}}):
+        m = magic.Magic(mime=True)
         if len({{var_name}}) > 1:
             if content_type and content_type not in ["*/*", "multipart/mixed"]:
                 return PlainTextResponse(
@@ -221,7 +226,18 @@ async def pipeline_1(request: Request,
             def response_generator():
                 for file in {{var_name}}:
                     {% if accepts_text %}
-                    text = file.file.read().decode("utf-8")
+                    {% if default_gz_uncompressed_content_type %} 
+                    with gzip.GzipFile(fileobj=file.file) as f:
+                        text = f.read()
+                    {% else %}
+                    mime_type = m.from_buffer(file.file.read())
+                    file.file.seek(0)
+                    if mime_type == "application/gzip":
+                        with gzip.GzipFile(fileobj=file.file) as f:
+                            text = f.read().decode("utf-8")
+                    else:
+                        text = file.file.read().decode("utf-8")
+                    {% endif%}
                     {% elif accepts_file %}
                     _file = file.file
                     {% endif %}
@@ -231,6 +247,7 @@ async def pipeline_1(request: Request,
                         {% for param in multi_string_param_names %}m_{{param}}={{param}}, {% endfor %}
                         {% if default_response_type %}response_type=media_type, {% endif %}
                         {% if default_response_schema %}response_schema=default_response_schema, {% endif %}
+                        {% if default_gz_uncompressed_content_type %}gz_uncompressed_content_type=gz_uncompressed_content_type, {% endif %}
                         {% if accepts_file %}
                             {% if "filename" in optional_param_value_map %}filename=file.filename, {%endif%}
                             {% if "file_content_type" in optional_param_value_map %}file_content_type=file.content_type, {%endif%}
@@ -247,7 +264,18 @@ async def pipeline_1(request: Request,
         else:
             {% if accepts_text %}
             text_file = text_files[0]
-            text = text_file.file.read().decode("utf-8")
+            {% if default_gz_uncompressed_content_type %} 
+            with gzip.GzipFile(fileobj=text_file.file) as f:
+                text = f.read()
+            {% else %}
+            mime_type = m.from_buffer(text_file.file.read())
+            text_file.file.seek(0)
+            if mime_type == "application/gzip":
+                with gzip.GzipFile(fileobj=text_file.file) as f:
+                    text = f.read().decode("utf-8")
+            else:
+                text = text_file.file.read().decode("utf-8")
+            {% endif%}
             {% elif accepts_file %}
             file = files[0]
             _file = file.file
@@ -258,6 +286,7 @@ async def pipeline_1(request: Request,
                 {% for param in multi_string_param_names %}m_{{param}}={{param}}, {% endfor %}
                 {% if default_response_type %}response_type=media_type,{% endif %}
                 {% if default_response_schema %}response_schema=default_response_schema, {% endif %}
+                {% if default_gz_uncompressed_content_type %}gz_uncompressed_content_type=gz_uncompressed_content_type, {% endif %}
                 {% if accepts_file %}
                     {% if "filename" in optional_param_value_map %}filename=file.filename, {%endif%}
                     {% if "file_content_type" in optional_param_value_map %}file_content_type=file.content_type, {%endif%}

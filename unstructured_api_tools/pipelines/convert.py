@@ -25,6 +25,7 @@ HEADERS_RE = re.compile(r"#(!/usr/bin/env python| coding: utf-8)")
 
 PIPELINE_FILENAME_RE = re.compile("pipeline-(.*)\\.ipynb")
 RESERVED_API_NAMES = ["app"]
+UNSTRUCTURED_API_VERSION = "0.4.7-dev1"
 
 PATH = Path(__file__).resolve().parent
 TEMPLATE_PATH = os.path.join(PATH, "templates")
@@ -201,7 +202,7 @@ def build_root_app_module(
     else:
         title = "Unstructured Pipeline API"
         description = ""
-        version = ""
+        version = UNSTRUCTURED_API_VERSION
 
     content = template.render(
         module_names=module_names, title=title, description=description, version=version
