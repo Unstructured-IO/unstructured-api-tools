@@ -1,7 +1,8 @@
-# 0.4.7-dev1
+# 0.4.7
 
 * Notebook conversion organizes module level imports at the top of the file
 * Allow for FastAPI metadata to be read from the config file
+* Add `__init__.py` to API module and add a default version for FastAPI.
 
 # 0.4.6
 
