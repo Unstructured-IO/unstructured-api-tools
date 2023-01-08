@@ -125,13 +125,13 @@ async def pipeline_1(request: Request,
     text_files_list: List = text_files or []
 
     if len(files_list) + len(text_files_list) > 1:
-        if content_type and content_type not in ["*/*", "multipart/mixed"]:
+        if content_type and content_type not in ["*/*", "multipart/mixed", "application/json"]:
             return PlainTextResponse(
                 content=(f"Conflict in media type {content_type}"
                             " with response type \"multipart/mixed\".\n"),
                 status_code=status.HTTP_406_NOT_ACCEPTABLE,
             )
-        def response_generator():
+        def response_generator(is_multipart):
             for text_file in text_files_list:
                 text = text_file.file.read().decode("utf-8")
 
@@ -142,8 +142,9 @@ async def pipeline_1(request: Request,
                     {% if default_response_type %}response_type=media_type, {% endif %}
                     {% if default_response_schema %}response_schema=default_response_schema, {% endif %}
                 )
-                if type(response) not in [str, bytes]:
-                    response = json.dumps(response)
+                if is_multipart:
+                    if type(response) not in [str, bytes]:
+                        response = json.dumps(response)
                 yield response
 
             for file in files_list:
@@ -158,14 +159,17 @@ async def pipeline_1(request: Request,
                     {% if "filename" in optional_param_value_map %}filename=file.filename, {%endif%}
                     {% if "file_content_type" in optional_param_value_map %}file_content_type=file.content_type, {%endif%}
                 )
-                if type(response) not in [str, bytes]:
-                    response = json.dumps(response)
+                if is_multipart:
+                    if type(response) not in [str, bytes]:
+                        response = json.dumps(response)
                 yield response
-
-        return MultipartMixedResponse(
-            response_generator(),
-            {% if default_response_type %}content_type=media_type{% endif %}
-        )
+        if content_type == "multipart/mixed":
+            return MultipartMixedResponse(
+                response_generator(is_multipart=True),
+                {% if default_response_type %}content_type=media_type{% endif %}
+            )
+        else:
+            return response_generator(is_multipart=False)
     else:
         if has_text:
             text_file = text_files_list[0]
