@@ -130,7 +130,7 @@ traitlets==5.7.1
     #   nbformat
 types-requests==2.28.11.5
     # via unstructured-api-tools (setup.py)
-types-ujson==5.6.0.0
+types-ujson==5.7.0.0
     # via unstructured-api-tools (setup.py)
 types-urllib3==1.26.25.4
     # via types-requests
