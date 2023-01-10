@@ -88,7 +88,7 @@ platformdirs==2.6.0
     # via jupyter-core
 pydantic==1.10.4
     # via fastapi
-pygments==2.13.0
+pygments==2.14.0
     # via nbconvert
 pyrsistent==0.19.2
     # via jsonschema
@@ -121,7 +121,7 @@ tomli==2.0.1
     # via mypy
 tornado==6.2
     # via jupyter-client
-traitlets==5.7.1
+traitlets==5.8.1
     # via
     #   jupyter-client
     #   jupyter-core
