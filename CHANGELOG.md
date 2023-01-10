@@ -1,3 +1,7 @@
+# 0.4.8
+
+*  Add ability to return JSON responses for multiple text_files
+
 # 0.4.7
 
 * Notebook conversion organizes module level imports at the top of the file
