@@ -1,3 +1,7 @@
+# 0.4.9-dev0
+
+*  requirements/* bumps (replace this line with the next real CHANGELOG change)
+
 # 0.4.8
 
 *  Add ability to return JSON responses for multiple text_files
