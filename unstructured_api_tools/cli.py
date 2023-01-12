@@ -32,7 +32,7 @@ def convert_pipeline_notebooks(
 ):
     """Convert a pipeline notebook to a Python script. The conversion script will retain
     any cell that includes # pipeline-api at the top."""
-    notebook_filenames = [f for f in os.listdir(input_directory) if f.endswith(".ipynb")]
+    notebook_filenames = sorted([f for f in os.listdir(input_directory) if f.endswith(".ipynb")])
 
     if flake8_ignore:
         validate_flake8_ignore(flake8_ignore)
