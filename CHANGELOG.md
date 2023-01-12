@@ -1,6 +1,6 @@
-# 0.4.9-dev0
+# 0.4.9
 
-*  requirements/* bumps (replace this line with the next real CHANGELOG change)
+*  Bug fix: Generated code now consistent across Operating Systems
 
 # 0.4.8
 
