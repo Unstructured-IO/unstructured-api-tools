@@ -76,7 +76,7 @@ nbformat==5.7.1
     #   nbconvert
 nest-asyncio==1.5.6
     # via jupyter-client
-packaging==22.0
+packaging==23.0
     # via
     #   limits
     #   nbconvert
