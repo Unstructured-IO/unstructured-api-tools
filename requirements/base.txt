@@ -24,7 +24,7 @@ deprecated==1.2.13
     # via limits
 entrypoints==0.4
     # via jupyter-client
-fastapi==0.88.0
+fastapi==0.89.1
     # via unstructured-api-tools (setup.py)
 fastjsonschema==2.16.2
     # via nbformat
