@@ -40,7 +40,7 @@ ptyprocess==0.7.0
     # via pexpect
 pure-eval==0.2.2
     # via stack-data
-pygments==2.13.0
+pygments==2.14.0
     # via ipython
 six==1.16.0
     # via asttokens
