@@ -56,7 +56,7 @@ jupyterlab-pygments==0.2.2
     # via nbconvert
 limits==2.8.0
     # via slowapi
-markupsafe==2.1.1
+markupsafe==2.1.2
     # via
     #   jinja2
     #   nbconvert
