@@ -121,7 +121,7 @@ tomli==2.0.1
     # via mypy
 tornado==6.2
     # via jupyter-client
-traitlets==5.8.1
+traitlets==5.9.0
     # via
     #   jupyter-client
     #   jupyter-core
