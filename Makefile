@@ -34,9 +34,9 @@ install-dev:
 ## pip-compile:             compiles all base/dev/test requirements
 .PHONY: pip-compile
 pip-compile:
-	pip-compile -o requirements/base.txt
-	pip-compile requirements/dev.in
-	pip-compile requirements/test.in
+	pip-compile --upgrade -o requirements/base.txt
+	pip-compile --upgrade requirements/dev.in
+	pip-compile --upgrade requirements/test.in
 
 ## install-project-local:   install unstructured_api_tools into your local python environment
 .PHONY: install-project-local
