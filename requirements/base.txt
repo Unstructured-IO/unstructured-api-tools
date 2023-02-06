@@ -152,7 +152,7 @@ websockets==10.4
     # via uvicorn
 wrapt==1.14.1
     # via deprecated
-zipp==3.12.0
+zipp==3.12.1
     # via
     #   importlib-metadata
     #   importlib-resources
