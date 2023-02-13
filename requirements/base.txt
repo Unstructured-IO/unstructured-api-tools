@@ -64,7 +64,7 @@ mistune==2.0.4
     # via nbconvert
 mypy==1.0.0
     # via unstructured-api-tools (setup.py)
-mypy-extensions==0.4.3
+mypy-extensions==1.0.0
     # via mypy
 nbclient==0.7.2
     # via nbconvert
