@@ -10,7 +10,7 @@ anyio==3.6.2
     #   watchfiles
 attrs==22.2.0
     # via jsonschema
-beautifulsoup4==4.11.1
+beautifulsoup4==4.11.2
     # via nbconvert
 bleach==6.0.0
     # via nbconvert
