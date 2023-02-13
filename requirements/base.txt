@@ -60,7 +60,7 @@ markupsafe==2.1.2
     # via
     #   jinja2
     #   nbconvert
-mistune==2.0.4
+mistune==2.0.5
     # via nbconvert
 mypy==1.0.0
     # via unstructured-api-tools (setup.py)
