@@ -1,0 +1,16 @@
+TEST_M_INPUT1 = [
+    "RISK_FACTORS",
+    "MANAGEMENT",
+    "BUSINESS"
+]
+
+
+@pytest.mark.parametrize("text_files_generator", TEST_TEXT, indirect=["text_files_generator"])
+@pytest.mark.parametrize("m_input1", TEST_M_INPUT1)
+def test_pipeline_api_text_m_input1(text_files_generator, m_input1):
+    response = test_client.post(
+        "{{url}}",
+        files=[("text_files", (text_files_generator, open(text_files_generator, "rb"), "text/plain"))],
+        data={"section": [m_input1]}
+    )
+    assert response.status_code == 200

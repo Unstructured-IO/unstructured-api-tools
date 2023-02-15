@@ -1,0 +1,13 @@
+import pytest # noqa: E402
+
+{{app_import}} # noqa: E402
+from fastapi.testclient import TestClient # noqa: E402
+
+test_client = TestClient(app)
+
+def test_healthcheck():
+    response = test_client.get("/healthcheck")
+    assert response.status_code == 200
+    assert response.json() == {"healthcheck": "HEALTHCHECK STATUS: EVERYTHING OK!"}
+
+{{endpoint_tests}}

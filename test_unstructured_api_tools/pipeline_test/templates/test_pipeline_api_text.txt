@@ -1,0 +1,145 @@
+TEST_TEXT = [
+    """<SEC-DOCUMENT>
+            <TYPE>10-K
+            <COMPANY>Proctor & Gamble
+            <HTML>
+                <p>SECURITY AND EXCHANGE COMISSION FILING</p>
+                <p>ITEM 1. BUSINESS</p>
+                <p>This is a section and great and wonderful business dealings.</p>
+                <p>ITEM 1A. RISK FACTORS</p>
+                <p>Wolverines</p>
+                <p>The business could be attacked by wolverines.</p>
+                <p>Bears</p>
+                <p>The business could be attacked by bears.</p>
+                <p>ITEM 1B. UNRESOLVED STAFF COMMENTS</p>
+                <p>None</p>
+                <p>PROSPECTUS SUMMARY</p>
+                <p>Here is a summary of the prospectus</p>
+            </HTML>
+        </SEC-DOCUMENT>""",
+    """
+        <SEC-DOCUMENT>
+        <TYPE>10-Q
+        <COMPANY>Proctor & Gamble
+        MIME-Version: 1.0
+        Date: Fri, 16 Dec 2022 17:04:16 -0500
+        Message-ID: <CADc-_xaLB2FeVQ7mNsoX+NJb_7hAJhBKa_zet-rtgPGenj0uVw@mail.gmail.com>
+        Subject: Test Email
+        From: Matthew Robinson <mrobinson@unstructured.io>
+        To: Matthew Robinson <mrobinson@unstructured.io>
+        Content-Type: multipart/alternative; boundary="00000000000095c9b205eff92630"
+
+        --00000000000095c9b205eff92630
+        Content-Type: text/plain; charset="UTF-8"
+
+        This is a test email to use for unit tests.
+
+        Important points:
+
+           - Roses are red
+           - Violets are blue
+
+        --00000000000095c9b205eff92630
+        Content-Type: text/html; charset="UTF-8"
+
+        <div dir="ltr">
+            <div>This is a test email to use for unit tests.</div>
+            <div>
+                <br>
+            </div>
+            <div>Important points:</div>
+            <div>
+                <ul>
+                    <li>Roses are red</li>
+                    <li>Violets are blue</li>
+                </ul>
+            </div>
+        </div>
+
+        --00000000000095c9b205eff92630--
+        </SEC-DOCUMENT>
+        """,
+    """
+        <SEC-DOCUMENT>
+        <TYPE>S-1
+        <COMPANY>Proctor & Gamble
+
+        This is a test document to use for unit tests.
+
+        Doylestown, PA 18901
+
+        Important points:
+
+           - Hamburgers are delicious
+           - Dogs are the best
+           - I love fuzzy blankets
+        </SEC-DOCUMENT>
+        """
+]
+
+
+@pytest.fixture(scope="function")
+def text_files_generator(request):
+    file_name = "test.txt"
+    with open(file_name, "w") as f:
+        f.write(request.param)
+        f.close()
+        yield file_name
+        os.remove(file_name)
+
+
+@pytest.mark.parametrize("text_files_generator", TEST_TEXT, indirect=["text_files_generator"])
+def test_pipeline_api_text_single(text_files_generator):
+    response = test_client.post("{{url}}", files=[("text_files", (text_files_generator, open(text_files_generator, "rb"), "text/plain"))])
+    assert response.status_code == 200
+
+
+@pytest.mark.parametrize("text_files_generator", TEST_TEXT, indirect=["text_files_generator"])
+def test_pipeline_api_text_multiple_files(text_files_generator):
+    _text_for_file = """
+            <SEC-DOCUMENT>
+            <TYPE>10-Q
+            <COMPANY>Proctor & Gamble
+            This is a new test document for multiple files test.
+
+            Doylestown, PA 18901
+
+            Important points:
+
+               - Hamburgers are delicious
+               - Dogs are the best
+               - I love fuzzy blankets
+            </SEC-DOCUMENT>
+    """
+    file_name = "new_test.txt"
+
+    with open(file_name, "w") as f:
+        f.write(_text_for_file)
+        f.close()
+        response = test_client.post("/sec-filings/v0.2.1/section", files=[
+            ("text_files", (text_files_generator, open(text_files_generator, "rb"), "text/plain")),
+            ("text_files", (file_name, open(file_name, "rb"), "text/plain")),
+        ])
+        os.remove(file_name)
+    assert response.status_code == 200
+
+
+@pytest.mark.parametrize("text_files_generator", TEST_TEXT, indirect=["text_files_generator"])
+def test_pipeline_api_text_labelstudio(text_files_generator):
+    response = test_client.post(
+        "{{url}}",
+        files=[("text_files", (text_files_generator, open(text_files_generator, "rb"), "text/plain"))],
+        data={"output_schema": "labelstudio"}
+    )
+    assert response.status_code == 200
+
+
+@pytest.mark.parametrize("text_files_generator", TEST_TEXT, indirect=["text_files_generator"])
+def test_pipeline_api_text_isd(text_files_generator):
+    response = test_client.post(
+        "{{url}}",
+        files=[("text_files", (text_files_generator, open(text_files_generator, "rb"), "text/plain"))],
+        data={"output_schema": "isd"}
+    )
+    assert response.status_code == 200
+

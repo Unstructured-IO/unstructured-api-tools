@@ -1,0 +1,16 @@
+TEST_M_INPUT2 = [
+    "^(\S+\W?)+$",
+    "risk factors",
+    "^(?:prospectus )?summary$"
+]
+
+
+@pytest.mark.parametrize("text_files_generator", TEST_TEXT, indirect=["text_files_generator"])
+@pytest.mark.parametrize("m_input2", TEST_M_INPUT2)
+def test_pipeline_api_text_m_input2(text_files_generator, m_input2):
+    response = test_client.post(
+        "{{url}}",
+        files=[("text_files", (text_files_generator, open(text_files_generator, "rb"), "text/plain"))],
+        data={"section_regex": [m_input2]}
+    )
+    assert response.status_code == 200
