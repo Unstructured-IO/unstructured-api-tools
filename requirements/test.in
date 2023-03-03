@@ -8,3 +8,5 @@ flake8
 pytest-cov
 # NOTE(mrobinson) - requests is needed for the fastapi test client
 requests
+requests_toolbelt
+nbdev

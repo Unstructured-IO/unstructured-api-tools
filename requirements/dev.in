@@ -2,3 +2,4 @@
 # ref: https://github.com/ipython/ipython/issues/13598
 ipython==8.9.0
 pip-tools
+jupyter
