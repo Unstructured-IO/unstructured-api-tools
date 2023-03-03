@@ -97,8 +97,8 @@ check-src:
 
 .PHONY: check-tests
 check-tests:
-	black --line-length 100 test_${PACKAGE_NAME} --check
-	flake8 test_${PACKAGE_NAME}
+	black --line-length 100 test_${PACKAGE_NAME} --check --exclude test_${PACKAGE_NAME}/pipeline-test-project
+	flake8 test_${PACKAGE_NAME} --exclude test_${PACKAGE_NAME}/pipeline-test-project/prepline_test_project/api
 
 ## check-scripts:              run shellcheck
 .PHONY: check-scripts
@@ -125,4 +125,5 @@ version-sync:
 
 .PHONY: check-coverage
 check-coverage:
+	# TODO(crag): add coverage check for test_unstructured_api_tools/pipeline-test-project/prepline_test_project/api/
 	coverage report --fail-under=95
