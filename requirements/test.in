@@ -5,6 +5,7 @@ coverage
 # ref: https://github.com/psf/black/issues/2964
 click>=8.1
 flake8
+httpx
 pytest-cov
 # NOTE(mrobinson) - requests is needed for the fastapi test client
 requests
