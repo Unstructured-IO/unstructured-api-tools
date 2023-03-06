@@ -129,3 +129,6 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# API test project test files
+/test_unstructured_api_tools/pipeline-test-project/tmp*
