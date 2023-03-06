@@ -1,3 +1,7 @@
+# 0.5.0
+
+* Removed rate limit and slow api from project. Updated templates and tests.
+
 # 0.4.9
 
 *  Bug fix: Generated code now consistent across Operating Systems
