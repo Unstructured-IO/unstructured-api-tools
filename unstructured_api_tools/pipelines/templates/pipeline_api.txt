@@ -2,9 +2,6 @@ import os
 from typing import List, Union
 
 from fastapi import status, FastAPI, File, Form, Request, UploadFile, APIRouter
-from slowapi.errors import RateLimitExceeded
-from slowapi import Limiter, _rate_limit_exceeded_handler
-from slowapi.util import get_remote_address
 from fastapi.responses import PlainTextResponse
 
 import json
@@ -14,13 +11,9 @@ from base64 import b64encode
 from typing import Optional, Mapping, Iterator, Tuple
 import secrets
 
-limiter = Limiter(key_func=get_remote_address)
 app = FastAPI()
-app.state.limiter = limiter
-app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 router = APIRouter()
 
-RATE_LIMIT = os.environ.get("PIPELINE_API_RATE_LIMIT", "1/second")
 {% set default_response_type = optional_param_value_map.pop("response_type", None) %}
 {% if default_response_type %}
 def is_expected_response_type(media_type, response_type):
@@ -91,7 +84,6 @@ class MultipartMixedResponse(StreamingResponse):
 
 {% set default_response_schema = optional_param_value_map.pop("response_schema", None) %}
 @router.post("{{pipeline_path}}")
-@limiter.limit(RATE_LIMIT)
 async def pipeline_1(request: Request,
 {% if accepts_file %}files: Union[List[UploadFile], None] = File(default=None),{% endif %}
 {% if accepts_text %}text_files: Union[List[UploadFile], None] = File(default=None),{% endif %}

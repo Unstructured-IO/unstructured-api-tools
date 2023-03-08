@@ -81,7 +81,6 @@ def _assert_response_for_process_file_1(test_files, test_params, test_type_heade
 )
 def test_process_file_1(test_files, test_params, test_type_header, expected_status):
     # NOTE(robinson) - Reset the rate limit to avoid 429s in tests
-    app.state.limiter.reset()
     client = TestClient(app)
 
     _files = [

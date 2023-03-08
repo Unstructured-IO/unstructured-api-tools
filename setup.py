@@ -54,7 +54,6 @@ setup(
     install_requires=[
         "click>=8.1",
         "fastapi",
-        "slowapi",
         "Jinja2",
         "mypy>=0.99",
         "nbconvert",
