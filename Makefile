@@ -11,7 +11,7 @@ help: Makefile
 # Install #
 ###########
 
-## install:                    installs all base, test, and dev requirements
+## install:                    installs all base and test requirements
 .PHONY: install
 install: install-base install-test
 
@@ -27,7 +27,7 @@ install-base:
 install-test:
 	pip install -r requirements/test.txt
 
-## pip-compile:                compiles all base/dev/test requirements
+## pip-compile:                compiles all base and test requirements
 .PHONY: pip-compile
 pip-compile:
 	# NOTE(crag): you have to manually install pip-tools for now to run this.
