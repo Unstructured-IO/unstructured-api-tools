@@ -20,7 +20,7 @@ click==8.1.3
     #   uvicorn
 defusedxml==0.7.1
     # via nbconvert
-fastapi==0.93.0
+fastapi==0.94.1
     # via unstructured-api-tools (setup.py)
 fastjsonschema==2.16.3
     # via nbformat
@@ -64,7 +64,7 @@ mypy-extensions==1.0.0
     # via mypy
 nbclient==0.7.2
     # via nbconvert
-nbconvert==7.2.9
+nbconvert==7.2.10
     # via unstructured-api-tools (setup.py)
 nbformat==5.7.3
     # via
@@ -76,7 +76,7 @@ pandocfilters==1.5.0
     # via nbconvert
 pkgutil-resolve-name==1.3.10
     # via jsonschema
-platformdirs==3.1.0
+platformdirs==3.1.1
     # via jupyter-core
 pydantic==1.10.6
     # via fastapi
@@ -92,7 +92,7 @@ python-multipart==0.0.6
     # via unstructured-api-tools (setup.py)
 pyyaml==6.0
     # via uvicorn
-pyzmq==25.0.0
+pyzmq==25.0.1
     # via jupyter-client
 six==1.16.0
     # via
@@ -102,7 +102,7 @@ sniffio==1.3.0
     # via anyio
 soupsieve==2.4
     # via beautifulsoup4
-starlette==0.25.0
+starlette==0.26.1
     # via fastapi
 tinycss2==1.2.1
     # via nbconvert
@@ -128,7 +128,7 @@ typing-extensions==4.5.0
     #   mypy
     #   pydantic
     #   starlette
-uvicorn[standard]==0.20.0
+uvicorn[standard]==0.21.0
     # via unstructured-api-tools (setup.py)
 uvloop==0.17.0
     # via uvicorn

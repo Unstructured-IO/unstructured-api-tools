@@ -11,12 +11,12 @@ help: Makefile
 # Install #
 ###########
 
-## install:                    installs all base, test, and dev requirements
+## install:                    installs all base and test requirements
 .PHONY: install
-install: install-base install-dev install-test
+install: install-base install-test
 
 .PHONY: install-ci
-install-ci: install-base install-test
+install-ci: install
 
 .PHONY: install-base
 install-base:
@@ -27,16 +27,14 @@ install-base:
 install-test:
 	pip install -r requirements/test.txt
 
-.PHONY: install-dev
-install-dev:
-	pip install -r requirements/dev.txt
-
-## pip-compile:                compiles all base/dev/test requirements
+## pip-compile:                compiles all base and test requirements
 .PHONY: pip-compile
 pip-compile:
+	# NOTE(crag): you have to manually install pip-tools for now to run this.
+	# There is a better way to do this with a pinned pip-compile version and a venv.
+	bash -c "pip-compile -h >/dev/null  || { echo please run \'pip install pip-tools\' and then rerun this command; exit 1; }"
 	pip-compile --upgrade -o requirements/base.txt
-	pip-compile --upgrade requirements/dev.in
-	pip-compile --upgrade requirements/test.in
+	pip-compile --upgrade -o requirements/test.txt requirements/base.txt requirements/test.in
 
 ## install-project-local:      install unstructured_api_tools into your local python environment
 .PHONY: install-project-local
