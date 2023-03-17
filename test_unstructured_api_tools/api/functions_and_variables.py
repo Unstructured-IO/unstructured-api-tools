@@ -43,8 +43,12 @@ def convert_text_files_for_api(files):
 
 
 def generate_header_kwargs(value=None):
-    return {
-        "headers": {
-            "Accept": value,
+    return (
+        {
+            "headers": {
+                "Accept": value,
+            }
         }
-    } if value else {}
+        if value
+        else {}
+    )

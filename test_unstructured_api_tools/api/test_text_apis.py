@@ -37,12 +37,7 @@ def _assert_response_for_process_text_1(test_files, response):
     def _json_for_one_file(test_file):
         with open(test_file, "r") as file:
             return {
-                "silly_result": " : ".join(
-                    [
-                        str(FILENAME_LENGTHS[test_file]),
-                        str(file.read())
-                    ]
-                )
+                "silly_result": " : ".join([str(FILENAME_LENGTHS[test_file]), str(file.read())])
             }
 
     if len(test_files) == 1:
@@ -60,7 +55,7 @@ def _assert_response_for_process_text_2(test_files, response, m_input1, m_input2
                         str(FILENAME_LENGTHS[test_file]),
                         str(file.read()),
                         str(m_input1.get("input1", None)),
-                        str(m_input2.get("input2", None))
+                        str(m_input2.get("input2", None)),
                     ]
                 )
             }
@@ -76,11 +71,7 @@ def _assert_response_for_process_text_3(test_files, response, response_type=TEXT
         with open(test_file, "r") as file:
             return {
                 "silly_result": " : ".join(
-                    [
-                        str(FILENAME_LENGTHS[test_file]),
-                        str(file.read()),
-                        str(response_type)
-                    ]
+                    [str(FILENAME_LENGTHS[test_file]), str(file.read()), str(response_type)]
                 )
             }
 
@@ -105,7 +96,7 @@ def _assert_response_for_process_text_4(test_files, response, response_type, res
                         str(FILENAME_LENGTHS[test_file]),
                         str(file.read()),
                         str(response_type),
-                        str(response_schema["output_schema"])
+                        str(response_schema["output_schema"]),
                     ]
                 )
             }
@@ -128,7 +119,7 @@ def _assert_response_for_process_text_4(test_files, response, response_type, res
         ([FILE_C], 200),
         ([FILE_D], 200),
         ([FILE_C, FILE_D], 200),
-    ]
+    ],
 )
 def test_process_text_1(test_files, expected_status):
     response = client.post(PROCESS_TEXT_1_ROUTE, files=convert_text_files_for_api(test_files))
@@ -147,13 +138,13 @@ def test_process_text_1(test_files, expected_status):
         ([FILE_C, FILE_D], P_INPUT_1_SINGLE, P_INPUT_2_EMPTY, 200),
         ([FILE_C, FILE_D], P_INPUT_1_SINGLE, P_INPUT_2_SINGLE, 200),
         ([FILE_C, FILE_D], P_INPUT_1_MULTI, P_INPUT_2_MULTI, 200),
-    ]
+    ],
 )
 def test_process_text_2(test_files, m_input1, m_input2, expected_status):
     response = client.post(
         PROCESS_TEXT_2_ROUTE,
         files=convert_text_files_for_api(test_files),
-        data={**m_input1, **m_input2}
+        data={**m_input1, **m_input2},
     )
     assert response.status_code == expected_status
     if response.status_code == 200:
@@ -184,7 +175,7 @@ def test_process_text_2(test_files, m_input1, m_input2, expected_status):
         # endpoint fails because media type text/csv should have response type str
         # because None response type has default text/csv value
         pytest.param([FILE_D], None, 200, marks=pytest.mark.xfail),
-    ]
+    ],
 )
 def test_process_text_3(test_files, response_type, expected_status):
     response = client.post(
@@ -207,7 +198,7 @@ def test_process_text_3(test_files, response_type, expected_status):
         ([FILE_C, FILE_D], JSON, RESPONSE_SCHEMA_LABELSTUDIO, 200),
         ([FILE_C, FILE_D], MIXED, RESPONSE_SCHEMA_ISD, 200),
         ([FILE_C, FILE_D], MIXED, RESPONSE_SCHEMA_LABELSTUDIO, 200),
-    ]
+    ],
 )
 def test_process_text_4(test_files, response_type, response_schema, expected_status):
     response = client.post(

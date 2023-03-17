@@ -23,7 +23,8 @@ from test_unstructured_api_tools.api.functions_and_variables import (
     MIXED,
     RESPONSE_SCHEMA_ISD,
     RESPONSE_SCHEMA_LABELSTUDIO,
-    FILENAME_FORMATS, generate_header_kwargs,
+    FILENAME_FORMATS,
+    generate_header_kwargs,
 )
 
 PROCESS_FILE_TEXT_1_ROUTE = "/test-project/v1.2.3/process-text-file-1"
@@ -56,7 +57,7 @@ def _assert_response_for_process_file_text_1(test_files, test_files_text, respon
                     str(text),
                     str(len(file_read) if file_read else None),
                     str(filename),
-                    str(file_content_type)
+                    str(file_content_type),
                 ]
             )
         }
@@ -66,11 +67,15 @@ def _assert_response_for_process_file_text_1(test_files, test_files_text, respon
     if len(test_files) > 0:
         test_files_arr = [_json_for_one_file(test_file=test_file) for test_file in test_files]
     if len(test_files_text) > 0:
-        test_text_files_arr = [_json_for_one_file(test_text_file=test_file) for test_file in test_files_text]
+        test_text_files_arr = [
+            _json_for_one_file(test_text_file=test_file) for test_file in test_files_text
+        ]
     assert response.json() == test_text_files_arr + test_files_arr
 
 
-def _assert_response_for_process_file_text_2(test_files, test_files_text, response_type, m_input2, response):
+def _assert_response_for_process_file_text_2(
+    test_files, test_files_text, response_type, m_input2, response
+):
     def _json_for_one_file(test_file=None, test_text_file=None):
         text = None
         file_read = None
@@ -94,7 +99,7 @@ def _assert_response_for_process_file_text_2(test_files, test_files_text, respon
                     str(filename),
                     str(file_content_type),
                     str(response_type),
-                    str(m_input2.get("input2", None))
+                    str(m_input2.get("input2", None)),
                 ]
             )
         }
@@ -104,7 +109,9 @@ def _assert_response_for_process_file_text_2(test_files, test_files_text, respon
     if len(test_files) > 0:
         test_files_arr = [_json_for_one_file(test_file=test_file) for test_file in test_files]
     if len(test_files_text) > 0:
-        test_text_files_arr = [_json_for_one_file(test_text_file=test_file) for test_file in test_files_text]
+        test_text_files_arr = [
+            _json_for_one_file(test_text_file=test_file) for test_file in test_files_text
+        ]
     if response_type == JSON:
         assert response.json() == test_text_files_arr + test_files_arr
     elif response_type == MIXED:
@@ -115,7 +122,9 @@ def _assert_response_for_process_file_text_2(test_files, test_files_text, respon
         assert response_array == test_text_files_arr + test_files_arr
 
 
-def _assert_response_for_process_file_text_3(test_files, test_files_text, response_type, response_schema, response):
+def _assert_response_for_process_file_text_3(
+    test_files, test_files_text, response_type, response_schema, response
+):
     def _json_for_one_file(test_file=None, test_text_file=None):
         text = None
         file_read = None
@@ -139,7 +148,7 @@ def _assert_response_for_process_file_text_3(test_files, test_files_text, respon
                     str(filename),
                     str(file_content_type),
                     str(response_type),
-                    str(response_schema["output_schema"])
+                    str(response_schema["output_schema"]),
                 ]
             )
         }
@@ -149,7 +158,9 @@ def _assert_response_for_process_file_text_3(test_files, test_files_text, respon
     if len(test_files) > 0:
         test_files_arr = [_json_for_one_file(test_file=test_file) for test_file in test_files]
     if len(test_files_text) > 0:
-        test_text_files_arr = [_json_for_one_file(test_text_file=test_file) for test_file in test_files_text]
+        test_text_files_arr = [
+            _json_for_one_file(test_text_file=test_file) for test_file in test_files_text
+        ]
     if response_type == JSON:
         assert response.json() == test_text_files_arr + test_files_arr
     elif response_type == MIXED:
@@ -161,13 +172,7 @@ def _assert_response_for_process_file_text_3(test_files, test_files_text, respon
 
 
 def _assert_response_for_process_file_text_4(
-        test_files,
-        test_files_text,
-        response_type,
-        response_schema,
-        m_input1,
-        m_input2,
-        response
+    test_files, test_files_text, response_type, response_schema, m_input1, m_input2, response
 ):
     def _json_for_one_file(test_file=None, test_text_file=None):
         text = None
@@ -204,7 +209,9 @@ def _assert_response_for_process_file_text_4(
     if len(test_files) > 0:
         test_files_arr = [_json_for_one_file(test_file=test_file) for test_file in test_files]
     if len(test_files_text) > 0:
-        test_text_files_arr = [_json_for_one_file(test_text_file=test_file) for test_file in test_files_text]
+        test_text_files_arr = [
+            _json_for_one_file(test_text_file=test_file) for test_file in test_files_text
+        ]
     if response_type == JSON:
         assert response.json() == test_text_files_arr + test_files_arr
     elif response_type == MIXED:
@@ -224,12 +231,12 @@ def _assert_response_for_process_file_text_4(
         ([FILE_A, FILE_B], [FILE_C, FILE_D], 200),
         ([FILE_A], [FILE_D], 200),
         ([FILE_B], [FILE_D], 200),
-    ]
+    ],
 )
 def test_process_file_text_1(test_files, test_files_text, expected_status):
     response = client.post(
         PROCESS_FILE_TEXT_1_ROUTE,
-        files=convert_files_for_api(test_files) + convert_text_files_for_api(test_files_text)
+        files=convert_files_for_api(test_files) + convert_text_files_for_api(test_files_text),
     )
     assert response.status_code == expected_status
     if response.status_code == 200:
@@ -247,7 +254,7 @@ def test_process_file_text_1(test_files, test_files_text, expected_status):
         ([FILE_A], [FILE_C, FILE_D], JSON, P_INPUT_2_SINGLE, 200),
         ([FILE_B], [FILE_C], JSON, P_INPUT_2_MULTI, 200),
         ([FILE_B], [FILE_C], MIXED, P_INPUT_2_EMPTY, 200),
-    ]
+    ],
 )
 def test_process_file_text_2(test_files, test_files_text, response_type, m_input2, expected_status):
     response = client.post(
@@ -258,7 +265,9 @@ def test_process_file_text_2(test_files, test_files_text, response_type, m_input
     )
     assert response.status_code == expected_status
     if response.status_code == 200:
-        _assert_response_for_process_file_text_2(test_files, test_files_text, response_type, m_input2, response)
+        _assert_response_for_process_file_text_2(
+            test_files, test_files_text, response_type, m_input2, response
+        )
 
 
 @pytest.mark.parametrize(
@@ -274,9 +283,11 @@ def test_process_file_text_2(test_files, test_files_text, response_type, m_input
         ([FILE_A, FILE_B], [FILE_C], MIXED, RESPONSE_SCHEMA_LABELSTUDIO, 200),
         ([FILE_A, FILE_B], [FILE_C, FILE_D], MIXED, RESPONSE_SCHEMA_ISD, 200),
         ([FILE_A, FILE_B], [FILE_C, FILE_D], MIXED, RESPONSE_SCHEMA_LABELSTUDIO, 200),
-    ]
+    ],
 )
-def test_process_file_text_3(test_files, test_files_text, response_type, response_schema, expected_status):
+def test_process_file_text_3(
+    test_files, test_files_text, response_type, response_schema, expected_status
+):
     response = client.post(
         PROCESS_FILE_TEXT_3_ROUTE,
         files=convert_files_for_api(test_files) + convert_text_files_for_api(test_files_text),
@@ -285,30 +296,82 @@ def test_process_file_text_3(test_files, test_files_text, response_type, respons
     )
     assert response.status_code == expected_status
     if response.status_code == 200:
-        _assert_response_for_process_file_text_3(test_files, test_files_text, response_type, response_schema, response)
+        _assert_response_for_process_file_text_3(
+            test_files, test_files_text, response_type, response_schema, response
+        )
 
 
 @pytest.mark.parametrize(
     "test_files,test_files_text,response_type,response_schema,m_input1,m_input2,expected_status",
     [
-        ([FILE_A], [FILE_C], JSON, RESPONSE_SCHEMA_LABELSTUDIO, P_INPUT_1_MULTI, P_INPUT_2_SINGLE, 200),
-        ([FILE_A, FILE_B], [FILE_C], JSON, RESPONSE_SCHEMA_LABELSTUDIO, P_INPUT_1_SINGLE, P_INPUT_2_SINGLE, 200),
-        ([FILE_A], [FILE_C, FILE_D], JSON, RESPONSE_SCHEMA_ISD, P_INPUT_1_MULTI, P_INPUT_2_MULTI, 200),
-        ([FILE_A, FILE_B], [FILE_C, FILE_D], JSON, RESPONSE_SCHEMA_LABELSTUDIO, P_INPUT_1_MULTI, P_INPUT_2_SINGLE, 200),
+        (
+            [FILE_A],
+            [FILE_C],
+            JSON,
+            RESPONSE_SCHEMA_LABELSTUDIO,
+            P_INPUT_1_MULTI,
+            P_INPUT_2_SINGLE,
+            200,
+        ),
+        (
+            [FILE_A, FILE_B],
+            [FILE_C],
+            JSON,
+            RESPONSE_SCHEMA_LABELSTUDIO,
+            P_INPUT_1_SINGLE,
+            P_INPUT_2_SINGLE,
+            200,
+        ),
+        (
+            [FILE_A],
+            [FILE_C, FILE_D],
+            JSON,
+            RESPONSE_SCHEMA_ISD,
+            P_INPUT_1_MULTI,
+            P_INPUT_2_MULTI,
+            200,
+        ),
+        (
+            [FILE_A, FILE_B],
+            [FILE_C, FILE_D],
+            JSON,
+            RESPONSE_SCHEMA_LABELSTUDIO,
+            P_INPUT_1_MULTI,
+            P_INPUT_2_SINGLE,
+            200,
+        ),
         ([FILE_A], [FILE_C], MIXED, RESPONSE_SCHEMA_ISD, P_INPUT_1_MULTI, P_INPUT_2_EMPTY, 200),
-        ([FILE_A, FILE_B], [FILE_C], MIXED, RESPONSE_SCHEMA_LABELSTUDIO, P_INPUT_1_SINGLE, P_INPUT_2_SINGLE, 200),
-        ([FILE_A], [FILE_C, FILE_D], MIXED, RESPONSE_SCHEMA_ISD, P_INPUT_1_EMPTY, P_INPUT_2_EMPTY, 200),
-        ([FILE_A, FILE_B], [FILE_C, FILE_D], MIXED, RESPONSE_SCHEMA_ISD, P_INPUT_1_MULTI, P_INPUT_2_MULTI, 200),
-    ]
+        (
+            [FILE_A, FILE_B],
+            [FILE_C],
+            MIXED,
+            RESPONSE_SCHEMA_LABELSTUDIO,
+            P_INPUT_1_SINGLE,
+            P_INPUT_2_SINGLE,
+            200,
+        ),
+        (
+            [FILE_A],
+            [FILE_C, FILE_D],
+            MIXED,
+            RESPONSE_SCHEMA_ISD,
+            P_INPUT_1_EMPTY,
+            P_INPUT_2_EMPTY,
+            200,
+        ),
+        (
+            [FILE_A, FILE_B],
+            [FILE_C, FILE_D],
+            MIXED,
+            RESPONSE_SCHEMA_ISD,
+            P_INPUT_1_MULTI,
+            P_INPUT_2_MULTI,
+            200,
+        ),
+    ],
 )
 def test_process_file_text_4(
-        test_files,
-        test_files_text,
-        response_type,
-        response_schema,
-        m_input1,
-        m_input2,
-        expected_status
+    test_files, test_files_text, response_type, response_schema, m_input1, m_input2, expected_status
 ):
     response = client.post(
         PROCESS_FILE_TEXT_4_ROUTE,
@@ -325,5 +388,5 @@ def test_process_file_text_4(
             response_schema,
             m_input1,
             m_input2,
-            response
+            response,
         )

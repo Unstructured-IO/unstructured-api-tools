@@ -24,7 +24,7 @@ from functions_and_variables import (
     P_INPUT_2_SINGLE,
     TEXT_CSV,
     convert_files_for_api,
-    generate_header_kwargs
+    generate_header_kwargs,
 )
 
 PROCESS_FILE_1_ROUTE = "/test-project/v1.2.3/process-file-1"
@@ -69,13 +69,7 @@ def _assert_response_for_process_file_1(test_files, test_params, test_type_heade
 
 def _assert_response_for_process_file_2(test_files, response):
     def _json_for_one_file(test_file):
-        return {
-            "silly_result": " : ".join(
-                [
-                    str(FILENAME_LENGTHS[test_file])
-                ]
-            )
-        }
+        return {"silly_result": " : ".join([str(FILENAME_LENGTHS[test_file])])}
 
     if len(test_files) == 1:
         assert response.json() == _json_for_one_file(test_files[0])
@@ -83,14 +77,16 @@ def _assert_response_for_process_file_2(test_files, response):
         assert response.json() == [_json_for_one_file(test_file) for test_file in test_files]
 
 
-def _asert_response_for_process_file_3(test_files, response, response_schema, response_type=TEXT_CSV):
+def _asert_response_for_process_file_3(
+    test_files, response, response_schema, response_type=TEXT_CSV
+):
     def _json_for_one_file(test_file):
         return {
             "silly_result": " : ".join(
                 [
                     str(FILENAME_LENGTHS[test_file]),
                     str(response_type),
-                    str(response_schema["output_schema"])
+                    str(response_schema["output_schema"]),
                 ]
             )
         }
@@ -107,7 +103,9 @@ def _asert_response_for_process_file_3(test_files, response, response_schema, re
             assert json_part == _json_for_one_file(test_files[i])
 
 
-def _assert_response_for_process_file_4(test_files, response, response_schema, response_type, m_input1):
+def _assert_response_for_process_file_4(
+    test_files, response, response_schema, response_type, m_input1
+):
     def _json_for_one_file(test_file):
         return {
             "silly_result": " : ".join(
@@ -116,7 +114,7 @@ def _assert_response_for_process_file_4(test_files, response, response_schema, r
                     str(FILENAME_FORMATS[test_file]),
                     str(response_type),
                     str(response_schema["output_schema"]),
-                    str(m_input1["input1"])
+                    str(m_input1["input1"]),
                 ]
             )
         }
@@ -127,7 +125,9 @@ def _assert_response_for_process_file_4(test_files, response, response_schema, r
         assert response.json() == [_json_for_one_file(test_file) for test_file in test_files]
 
 
-def _assert_response_for_process_file_5(test_files, response, response_schema, response_type, m_input1, m_input2):
+def _assert_response_for_process_file_5(
+    test_files, response, response_schema, response_type, m_input1, m_input2
+):
     def _json_for_one_file(test_file):
         return {
             "silly_result": " : ".join(
@@ -137,7 +137,7 @@ def _assert_response_for_process_file_5(test_files, response, response_schema, r
                     str(response_type),
                     str(response_schema["output_schema"]),
                     str(m_input1["input1"]),
-                    str(m_input2["input2"])
+                    str(m_input2["input2"]),
                 ]
             )
         }
@@ -182,13 +182,7 @@ def test_process_file_1(test_files, test_params, test_type_header, expected_stat
         _assert_response_for_process_file_1(test_files, test_params, test_type_header, response)
 
 
-@pytest.mark.parametrize(
-    "test_files,expected_status",
-    [
-        ([FILE_A], 200),
-        ([FILE_A, FILE_B], 200)
-    ]
-)
+@pytest.mark.parametrize("test_files,expected_status", [([FILE_A], 200), ([FILE_A, FILE_B], 200)])
 def test_process_file_2(test_files, expected_status):
     response = client.post(PROCESS_FILE_2_ROUTE, files=convert_files_for_api(test_files))
     assert response.status_code == expected_status
@@ -223,9 +217,11 @@ def test_process_file_2(test_files, expected_status):
         ([FILE_A, FILE_B], JSON, RESPONSE_SCHEMA_LABELSTUDIO, 200),
         ([FILE_A, FILE_B], MIXED, RESPONSE_SCHEMA_LABELSTUDIO, 200),
         # endpoint fails because text/csv is not acceptable for multiple files
-        pytest.param([FILE_A, FILE_B], TEXT_CSV, RESPONSE_SCHEMA_LABELSTUDIO, 200, marks=pytest.mark.xfail),
+        pytest.param(
+            [FILE_A, FILE_B], TEXT_CSV, RESPONSE_SCHEMA_LABELSTUDIO, 200, marks=pytest.mark.xfail
+        ),
         ([FILE_A, FILE_B], None, RESPONSE_SCHEMA_LABELSTUDIO, 200),
-    ]
+    ],
 )
 def test_process_file_3(test_files, response_type, response_schema, expected_status):
     response = client.post(
@@ -248,7 +244,7 @@ def test_process_file_3(test_files, response_type, response_schema, expected_sta
         ([FILE_A, FILE_B], JSON, RESPONSE_SCHEMA_LABELSTUDIO, P_INPUT_1_EMPTY, 200),
         ([FILE_A, FILE_B], JSON, RESPONSE_SCHEMA_ISD, P_INPUT_1_MULTI, 200),
         ([FILE_A, FILE_B], JSON, RESPONSE_SCHEMA_ISD, P_INPUT_1_SINGLE, 200),
-    ]
+    ],
 )
 def test_process_file_4(test_files, response_type, response_schema, m_input1, expected_status):
     response = client.post(
@@ -259,7 +255,9 @@ def test_process_file_4(test_files, response_type, response_schema, m_input1, ex
     )
     assert response.status_code == expected_status
     if response.status_code == 200:
-        _assert_response_for_process_file_4(test_files, response, response_schema, response_type, m_input1)
+        _assert_response_for_process_file_4(
+            test_files, response, response_schema, response_type, m_input1
+        )
 
 
 @pytest.mark.parametrize(
@@ -268,12 +266,35 @@ def test_process_file_4(test_files, response_type, response_schema, m_input1, ex
         ([FILE_A], JSON, RESPONSE_SCHEMA_ISD, P_INPUT_1_MULTI, P_INPUT_2_MULTI, 200),
         ([FILE_A], JSON, RESPONSE_SCHEMA_LABELSTUDIO, P_INPUT_1_EMPTY, P_INPUT_2_MULTI, 200),
         ([FILE_A], JSON, RESPONSE_SCHEMA_LABELSTUDIO, P_INPUT_1_SINGLE, P_INPUT_2_EMPTY, 200),
-        ([FILE_A, FILE_B], JSON, RESPONSE_SCHEMA_LABELSTUDIO, P_INPUT_1_SINGLE, P_INPUT_2_EMPTY, 200),
-        ([FILE_A, FILE_B], JSON, RESPONSE_SCHEMA_LABELSTUDIO, P_INPUT_1_EMPTY, P_INPUT_2_EMPTY, 200),
-        ([FILE_A, FILE_B], JSON, RESPONSE_SCHEMA_LABELSTUDIO, P_INPUT_1_MULTI, P_INPUT_2_EMPTY, 200),
-    ]
+        (
+            [FILE_A, FILE_B],
+            JSON,
+            RESPONSE_SCHEMA_LABELSTUDIO,
+            P_INPUT_1_SINGLE,
+            P_INPUT_2_EMPTY,
+            200,
+        ),
+        (
+            [FILE_A, FILE_B],
+            JSON,
+            RESPONSE_SCHEMA_LABELSTUDIO,
+            P_INPUT_1_EMPTY,
+            P_INPUT_2_EMPTY,
+            200,
+        ),
+        (
+            [FILE_A, FILE_B],
+            JSON,
+            RESPONSE_SCHEMA_LABELSTUDIO,
+            P_INPUT_1_MULTI,
+            P_INPUT_2_EMPTY,
+            200,
+        ),
+    ],
 )
-def test_process_file_5(test_files, response_type, response_schema, m_input1, m_input2, expected_status):
+def test_process_file_5(
+    test_files, response_type, response_schema, m_input1, m_input2, expected_status
+):
     response = client.post(
         PROCESS_FILE_5_ROUTE,
         files=convert_files_for_api(test_files),
@@ -282,4 +303,6 @@ def test_process_file_5(test_files, response_type, response_schema, m_input1, m_
     )
     assert response.status_code == expected_status
     if response.status_code == 200:
-        _assert_response_for_process_file_5(test_files, response, response_schema, response_type, m_input1, m_input2)
+        _assert_response_for_process_file_5(
+            test_files, response, response_schema, response_type, m_input1, m_input2
+        )
