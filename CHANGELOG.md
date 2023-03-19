@@ -1,3 +1,7 @@
+# 0.6.0
+
+* Add file type validation via `UNSTRUCTURED_ALLOWED_MIMETYPES`
+
 # 0.5.0
 
 * Removed rate limit and slow api from project. Updated templates and tests.
