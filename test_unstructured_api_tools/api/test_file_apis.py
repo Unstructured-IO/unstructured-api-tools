@@ -11,8 +11,8 @@ from functions_and_variables import (
     FILENAME_FORMATS,
     JSON,
     MIXED,
-    FILE_A,
-    FILE_B,
+    FILE_DOCX,
+    FILE_IMAGE,
     RESPONSE_SCHEMA_ISD,
     RESPONSE_SCHEMA_LABELSTUDIO,
     P_INPUT_1_SINGLE,
@@ -27,10 +27,19 @@ from functions_and_variables import (
     generate_header_kwargs,
 )
 
+# accepts: files, input2
 PROCESS_FILE_1_ROUTE = "/test-project/v1.2.3/process-file-1"
+
+# accepts: files
 PROCESS_FILE_2_ROUTE = "/test-project/v1.2.3/process-file-2"
+
+# accepts: files, response_type, response_schema
 PROCESS_FILE_3_ROUTE = "/test-project/v1.2.3/process-file-3"
+
+# accepts: files, response_type, response_schema, input1
 PROCESS_FILE_4_ROUTE = "/test-project/v1.2.3/process-file-4"
+
+# accepts: files, response_type, response_schema, input1, input2
 PROCESS_FILE_5_ROUTE = "/test-project/v1.2.3/process-file-5"
 
 client = TestClient(app)
@@ -151,19 +160,19 @@ def _assert_response_for_process_file_5(
 @pytest.mark.parametrize(
     "test_files,test_params,test_type_header,expected_status",
     [
-        ([FILE_A], P_INPUT_2_SINGLE, JSON, 200),
-        ([FILE_A], P_INPUT_2_MULTI, JSON, 200),
-        ([FILE_A], None, JSON, 200),
-        ([FILE_A], P_INPUT_1_SINGLE, JSON, 200),
-        ([FILE_A], P_INPUT_1_MULTI, JSON, 200),
-        ([FILE_A], P_INPUT_1_AND_2_MULTI, JSON, 200),
-        ([FILE_B], P_INPUT_1_AND_2_MULTI, JSON, 200),
-        ([FILE_A, FILE_B], P_INPUT_1_AND_2_MULTI, JSON, 200),
-        ([FILE_A, FILE_B], P_INPUT_1_AND_2_MULTI, MIXED, 200),
+        ([FILE_DOCX], P_INPUT_2_SINGLE, JSON, 200),
+        ([FILE_DOCX], P_INPUT_2_MULTI, JSON, 200),
+        ([FILE_DOCX], None, JSON, 200),
+        ([FILE_DOCX], P_INPUT_1_SINGLE, JSON, 200),
+        ([FILE_DOCX], P_INPUT_1_MULTI, JSON, 200),
+        ([FILE_DOCX], P_INPUT_1_AND_2_MULTI, JSON, 200),
+        ([FILE_IMAGE], P_INPUT_1_AND_2_MULTI, JSON, 200),
+        ([FILE_DOCX, FILE_IMAGE], P_INPUT_1_AND_2_MULTI, JSON, 200),
+        ([FILE_DOCX, FILE_IMAGE], P_INPUT_1_AND_2_MULTI, MIXED, 200),
         # json returned though mixed requested (maybe not a bug for 1 file?)
-        pytest.param([FILE_A], P_INPUT_1_MULTI, MIXED, 200, marks=pytest.mark.xfail),
+        pytest.param([FILE_DOCX], P_INPUT_1_MULTI, MIXED, 200, marks=pytest.mark.xfail),
         # json returned though csv requested
-        pytest.param([FILE_B], P_INPUT_1_AND_2_MULTI, TEXT_CSV, 200, marks=pytest.mark.xfail),
+        pytest.param([FILE_IMAGE], P_INPUT_1_AND_2_MULTI, TEXT_CSV, 200, marks=pytest.mark.xfail),
     ],
 )
 def test_process_file_1(test_files, test_params, test_type_header, expected_status):
@@ -182,7 +191,9 @@ def test_process_file_1(test_files, test_params, test_type_header, expected_stat
         _assert_response_for_process_file_1(test_files, test_params, test_type_header, response)
 
 
-@pytest.mark.parametrize("test_files,expected_status", [([FILE_A], 200), ([FILE_A, FILE_B], 200)])
+@pytest.mark.parametrize(
+    "test_files,expected_status", [([FILE_DOCX], 200), ([FILE_DOCX, FILE_IMAGE], 200)]
+)
 def test_process_file_2(test_files, expected_status):
     response = client.post(PROCESS_FILE_2_ROUTE, files=convert_files_for_api(test_files))
     assert response.status_code == expected_status
@@ -193,34 +204,42 @@ def test_process_file_2(test_files, expected_status):
 @pytest.mark.parametrize(
     "test_files,response_type,response_schema,expected_status",
     [
-        ([FILE_A], JSON, RESPONSE_SCHEMA_ISD, 200),
+        ([FILE_DOCX], JSON, RESPONSE_SCHEMA_ISD, 200),
         # endpoint doesn't accept mixed media type for one file
-        pytest.param([FILE_A], MIXED, RESPONSE_SCHEMA_ISD, 200, marks=pytest.mark.xfail),
+        pytest.param([FILE_DOCX], MIXED, RESPONSE_SCHEMA_ISD, 200, marks=pytest.mark.xfail),
         # endpoint fails because media type text/csv should have response type str
-        pytest.param([FILE_A], TEXT_CSV, RESPONSE_SCHEMA_ISD, 200, marks=pytest.mark.xfail),
+        pytest.param([FILE_DOCX], TEXT_CSV, RESPONSE_SCHEMA_ISD, 200, marks=pytest.mark.xfail),
         # endpoint fails because media type text/csv should have response type str
         # because None response type has default text/csv value
-        pytest.param([FILE_A], None, RESPONSE_SCHEMA_ISD, 200, marks=pytest.mark.xfail),
-        ([FILE_A], JSON, RESPONSE_SCHEMA_LABELSTUDIO, 200),
+        pytest.param([FILE_DOCX], None, RESPONSE_SCHEMA_ISD, 200, marks=pytest.mark.xfail),
+        ([FILE_DOCX], JSON, RESPONSE_SCHEMA_LABELSTUDIO, 200),
         # endpoint doesn't accept mixed media type for one file
-        pytest.param([FILE_A], MIXED, RESPONSE_SCHEMA_LABELSTUDIO, 200, marks=pytest.mark.xfail),
+        pytest.param([FILE_DOCX], MIXED, RESPONSE_SCHEMA_LABELSTUDIO, 200, marks=pytest.mark.xfail),
         # endpoint fails because media type text/csv should have response type str
-        pytest.param([FILE_A], TEXT_CSV, RESPONSE_SCHEMA_LABELSTUDIO, 200, marks=pytest.mark.xfail),
+        pytest.param(
+            [FILE_DOCX], TEXT_CSV, RESPONSE_SCHEMA_LABELSTUDIO, 200, marks=pytest.mark.xfail
+        ),
         # endpoint fails because media type text/csv should have response type str
         # because None response type has default text/csv value
-        pytest.param([FILE_A], None, RESPONSE_SCHEMA_LABELSTUDIO, 200, marks=pytest.mark.xfail),
-        ([FILE_A, FILE_B], JSON, RESPONSE_SCHEMA_ISD, 200),
-        ([FILE_A, FILE_B], MIXED, RESPONSE_SCHEMA_ISD, 200),
-        # endpoint fails because text/csv is not acceptable for multiple files
-        pytest.param([FILE_A, FILE_B], TEXT_CSV, RESPONSE_SCHEMA_ISD, 200, marks=pytest.mark.xfail),
-        ([FILE_A, FILE_B], None, RESPONSE_SCHEMA_ISD, 200),
-        ([FILE_A, FILE_B], JSON, RESPONSE_SCHEMA_LABELSTUDIO, 200),
-        ([FILE_A, FILE_B], MIXED, RESPONSE_SCHEMA_LABELSTUDIO, 200),
+        pytest.param([FILE_DOCX], None, RESPONSE_SCHEMA_LABELSTUDIO, 200, marks=pytest.mark.xfail),
+        ([FILE_DOCX, FILE_IMAGE], JSON, RESPONSE_SCHEMA_ISD, 200),
+        ([FILE_DOCX, FILE_IMAGE], MIXED, RESPONSE_SCHEMA_ISD, 200),
         # endpoint fails because text/csv is not acceptable for multiple files
         pytest.param(
-            [FILE_A, FILE_B], TEXT_CSV, RESPONSE_SCHEMA_LABELSTUDIO, 200, marks=pytest.mark.xfail
+            [FILE_DOCX, FILE_IMAGE], TEXT_CSV, RESPONSE_SCHEMA_ISD, 200, marks=pytest.mark.xfail
         ),
-        ([FILE_A, FILE_B], None, RESPONSE_SCHEMA_LABELSTUDIO, 200),
+        ([FILE_DOCX, FILE_IMAGE], None, RESPONSE_SCHEMA_ISD, 200),
+        ([FILE_DOCX, FILE_IMAGE], JSON, RESPONSE_SCHEMA_LABELSTUDIO, 200),
+        ([FILE_DOCX, FILE_IMAGE], MIXED, RESPONSE_SCHEMA_LABELSTUDIO, 200),
+        # endpoint fails because text/csv is not acceptable for multiple files
+        pytest.param(
+            [FILE_DOCX, FILE_IMAGE],
+            TEXT_CSV,
+            RESPONSE_SCHEMA_LABELSTUDIO,
+            200,
+            marks=pytest.mark.xfail,
+        ),
+        ([FILE_DOCX, FILE_IMAGE], None, RESPONSE_SCHEMA_LABELSTUDIO, 200),
     ],
 )
 def test_process_file_3(test_files, response_type, response_schema, expected_status):
@@ -238,12 +257,12 @@ def test_process_file_3(test_files, response_type, response_schema, expected_sta
 @pytest.mark.parametrize(
     "test_files,response_type,response_schema,m_input1,expected_status",
     [
-        ([FILE_A], JSON, RESPONSE_SCHEMA_ISD, P_INPUT_1_EMPTY, 200),
-        ([FILE_A], JSON, RESPONSE_SCHEMA_ISD, P_INPUT_1_MULTI, 200),
-        ([FILE_A], JSON, RESPONSE_SCHEMA_LABELSTUDIO, P_INPUT_1_SINGLE, 200),
-        ([FILE_A, FILE_B], JSON, RESPONSE_SCHEMA_LABELSTUDIO, P_INPUT_1_EMPTY, 200),
-        ([FILE_A, FILE_B], JSON, RESPONSE_SCHEMA_ISD, P_INPUT_1_MULTI, 200),
-        ([FILE_A, FILE_B], JSON, RESPONSE_SCHEMA_ISD, P_INPUT_1_SINGLE, 200),
+        ([FILE_DOCX], JSON, RESPONSE_SCHEMA_ISD, P_INPUT_1_EMPTY, 200),
+        ([FILE_DOCX], JSON, RESPONSE_SCHEMA_ISD, P_INPUT_1_MULTI, 200),
+        ([FILE_DOCX], JSON, RESPONSE_SCHEMA_LABELSTUDIO, P_INPUT_1_SINGLE, 200),
+        ([FILE_DOCX, FILE_IMAGE], JSON, RESPONSE_SCHEMA_LABELSTUDIO, P_INPUT_1_EMPTY, 200),
+        ([FILE_DOCX, FILE_IMAGE], JSON, RESPONSE_SCHEMA_ISD, P_INPUT_1_MULTI, 200),
+        ([FILE_DOCX, FILE_IMAGE], JSON, RESPONSE_SCHEMA_ISD, P_INPUT_1_SINGLE, 200),
     ],
 )
 def test_process_file_4(test_files, response_type, response_schema, m_input1, expected_status):
@@ -263,11 +282,11 @@ def test_process_file_4(test_files, response_type, response_schema, m_input1, ex
 @pytest.mark.parametrize(
     "test_files,response_type,response_schema,m_input1,m_input2,expected_status",
     [
-        ([FILE_A], JSON, RESPONSE_SCHEMA_ISD, P_INPUT_1_MULTI, P_INPUT_2_MULTI, 200),
-        ([FILE_A], JSON, RESPONSE_SCHEMA_LABELSTUDIO, P_INPUT_1_EMPTY, P_INPUT_2_MULTI, 200),
-        ([FILE_A], JSON, RESPONSE_SCHEMA_LABELSTUDIO, P_INPUT_1_SINGLE, P_INPUT_2_EMPTY, 200),
+        ([FILE_DOCX], JSON, RESPONSE_SCHEMA_ISD, P_INPUT_1_MULTI, P_INPUT_2_MULTI, 200),
+        ([FILE_DOCX], JSON, RESPONSE_SCHEMA_LABELSTUDIO, P_INPUT_1_EMPTY, P_INPUT_2_MULTI, 200),
+        ([FILE_DOCX], JSON, RESPONSE_SCHEMA_LABELSTUDIO, P_INPUT_1_SINGLE, P_INPUT_2_EMPTY, 200),
         (
-            [FILE_A, FILE_B],
+            [FILE_DOCX, FILE_IMAGE],
             JSON,
             RESPONSE_SCHEMA_LABELSTUDIO,
             P_INPUT_1_SINGLE,
@@ -275,7 +294,7 @@ def test_process_file_4(test_files, response_type, response_schema, m_input1, ex
             200,
         ),
         (
-            [FILE_A, FILE_B],
+            [FILE_DOCX, FILE_IMAGE],
             JSON,
             RESPONSE_SCHEMA_LABELSTUDIO,
             P_INPUT_1_EMPTY,
@@ -283,7 +302,7 @@ def test_process_file_4(test_files, response_type, response_schema, m_input1, ex
             200,
         ),
         (
-            [FILE_A, FILE_B],
+            [FILE_DOCX, FILE_IMAGE],
             JSON,
             RESPONSE_SCHEMA_LABELSTUDIO,
             P_INPUT_1_MULTI,

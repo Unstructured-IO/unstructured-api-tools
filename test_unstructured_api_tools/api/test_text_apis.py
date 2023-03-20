@@ -7,8 +7,8 @@ from prepline_test_project.api.app import app
 from requests_toolbelt.multipart import decoder
 
 from test_unstructured_api_tools.api.functions_and_variables import (
-    FILE_C,
-    FILE_D,
+    FILE_TXT_1,
+    FILE_TXT_2,
     convert_text_files_for_api,
     FILENAME_LENGTHS,
     P_INPUT_1_SINGLE,
@@ -25,9 +25,16 @@ from test_unstructured_api_tools.api.functions_and_variables import (
     generate_header_kwargs,
 )
 
+# accepts: text files
 PROCESS_TEXT_1_ROUTE = "/test-project/v1.2.3/process-text-1"
+
+# accepts: text files, input1, input2
 PROCESS_TEXT_2_ROUTE = "/test-project/v1.2.3/process-text-2"
+
+# accepts: text files, response_type
 PROCESS_TEXT_3_ROUTE = "/test-project/v1.2.3/process-text-3"
+
+# accepts: text files, response_type, response_schema
 PROCESS_TEXT_4_ROUTE = "/test-project/v1.2.3/process-text-4"
 
 client = TestClient(app)
@@ -116,9 +123,9 @@ def _assert_response_for_process_text_4(test_files, response, response_type, res
 @pytest.mark.parametrize(
     "test_files,expected_status",
     [
-        ([FILE_C], 200),
-        ([FILE_D], 200),
-        ([FILE_C, FILE_D], 200),
+        ([FILE_TXT_1], 200),
+        ([FILE_TXT_2], 200),
+        ([FILE_TXT_1, FILE_TXT_2], 200),
     ],
 )
 def test_process_text_1(test_files, expected_status):
@@ -131,13 +138,13 @@ def test_process_text_1(test_files, expected_status):
 @pytest.mark.parametrize(
     "test_files,m_input1,m_input2,expected_status",
     [
-        ([FILE_C], P_INPUT_1_SINGLE, P_INPUT_2_SINGLE, 200),
-        ([FILE_C], P_INPUT_1_EMPTY, P_INPUT_2_SINGLE, 200),
-        ([FILE_C], P_INPUT_1_EMPTY, P_INPUT_2_MULTI, 200),
-        ([FILE_C, FILE_D], P_INPUT_1_EMPTY, P_INPUT_2_EMPTY, 200),
-        ([FILE_C, FILE_D], P_INPUT_1_SINGLE, P_INPUT_2_EMPTY, 200),
-        ([FILE_C, FILE_D], P_INPUT_1_SINGLE, P_INPUT_2_SINGLE, 200),
-        ([FILE_C, FILE_D], P_INPUT_1_MULTI, P_INPUT_2_MULTI, 200),
+        ([FILE_TXT_1], P_INPUT_1_SINGLE, P_INPUT_2_SINGLE, 200),
+        ([FILE_TXT_1], P_INPUT_1_EMPTY, P_INPUT_2_SINGLE, 200),
+        ([FILE_TXT_1], P_INPUT_1_EMPTY, P_INPUT_2_MULTI, 200),
+        ([FILE_TXT_1, FILE_TXT_2], P_INPUT_1_EMPTY, P_INPUT_2_EMPTY, 200),
+        ([FILE_TXT_1, FILE_TXT_2], P_INPUT_1_SINGLE, P_INPUT_2_EMPTY, 200),
+        ([FILE_TXT_1, FILE_TXT_2], P_INPUT_1_SINGLE, P_INPUT_2_SINGLE, 200),
+        ([FILE_TXT_1, FILE_TXT_2], P_INPUT_1_MULTI, P_INPUT_2_MULTI, 200),
     ],
 )
 def test_process_text_2(test_files, m_input1, m_input2, expected_status):
@@ -154,27 +161,27 @@ def test_process_text_2(test_files, m_input1, m_input2, expected_status):
 @pytest.mark.parametrize(
     "test_files,response_type,expected_status",
     [
-        ([FILE_C], JSON, 200),
+        ([FILE_TXT_1], JSON, 200),
         # endpoint doesn't accept mixed media type for one file
-        pytest.param([FILE_C], MIXED, 200, marks=pytest.mark.xfail),
+        pytest.param([FILE_TXT_1], MIXED, 200, marks=pytest.mark.xfail),
         # endpoint fails because media type text/csv should have response type str
-        pytest.param([FILE_C], TEXT_CSV, 200, marks=pytest.mark.xfail),
+        pytest.param([FILE_TXT_1], TEXT_CSV, 200, marks=pytest.mark.xfail),
         # endpoint fails because media type text/csv should have response type str
         # because None response type has default text/csv value
-        pytest.param([FILE_C], None, 200, marks=pytest.mark.xfail),
-        ([FILE_C, FILE_D], JSON, 200),
-        ([FILE_C, FILE_D], MIXED, 200),
+        pytest.param([FILE_TXT_1], None, 200, marks=pytest.mark.xfail),
+        ([FILE_TXT_1, FILE_TXT_2], JSON, 200),
+        ([FILE_TXT_1, FILE_TXT_2], MIXED, 200),
         # endpoint fails because media type text/csv should have response type str
-        pytest.param([FILE_C, FILE_D], TEXT_CSV, 200, marks=pytest.mark.xfail),
-        ([FILE_C, FILE_D], None, 200),
-        ([FILE_D], JSON, 200),
+        pytest.param([FILE_TXT_1, FILE_TXT_2], TEXT_CSV, 200, marks=pytest.mark.xfail),
+        ([FILE_TXT_1, FILE_TXT_2], None, 200),
+        ([FILE_TXT_2], JSON, 200),
         # endpoint doesn't accept mixed media type for one file
-        pytest.param([FILE_D], MIXED, 200, marks=pytest.mark.xfail),
+        pytest.param([FILE_TXT_2], MIXED, 200, marks=pytest.mark.xfail),
         # endpoint fails because media type text/csv should have response type str
-        pytest.param([FILE_D], TEXT_CSV, 200, marks=pytest.mark.xfail),
+        pytest.param([FILE_TXT_2], TEXT_CSV, 200, marks=pytest.mark.xfail),
         # endpoint fails because media type text/csv should have response type str
         # because None response type has default text/csv value
-        pytest.param([FILE_D], None, 200, marks=pytest.mark.xfail),
+        pytest.param([FILE_TXT_2], None, 200, marks=pytest.mark.xfail),
     ],
 )
 def test_process_text_3(test_files, response_type, expected_status):
@@ -192,12 +199,12 @@ def test_process_text_3(test_files, response_type, expected_status):
 @pytest.mark.parametrize(
     "test_files,response_type,response_schema,expected_status",
     [
-        ([FILE_C], JSON, RESPONSE_SCHEMA_ISD, 200),
-        ([FILE_C], JSON, RESPONSE_SCHEMA_LABELSTUDIO, 200),
-        ([FILE_C, FILE_D], JSON, RESPONSE_SCHEMA_ISD, 200),
-        ([FILE_C, FILE_D], JSON, RESPONSE_SCHEMA_LABELSTUDIO, 200),
-        ([FILE_C, FILE_D], MIXED, RESPONSE_SCHEMA_ISD, 200),
-        ([FILE_C, FILE_D], MIXED, RESPONSE_SCHEMA_LABELSTUDIO, 200),
+        ([FILE_TXT_1], JSON, RESPONSE_SCHEMA_ISD, 200),
+        ([FILE_TXT_1], JSON, RESPONSE_SCHEMA_LABELSTUDIO, 200),
+        ([FILE_TXT_1, FILE_TXT_2], JSON, RESPONSE_SCHEMA_ISD, 200),
+        ([FILE_TXT_1, FILE_TXT_2], JSON, RESPONSE_SCHEMA_LABELSTUDIO, 200),
+        ([FILE_TXT_1, FILE_TXT_2], MIXED, RESPONSE_SCHEMA_ISD, 200),
+        ([FILE_TXT_1, FILE_TXT_2], MIXED, RESPONSE_SCHEMA_LABELSTUDIO, 200),
     ],
 )
 def test_process_text_4(test_files, response_type, response_schema, expected_status):

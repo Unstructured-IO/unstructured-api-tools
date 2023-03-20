@@ -7,10 +7,10 @@ from prepline_test_project.api.app import app
 from requests_toolbelt.multipart import decoder
 
 from test_unstructured_api_tools.api.functions_and_variables import (
-    FILE_A,
-    FILE_B,
-    FILE_C,
-    FILE_D,
+    FILE_DOCX,
+    FILE_IMAGE,
+    FILE_TXT_1,
+    FILE_TXT_2,
     convert_files_for_api,
     convert_text_files_for_api,
     P_INPUT_1_EMPTY,
@@ -27,9 +27,16 @@ from test_unstructured_api_tools.api.functions_and_variables import (
     generate_header_kwargs,
 )
 
+# accepts: files, text files
 PROCESS_FILE_TEXT_1_ROUTE = "/test-project/v1.2.3/process-text-file-1"
+
+# accepts: files, text files, response_type, input2
 PROCESS_FILE_TEXT_2_ROUTE = "/test-project/v1.2.3/process-text-file-2"
+
+# accepts: files, text files, response_type, response_schema
 PROCESS_FILE_TEXT_3_ROUTE = "/test-project/v1.2.3/process-text-file-3"
+
+# accepts: files, text files, response_type, response_schema, input1, input2
 PROCESS_FILE_TEXT_4_ROUTE = "/test-project/v1.2.3/process-text-file-4"
 
 client = TestClient(app)
@@ -225,12 +232,12 @@ def _assert_response_for_process_file_text_4(
 @pytest.mark.parametrize(
     "test_files,test_files_text,expected_status",
     [
-        ([FILE_A], [FILE_C], 200),
-        ([FILE_A, FILE_B], [FILE_C], 200),
-        ([FILE_A, FILE_B], [FILE_D], 200),
-        ([FILE_A, FILE_B], [FILE_C, FILE_D], 200),
-        ([FILE_A], [FILE_D], 200),
-        ([FILE_B], [FILE_D], 200),
+        ([FILE_DOCX], [FILE_TXT_1], 200),
+        ([FILE_DOCX, FILE_IMAGE], [FILE_TXT_1], 200),
+        ([FILE_DOCX, FILE_IMAGE], [FILE_TXT_2], 200),
+        ([FILE_DOCX, FILE_IMAGE], [FILE_TXT_1, FILE_TXT_2], 200),
+        ([FILE_DOCX], [FILE_TXT_2], 200),
+        ([FILE_IMAGE], [FILE_TXT_2], 200),
     ],
 )
 def test_process_file_text_1(test_files, test_files_text, expected_status):
@@ -246,14 +253,14 @@ def test_process_file_text_1(test_files, test_files_text, expected_status):
 @pytest.mark.parametrize(
     "test_files,test_files_text,response_type,m_input2,expected_status",
     [
-        ([FILE_A], [FILE_C], JSON, P_INPUT_2_MULTI, 200),
-        ([FILE_A, FILE_B], [FILE_C], JSON, P_INPUT_2_MULTI, 200),
-        ([FILE_A], [FILE_C], MIXED, P_INPUT_2_SINGLE, 200),
-        ([FILE_A, FILE_B], [FILE_C], MIXED, P_INPUT_2_EMPTY, 200),
-        ([FILE_A, FILE_B], [FILE_C, FILE_D], JSON, P_INPUT_2_MULTI, 200),
-        ([FILE_A], [FILE_C, FILE_D], JSON, P_INPUT_2_SINGLE, 200),
-        ([FILE_B], [FILE_C], JSON, P_INPUT_2_MULTI, 200),
-        ([FILE_B], [FILE_C], MIXED, P_INPUT_2_EMPTY, 200),
+        ([FILE_DOCX], [FILE_TXT_1], JSON, P_INPUT_2_MULTI, 200),
+        ([FILE_DOCX, FILE_IMAGE], [FILE_TXT_1], JSON, P_INPUT_2_MULTI, 200),
+        ([FILE_DOCX], [FILE_TXT_1], MIXED, P_INPUT_2_SINGLE, 200),
+        ([FILE_DOCX, FILE_IMAGE], [FILE_TXT_1], MIXED, P_INPUT_2_EMPTY, 200),
+        ([FILE_DOCX, FILE_IMAGE], [FILE_TXT_1, FILE_TXT_2], JSON, P_INPUT_2_MULTI, 200),
+        ([FILE_DOCX], [FILE_TXT_1, FILE_TXT_2], JSON, P_INPUT_2_SINGLE, 200),
+        ([FILE_IMAGE], [FILE_TXT_1], JSON, P_INPUT_2_MULTI, 200),
+        ([FILE_IMAGE], [FILE_TXT_1], MIXED, P_INPUT_2_EMPTY, 200),
     ],
 )
 def test_process_file_text_2(test_files, test_files_text, response_type, m_input2, expected_status):
@@ -273,16 +280,22 @@ def test_process_file_text_2(test_files, test_files_text, response_type, m_input
 @pytest.mark.parametrize(
     "test_files,test_files_text,response_type,response_schema,expected_status",
     [
-        ([FILE_A], [FILE_C], JSON, RESPONSE_SCHEMA_ISD, 200),
-        ([FILE_A], [FILE_C], MIXED, RESPONSE_SCHEMA_ISD, 200),
-        ([FILE_A, FILE_B], [FILE_C], JSON, RESPONSE_SCHEMA_ISD, 200),
-        ([FILE_A, FILE_B], [FILE_C], MIXED, RESPONSE_SCHEMA_ISD, 200),
-        ([FILE_A], [FILE_C], JSON, RESPONSE_SCHEMA_LABELSTUDIO, 200),
-        ([FILE_A], [FILE_C], MIXED, RESPONSE_SCHEMA_LABELSTUDIO, 200),
-        ([FILE_A, FILE_B], [FILE_C], JSON, RESPONSE_SCHEMA_LABELSTUDIO, 200),
-        ([FILE_A, FILE_B], [FILE_C], MIXED, RESPONSE_SCHEMA_LABELSTUDIO, 200),
-        ([FILE_A, FILE_B], [FILE_C, FILE_D], MIXED, RESPONSE_SCHEMA_ISD, 200),
-        ([FILE_A, FILE_B], [FILE_C, FILE_D], MIXED, RESPONSE_SCHEMA_LABELSTUDIO, 200),
+        ([FILE_DOCX], [FILE_TXT_1], JSON, RESPONSE_SCHEMA_ISD, 200),
+        ([FILE_DOCX], [FILE_TXT_1], MIXED, RESPONSE_SCHEMA_ISD, 200),
+        ([FILE_DOCX, FILE_IMAGE], [FILE_TXT_1], JSON, RESPONSE_SCHEMA_ISD, 200),
+        ([FILE_DOCX, FILE_IMAGE], [FILE_TXT_1], MIXED, RESPONSE_SCHEMA_ISD, 200),
+        ([FILE_DOCX], [FILE_TXT_1], JSON, RESPONSE_SCHEMA_LABELSTUDIO, 200),
+        ([FILE_DOCX], [FILE_TXT_1], MIXED, RESPONSE_SCHEMA_LABELSTUDIO, 200),
+        ([FILE_DOCX, FILE_IMAGE], [FILE_TXT_1], JSON, RESPONSE_SCHEMA_LABELSTUDIO, 200),
+        ([FILE_DOCX, FILE_IMAGE], [FILE_TXT_1], MIXED, RESPONSE_SCHEMA_LABELSTUDIO, 200),
+        ([FILE_DOCX, FILE_IMAGE], [FILE_TXT_1, FILE_TXT_2], MIXED, RESPONSE_SCHEMA_ISD, 200),
+        (
+            [FILE_DOCX, FILE_IMAGE],
+            [FILE_TXT_1, FILE_TXT_2],
+            MIXED,
+            RESPONSE_SCHEMA_LABELSTUDIO,
+            200,
+        ),
     ],
 )
 def test_process_file_text_3(
@@ -305,8 +318,8 @@ def test_process_file_text_3(
     "test_files,test_files_text,response_type,response_schema,m_input1,m_input2,expected_status",
     [
         (
-            [FILE_A],
-            [FILE_C],
+            [FILE_DOCX],
+            [FILE_TXT_1],
             JSON,
             RESPONSE_SCHEMA_LABELSTUDIO,
             P_INPUT_1_MULTI,
@@ -314,8 +327,8 @@ def test_process_file_text_3(
             200,
         ),
         (
-            [FILE_A, FILE_B],
-            [FILE_C],
+            [FILE_DOCX, FILE_IMAGE],
+            [FILE_TXT_1],
             JSON,
             RESPONSE_SCHEMA_LABELSTUDIO,
             P_INPUT_1_SINGLE,
@@ -323,8 +336,8 @@ def test_process_file_text_3(
             200,
         ),
         (
-            [FILE_A],
-            [FILE_C, FILE_D],
+            [FILE_DOCX],
+            [FILE_TXT_1, FILE_TXT_2],
             JSON,
             RESPONSE_SCHEMA_ISD,
             P_INPUT_1_MULTI,
@@ -332,18 +345,26 @@ def test_process_file_text_3(
             200,
         ),
         (
-            [FILE_A, FILE_B],
-            [FILE_C, FILE_D],
+            [FILE_DOCX, FILE_IMAGE],
+            [FILE_TXT_1, FILE_TXT_2],
             JSON,
             RESPONSE_SCHEMA_LABELSTUDIO,
             P_INPUT_1_MULTI,
             P_INPUT_2_SINGLE,
             200,
         ),
-        ([FILE_A], [FILE_C], MIXED, RESPONSE_SCHEMA_ISD, P_INPUT_1_MULTI, P_INPUT_2_EMPTY, 200),
         (
-            [FILE_A, FILE_B],
-            [FILE_C],
+            [FILE_DOCX],
+            [FILE_TXT_1],
+            MIXED,
+            RESPONSE_SCHEMA_ISD,
+            P_INPUT_1_MULTI,
+            P_INPUT_2_EMPTY,
+            200,
+        ),
+        (
+            [FILE_DOCX, FILE_IMAGE],
+            [FILE_TXT_1],
             MIXED,
             RESPONSE_SCHEMA_LABELSTUDIO,
             P_INPUT_1_SINGLE,
@@ -351,8 +372,8 @@ def test_process_file_text_3(
             200,
         ),
         (
-            [FILE_A],
-            [FILE_C, FILE_D],
+            [FILE_DOCX],
+            [FILE_TXT_1, FILE_TXT_2],
             MIXED,
             RESPONSE_SCHEMA_ISD,
             P_INPUT_1_EMPTY,
@@ -360,8 +381,8 @@ def test_process_file_text_3(
             200,
         ),
         (
-            [FILE_A, FILE_B],
-            [FILE_C, FILE_D],
+            [FILE_DOCX, FILE_IMAGE],
+            [FILE_TXT_1, FILE_TXT_2],
             MIXED,
             RESPONSE_SCHEMA_ISD,
             P_INPUT_1_MULTI,

@@ -1,17 +1,16 @@
-FILE_A = "test_unstructured_api_tools/api/fixtures/fake.docx"
-FILE_B = "test_unstructured_api_tools/api/fixtures/example.jpg"
-FILE_C = "test_unstructured_api_tools/api/fixtures/text_file.txt"
-FILE_D = "test_unstructured_api_tools/api/fixtures/text_file_2.txt"
+FILE_DOCX = "test_unstructured_api_tools/api/fixtures/fake.docx"
+FILE_IMAGE = "test_unstructured_api_tools/api/fixtures/example.jpg"
+FILE_TXT_1 = "test_unstructured_api_tools/api/fixtures/text_file.txt"
+FILE_TXT_2 = "test_unstructured_api_tools/api/fixtures/text_file_2.txt"
 
-FILENAME_LENGTHS = {FILE_A: 36602, FILE_B: 32764, FILE_C: 26, FILE_D: 30}
+FILENAME_LENGTHS = {FILE_DOCX: 36602, FILE_IMAGE: 32764, FILE_TXT_1: 26, FILE_TXT_2: 30}
 FILENAME_FORMATS = {
-    FILE_A: "application/vnd.openxmlformats",
-    FILE_B: "image/jpeg",
-    FILE_C: "text/plain",
-    FILE_D: "text/plain",
+    FILE_DOCX: "application/vnd.openxmlformats",
+    FILE_IMAGE: "image/jpeg",
+    FILE_TXT_1: "text/plain",
+    FILE_TXT_2: "text/plain",
 }
 
-P_INPUT_1_SINGLE = {"input1": ["hi"]}
 P_INPUT_1_SINGLE = {"input1": ["hi"]}
 P_INPUT_1_MULTI = {"input1": ["hi", "water is better than ice"]}
 P_INPUT_1_EMPTY = {"input1": []}
