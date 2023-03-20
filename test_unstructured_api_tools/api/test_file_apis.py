@@ -442,6 +442,6 @@ def test_reconfigure_supported_mimetypes():
 
     response = client.post(
         PROCESS_FILE_1_ROUTE,
-        files=[("files", (FILE_B, open(FILE_IMAGE, "rb"), FILENAME_FORMATS[FILE_IMAGE]))],
+        files=[("files", (FILE_DOCX, open(FILE_IMAGE, "rb"), FILENAME_FORMATS[FILE_IMAGE]))],
     )
     assert response.status_code == 200
