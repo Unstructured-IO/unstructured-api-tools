@@ -24,11 +24,11 @@ def pipeline_api(
     file,
     filename=None,
     file_content_type=None,
-    m_input_2=[],
+    m_input2=[],
 ):
     return {
         "silly_result": " : ".join(
-            [str(len(file.read())), filename, file_content_type, str(m_input_2)]
+            [str(len(file.read())), filename, file_content_type, str(m_input2)]
         )
     }
 
@@ -95,7 +95,7 @@ class MultipartMixedResponse(StreamingResponse):
 async def pipeline_1(
     request: Request,
     files: Union[List[UploadFile], None] = File(default=None),
-    input_2: List[str] = Form(default=[]),
+    input2: List[str] = Form(default=[]),
 ):
     content_type = request.headers.get("Accept")
 
@@ -120,7 +120,7 @@ async def pipeline_1(
 
                     response = pipeline_api(
                         _file,
-                        m_input_2=input_2,
+                        m_input2=input2,
                         filename=file.filename,
                         file_content_type=file.content_type,
                     )
@@ -141,7 +141,7 @@ async def pipeline_1(
 
             response = pipeline_api(
                 _file,
-                m_input_2=input_2,
+                m_input2=input2,
                 filename=file.filename,
                 file_content_type=file.content_type,
             )
