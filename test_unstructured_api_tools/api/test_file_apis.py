@@ -192,7 +192,7 @@ def test_process_file_1(test_files, test_params, test_type_header, expected_stat
         _assert_response_for_process_file_1(test_files, test_params, test_type_header, response)
 
 
-=======
+@pytest.mark.parametrize(
     "test_files,expected_status", [([FILE_DOCX], 200), ([FILE_DOCX, FILE_IMAGE], 200)]
 )
 def test_process_file_2(test_files, expected_status):
@@ -326,6 +326,7 @@ def test_process_file_5(
         _assert_response_for_process_file_5(
             test_files, response, response_schema, response_type, m_input1, m_input2
         )
+
 
 @pytest.mark.parametrize(
     "mimetype,filename,expected_status",
