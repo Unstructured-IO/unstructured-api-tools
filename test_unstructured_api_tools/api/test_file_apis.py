@@ -377,7 +377,8 @@ def test_supported_mimetypes(mimetype, filename, expected_status):
     # Keying off of the mimetype just works (there are 4 paths to test)
     # One file
     response = client.post(
-        PROCESS_FILE_1_ROUTE, files=[("files", ("example-filename", open(FILE_DOCX, "rb"), mimetype))]
+        PROCESS_FILE_1_ROUTE,
+        files=[("files", ("example-filename", open(FILE_DOCX, "rb"), mimetype))],
     )
     assert response.status_code == expected_status
 
@@ -409,7 +410,6 @@ def test_supported_mimetypes(mimetype, filename, expected_status):
         ],
     )
     assert response.status_code == expected_status
-
 
     # If the client doesn't set a mimetype, we may just see application/octet-stream
     # Here we fall back to the file extension
