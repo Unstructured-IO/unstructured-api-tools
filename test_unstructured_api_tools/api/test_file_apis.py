@@ -31,6 +31,9 @@ from functions_and_variables import (
 # accepts: files, input2
 PROCESS_FILE_1_ROUTE = "/test-project/v1.2.3/process-file-1"
 
+# Pull this over here for test_supported_mimetypes
+PROCESS_FILE_TEXT_1_ROUTE = "/test-project/v1.2.3/process-text-file-1"
+
 # accepts: files
 PROCESS_FILE_2_ROUTE = "/test-project/v1.2.3/process-file-2"
 
@@ -336,6 +339,7 @@ def test_process_file_5(
         ("application/msword", "file.doc", 200),
         ("application/pdf", "file.pdf", 200),
         ("application/vnd.ms-powerpoint", "file.ppt", 200),
+        ("application/vnd.ms-excel", "file.xls", 400),
         (
             "application/vnd.openxmlformats-officedocument.presentationml.presentation",
             "file.pptx",
@@ -345,6 +349,11 @@ def test_process_file_5(
             "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
             "file.docx",
             200,
+        ),
+        (
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "file.xlsx",
+            400,
         ),
         ("application/xml", "file.xml", 400),
         ("application/zip", "file.zip", 400),
@@ -380,9 +389,27 @@ def test_supported_mimetypes(mimetype, filename, expected_status):
             ("files", ("example-filename", open(FILE_DOCX, "rb"), mimetype)),
         ],
     )
+    assert response.status_code == expected_status
 
-    # When there are more test fixtures - come back
-    # and add single file plus text input, multi file plus text input
+    # One file (in an api that supports text files)
+    response = client.post(
+        PROCESS_FILE_TEXT_1_ROUTE,
+        files=[
+            ("files", ("example-filename", open(FILE_DOCX, "rb"), mimetype)),
+        ],
+    )
+    assert response.status_code == expected_status
+
+    # Multiple files (in an api that supports text files)
+    response = client.post(
+        PROCESS_FILE_TEXT_1_ROUTE,
+        files=[
+            ("files", ("example-filename", open(FILE_DOCX, "rb"), mimetype)),
+            ("files", ("example-filename", open(FILE_DOCX, "rb"), mimetype)),
+        ],
+    )
+    assert response.status_code == expected_status
+
 
     # If the client doesn't set a mimetype, we may just see application/octet-stream
     # Here we fall back to the file extension
