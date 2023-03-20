@@ -445,3 +445,5 @@ def test_reconfigure_supported_mimetypes():
         files=[("files", (FILE_DOCX, open(FILE_IMAGE, "rb"), FILENAME_FORMATS[FILE_IMAGE]))],
     )
     assert response.status_code == 200
+
+    del os.environ["UNSTRUCTURED_ALLOWED_MIMETYPES"]

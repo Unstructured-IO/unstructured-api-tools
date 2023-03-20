@@ -5,7 +5,7 @@ FILE_TXT_2 = "test_unstructured_api_tools/api/fixtures/text_file_2.txt"
 
 FILENAME_LENGTHS = {FILE_DOCX: 36602, FILE_IMAGE: 32764, FILE_TXT_1: 26, FILE_TXT_2: 30}
 FILENAME_FORMATS = {
-    FILE_DOCX: "application/vnd.openxmlformats",
+    FILE_DOCX: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     FILE_IMAGE: "image/jpeg",
     FILE_TXT_1: "text/plain",
     FILE_TXT_2: "text/plain",
