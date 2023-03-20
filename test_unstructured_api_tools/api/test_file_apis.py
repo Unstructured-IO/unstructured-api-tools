@@ -368,7 +368,7 @@ def test_supported_mimetypes(mimetype, filename, expected_status):
     # Keying off of the mimetype just works (there are 4 paths to test)
     # One file
     response = client.post(
-        PROCESS_FILE_1_ROUTE, files=[("files", ("example-filename", open(FILE_A, "rb"), mimetype))]
+        PROCESS_FILE_1_ROUTE, files=[("files", ("example-filename", open(FILE_DOCX, "rb"), mimetype))]
     )
     assert response.status_code == expected_status
 
@@ -376,8 +376,8 @@ def test_supported_mimetypes(mimetype, filename, expected_status):
     response = client.post(
         PROCESS_FILE_1_ROUTE,
         files=[
-            ("files", ("example-filename", open(FILE_A, "rb"), mimetype)),
-            ("files", ("example-filename", open(FILE_A, "rb"), mimetype)),
+            ("files", ("example-filename", open(FILE_DOCX, "rb"), mimetype)),
+            ("files", ("example-filename", open(FILE_DOCX, "rb"), mimetype)),
         ],
     )
 
@@ -388,7 +388,7 @@ def test_supported_mimetypes(mimetype, filename, expected_status):
     # Here we fall back to the file extension
     response = client.post(
         PROCESS_FILE_1_ROUTE,
-        files=[("files", (filename, open(FILE_A, "rb"), "application/octet-stream"))],
+        files=[("files", (filename, open(FILE_DOCX, "rb"), "application/octet-stream"))],
     )
     assert response.status_code == expected_status
 
@@ -401,7 +401,7 @@ def test_reconfigure_supported_mimetypes():
 
     response = client.post(
         PROCESS_FILE_1_ROUTE,
-        files=[("files", (FILE_A, open(FILE_A, "rb"), FILENAME_FORMATS[FILE_A]))],
+        files=[("files", (FILE_DOCX, open(FILE_DOCX, "rb"), FILENAME_FORMATS[FILE_DOCX]))],
     )
     assert response.status_code == 200
 
@@ -409,12 +409,12 @@ def test_reconfigure_supported_mimetypes():
 
     response = client.post(
         PROCESS_FILE_1_ROUTE,
-        files=[("files", (FILE_A, open(FILE_A, "rb"), FILENAME_FORMATS[FILE_A]))],
+        files=[("files", (FILE_DOCX, open(FILE_DOCX, "rb"), FILENAME_FORMATS[FILE_DOCX]))],
     )
     assert response.status_code == 400
 
     response = client.post(
         PROCESS_FILE_1_ROUTE,
-        files=[("files", (FILE_B, open(FILE_B, "rb"), FILENAME_FORMATS[FILE_B]))],
+        files=[("files", (FILE_B, open(FILE_IMAGE, "rb"), FILENAME_FORMATS[FILE_IMAGE]))],
     )
     assert response.status_code == 200
