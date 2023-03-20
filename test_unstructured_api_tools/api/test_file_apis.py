@@ -1,41 +1,56 @@
-from base64 import b64decode
 import json
+from base64 import b64decode
 import os
-import pytest
 
+import pytest
+from fastapi.testclient import TestClient
+from prepline_test_project.api.app import app
 from requests_toolbelt.multipart import decoder
 
-from fastapi.testclient import TestClient
+from functions_and_variables import (
+    FILENAME_LENGTHS,
+    FILENAME_FORMATS,
+    JSON,
+    MIXED,
+    FILE_DOCX,
+    FILE_IMAGE,
+    RESPONSE_SCHEMA_ISD,
+    RESPONSE_SCHEMA_LABELSTUDIO,
+    P_INPUT_1_SINGLE,
+    P_INPUT_2_EMPTY,
+    P_INPUT_2_MULTI,
+    P_INPUT_1_AND_2_MULTI,
+    P_INPUT_1_EMPTY,
+    P_INPUT_1_MULTI,
+    P_INPUT_2_SINGLE,
+    TEXT_CSV,
+    convert_files_for_api,
+    generate_header_kwargs,
+)
 
-from prepline_test_project.api.process_file_1 import app
-
+# accepts: files, input2
 PROCESS_FILE_1_ROUTE = "/test-project/v1.2.3/process-file-1"
 
-FILE_A = "test_unstructured_api_tools/api/fixtures/fake.docx"
-FILE_B = "test_unstructured_api_tools/api/fixtures/example.jpg"
+# accepts: files
+PROCESS_FILE_2_ROUTE = "/test-project/v1.2.3/process-file-2"
 
-FILENAME_LENGTHS = {FILE_A: 36602, FILE_B: 32764}
-FILENAME_FORMATS = {
-    FILE_A: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    FILE_B: "image/jpeg",
-}
+# accepts: files, response_type, response_schema
+PROCESS_FILE_3_ROUTE = "/test-project/v1.2.3/process-file-3"
 
-P_INPUT_1_SINGLE = {"input_1": ["hi"]}
-P_INPUT_1_MULTI = {"input_1": ["hi", "water is better than ice"]}
-P_INPUT_2_SINGLE = {"input_2": ["hello"]}
-P_INPUT_2_MULTI = {"input_2": ["hello", "earth is better than mars"]}
-P_INPUT_1_AND_2_MULTI = {"input_2": ["hello", "earth is better than mars"], "input_1": ["hi"]}
+# accepts: files, response_type, response_schema, input1
+PROCESS_FILE_4_ROUTE = "/test-project/v1.2.3/process-file-4"
 
-JSON = "application/json"
-MIXED = "multipart/mixed"
-TEXT_CSV = "text/csv"
+# accepts: files, response_type, response_schema, input1, input2
+PROCESS_FILE_5_ROUTE = "/test-project/v1.2.3/process-file-5"
+
+client = TestClient(app)
 
 
 def _assert_response_for_process_file_1(test_files, test_params, test_type_header, response):
     """assert json response payload matches expected response."""
     api_param_value = []
-    if test_params is not None and "input_2" in test_params:
-        api_param_value = test_params["input_2"]
+    if test_params is not None and "input2" in test_params:
+        api_param_value = test_params["input2"]
 
     def _json_for_one_file(test_file):
         return {
@@ -62,42 +77,112 @@ def _assert_response_for_process_file_1(test_files, test_params, test_type_heade
             assert json_part == _json_for_one_file(test_files[i])
 
 
+def _assert_response_for_process_file_2(test_files, response):
+    def _json_for_one_file(test_file):
+        return {"silly_result": " : ".join([str(FILENAME_LENGTHS[test_file])])}
+
+    if len(test_files) == 1:
+        assert response.json() == _json_for_one_file(test_files[0])
+    else:
+        assert response.json() == [_json_for_one_file(test_file) for test_file in test_files]
+
+
+def _asert_response_for_process_file_3(
+    test_files, response, response_schema, response_type=TEXT_CSV
+):
+    def _json_for_one_file(test_file):
+        return {
+            "silly_result": " : ".join(
+                [
+                    str(FILENAME_LENGTHS[test_file]),
+                    str(response_type),
+                    str(response_schema["output_schema"]),
+                ]
+            )
+        }
+
+    if response_type in [JSON, TEXT_CSV]:
+        if len(test_files) == 1:
+            assert response.json() == _json_for_one_file(test_files[0])
+        else:
+            assert response.json() == [_json_for_one_file(test_file) for test_file in test_files]
+    elif response_schema == MIXED:
+        data = decoder.MultipartDecoder.from_response(response)
+        for i, part in enumerate(data.parts):
+            json_part = json.loads(b64decode(part.content))
+            assert json_part == _json_for_one_file(test_files[i])
+
+
+def _assert_response_for_process_file_4(
+    test_files, response, response_schema, response_type, m_input1
+):
+    def _json_for_one_file(test_file):
+        return {
+            "silly_result": " : ".join(
+                [
+                    str(FILENAME_LENGTHS[test_file]),
+                    str(FILENAME_FORMATS[test_file]),
+                    str(response_type),
+                    str(response_schema["output_schema"]),
+                    str(m_input1["input1"]),
+                ]
+            )
+        }
+
+    if len(test_files) == 1:
+        assert response.json() == _json_for_one_file(test_files[0])
+    else:
+        assert response.json() == [_json_for_one_file(test_file) for test_file in test_files]
+
+
+def _assert_response_for_process_file_5(
+    test_files, response, response_schema, response_type, m_input1, m_input2
+):
+    def _json_for_one_file(test_file):
+        return {
+            "silly_result": " : ".join(
+                [
+                    str(FILENAME_LENGTHS[test_file]),
+                    str(FILENAME_FORMATS[test_file]),
+                    str(response_type),
+                    str(response_schema["output_schema"]),
+                    str(m_input1["input1"]),
+                    str(m_input2["input2"]),
+                ]
+            )
+        }
+
+    if len(test_files) == 1:
+        assert response.json() == _json_for_one_file(test_files[0])
+    else:
+        assert response.json() == [_json_for_one_file(test_file) for test_file in test_files]
+
+
 @pytest.mark.parametrize(
     "test_files,test_params,test_type_header,expected_status",
     [
-        ([FILE_A], P_INPUT_2_SINGLE, JSON, 200),
-        ([FILE_A], P_INPUT_2_MULTI, JSON, 200),
-        ([FILE_A], None, JSON, 200),
-        ([FILE_A], P_INPUT_1_SINGLE, JSON, 200),
-        ([FILE_A], P_INPUT_1_MULTI, JSON, 200),
-        ([FILE_A], P_INPUT_1_AND_2_MULTI, JSON, 200),
-        ([FILE_B], P_INPUT_1_AND_2_MULTI, JSON, 200),
-        ([FILE_A, FILE_B], P_INPUT_1_AND_2_MULTI, JSON, 200),
-        ([FILE_A, FILE_B], P_INPUT_1_AND_2_MULTI, MIXED, 200),
+        ([FILE_DOCX], P_INPUT_2_SINGLE, JSON, 200),
+        ([FILE_DOCX], P_INPUT_2_MULTI, JSON, 200),
+        ([FILE_DOCX], None, JSON, 200),
+        ([FILE_DOCX], P_INPUT_1_SINGLE, JSON, 200),
+        ([FILE_DOCX], P_INPUT_1_MULTI, JSON, 200),
+        ([FILE_DOCX], P_INPUT_1_AND_2_MULTI, JSON, 200),
+        ([FILE_IMAGE], P_INPUT_1_AND_2_MULTI, JSON, 200),
+        ([FILE_DOCX, FILE_IMAGE], P_INPUT_1_AND_2_MULTI, JSON, 200),
+        ([FILE_DOCX, FILE_IMAGE], P_INPUT_1_AND_2_MULTI, MIXED, 200),
         # json returned though mixed requested (maybe not a bug for 1 file?)
-        pytest.param([FILE_A], P_INPUT_1_MULTI, MIXED, 200, marks=pytest.mark.xfail),
+        pytest.param([FILE_DOCX], P_INPUT_1_MULTI, MIXED, 200, marks=pytest.mark.xfail),
         # json returned though csv requested
-        pytest.param([FILE_B], P_INPUT_1_AND_2_MULTI, TEXT_CSV, 200, marks=pytest.mark.xfail),
+        pytest.param([FILE_IMAGE], P_INPUT_1_AND_2_MULTI, TEXT_CSV, 200, marks=pytest.mark.xfail),
     ],
 )
 def test_process_file_1(test_files, test_params, test_type_header, expected_status):
-    # NOTE(robinson) - Reset the rate limit to avoid 429s in tests
-    client = TestClient(app)
-
-    _files = [
-        ("files", (test_file, open(test_file, "rb"), FILENAME_FORMATS[test_file]))
-        for test_file in test_files
-    ]
-
-    headers_kwargs = {}
-    if test_type_header is not None:
-        headers_kwargs = {
-            "headers": {
-                "Accept": test_type_header,
-            }
-        }
-
-    response = client.post(PROCESS_FILE_1_ROUTE, files=_files, data=test_params, **headers_kwargs)
+    response = client.post(
+        PROCESS_FILE_1_ROUTE,
+        files=convert_files_for_api(test_files),
+        data=test_params,
+        **generate_header_kwargs(test_type_header)
+    )
     assert response.status_code == expected_status
     if response.status_code == 200:
         if test_type_header == MIXED:
@@ -106,6 +191,141 @@ def test_process_file_1(test_files, test_params, test_type_header, expected_stat
             assert response.headers["content-type"] == test_type_header
         _assert_response_for_process_file_1(test_files, test_params, test_type_header, response)
 
+
+=======
+    "test_files,expected_status", [([FILE_DOCX], 200), ([FILE_DOCX, FILE_IMAGE], 200)]
+)
+def test_process_file_2(test_files, expected_status):
+    response = client.post(PROCESS_FILE_2_ROUTE, files=convert_files_for_api(test_files))
+    assert response.status_code == expected_status
+    if response.status_code == 200:
+        _assert_response_for_process_file_2(test_files, response)
+
+
+@pytest.mark.parametrize(
+    "test_files,response_type,response_schema,expected_status",
+    [
+        ([FILE_DOCX], JSON, RESPONSE_SCHEMA_ISD, 200),
+        # endpoint doesn't accept mixed media type for one file
+        pytest.param([FILE_DOCX], MIXED, RESPONSE_SCHEMA_ISD, 200, marks=pytest.mark.xfail),
+        # endpoint fails because media type text/csv should have response type str
+        pytest.param([FILE_DOCX], TEXT_CSV, RESPONSE_SCHEMA_ISD, 200, marks=pytest.mark.xfail),
+        # endpoint fails because media type text/csv should have response type str
+        # because None response type has default text/csv value
+        pytest.param([FILE_DOCX], None, RESPONSE_SCHEMA_ISD, 200, marks=pytest.mark.xfail),
+        ([FILE_DOCX], JSON, RESPONSE_SCHEMA_LABELSTUDIO, 200),
+        # endpoint doesn't accept mixed media type for one file
+        pytest.param([FILE_DOCX], MIXED, RESPONSE_SCHEMA_LABELSTUDIO, 200, marks=pytest.mark.xfail),
+        # endpoint fails because media type text/csv should have response type str
+        pytest.param(
+            [FILE_DOCX], TEXT_CSV, RESPONSE_SCHEMA_LABELSTUDIO, 200, marks=pytest.mark.xfail
+        ),
+        # endpoint fails because media type text/csv should have response type str
+        # because None response type has default text/csv value
+        pytest.param([FILE_DOCX], None, RESPONSE_SCHEMA_LABELSTUDIO, 200, marks=pytest.mark.xfail),
+        ([FILE_DOCX, FILE_IMAGE], JSON, RESPONSE_SCHEMA_ISD, 200),
+        ([FILE_DOCX, FILE_IMAGE], MIXED, RESPONSE_SCHEMA_ISD, 200),
+        # endpoint fails because text/csv is not acceptable for multiple files
+        pytest.param(
+            [FILE_DOCX, FILE_IMAGE], TEXT_CSV, RESPONSE_SCHEMA_ISD, 200, marks=pytest.mark.xfail
+        ),
+        ([FILE_DOCX, FILE_IMAGE], None, RESPONSE_SCHEMA_ISD, 200),
+        ([FILE_DOCX, FILE_IMAGE], JSON, RESPONSE_SCHEMA_LABELSTUDIO, 200),
+        ([FILE_DOCX, FILE_IMAGE], MIXED, RESPONSE_SCHEMA_LABELSTUDIO, 200),
+        # endpoint fails because text/csv is not acceptable for multiple files
+        pytest.param(
+            [FILE_DOCX, FILE_IMAGE],
+            TEXT_CSV,
+            RESPONSE_SCHEMA_LABELSTUDIO,
+            200,
+            marks=pytest.mark.xfail,
+        ),
+        ([FILE_DOCX, FILE_IMAGE], None, RESPONSE_SCHEMA_LABELSTUDIO, 200),
+    ],
+)
+def test_process_file_3(test_files, response_type, response_schema, expected_status):
+    response = client.post(
+        PROCESS_FILE_3_ROUTE,
+        files=convert_files_for_api(test_files),
+        data={**response_schema, "output_format": response_type},
+        **generate_header_kwargs(response_type)
+    )
+    assert response.status_code == expected_status
+    if response.status_code == 200:
+        _asert_response_for_process_file_3(test_files, response, response_schema, response_type)
+
+
+@pytest.mark.parametrize(
+    "test_files,response_type,response_schema,m_input1,expected_status",
+    [
+        ([FILE_DOCX], JSON, RESPONSE_SCHEMA_ISD, P_INPUT_1_EMPTY, 200),
+        ([FILE_DOCX], JSON, RESPONSE_SCHEMA_ISD, P_INPUT_1_MULTI, 200),
+        ([FILE_DOCX], JSON, RESPONSE_SCHEMA_LABELSTUDIO, P_INPUT_1_SINGLE, 200),
+        ([FILE_DOCX, FILE_IMAGE], JSON, RESPONSE_SCHEMA_LABELSTUDIO, P_INPUT_1_EMPTY, 200),
+        ([FILE_DOCX, FILE_IMAGE], JSON, RESPONSE_SCHEMA_ISD, P_INPUT_1_MULTI, 200),
+        ([FILE_DOCX, FILE_IMAGE], JSON, RESPONSE_SCHEMA_ISD, P_INPUT_1_SINGLE, 200),
+    ],
+)
+def test_process_file_4(test_files, response_type, response_schema, m_input1, expected_status):
+    response = client.post(
+        PROCESS_FILE_4_ROUTE,
+        files=convert_files_for_api(test_files),
+        data={**response_schema, **m_input1, "output_format": response_type},
+        **generate_header_kwargs(response_type)
+    )
+    assert response.status_code == expected_status
+    if response.status_code == 200:
+        _assert_response_for_process_file_4(
+            test_files, response, response_schema, response_type, m_input1
+        )
+
+
+@pytest.mark.parametrize(
+    "test_files,response_type,response_schema,m_input1,m_input2,expected_status",
+    [
+        ([FILE_DOCX], JSON, RESPONSE_SCHEMA_ISD, P_INPUT_1_MULTI, P_INPUT_2_MULTI, 200),
+        ([FILE_DOCX], JSON, RESPONSE_SCHEMA_LABELSTUDIO, P_INPUT_1_EMPTY, P_INPUT_2_MULTI, 200),
+        ([FILE_DOCX], JSON, RESPONSE_SCHEMA_LABELSTUDIO, P_INPUT_1_SINGLE, P_INPUT_2_EMPTY, 200),
+        (
+            [FILE_DOCX, FILE_IMAGE],
+            JSON,
+            RESPONSE_SCHEMA_LABELSTUDIO,
+            P_INPUT_1_SINGLE,
+            P_INPUT_2_EMPTY,
+            200,
+        ),
+        (
+            [FILE_DOCX, FILE_IMAGE],
+            JSON,
+            RESPONSE_SCHEMA_LABELSTUDIO,
+            P_INPUT_1_EMPTY,
+            P_INPUT_2_EMPTY,
+            200,
+        ),
+        (
+            [FILE_DOCX, FILE_IMAGE],
+            JSON,
+            RESPONSE_SCHEMA_LABELSTUDIO,
+            P_INPUT_1_MULTI,
+            P_INPUT_2_EMPTY,
+            200,
+        ),
+    ],
+)
+def test_process_file_5(
+    test_files, response_type, response_schema, m_input1, m_input2, expected_status
+):
+    response = client.post(
+        PROCESS_FILE_5_ROUTE,
+        files=convert_files_for_api(test_files),
+        data={**response_schema, **m_input1, **m_input2, "output_format": response_type},
+        **generate_header_kwargs(response_type)
+    )
+    assert response.status_code == expected_status
+    if response.status_code == 200:
+        _assert_response_for_process_file_5(
+            test_files, response, response_schema, response_type, m_input1, m_input2
+        )
 
 @pytest.mark.parametrize(
     "mimetype,filename,expected_status",

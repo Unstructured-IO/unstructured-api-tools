@@ -54,9 +54,9 @@ def pipeline_api(
         "silly_result": " : ".join(
             [
                 str(len(text if text else "")),
-                text,
+                str(text),
                 str(len(file.read()) if file else None),
-                filename,
+                str(filename),
                 str(file_content_type),
             ]
         )
