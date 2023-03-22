@@ -28,20 +28,6 @@ import secrets
 app = FastAPI()
 router = APIRouter()
 
-DEFAULT_MIMETYPES = "application/epub+zip,\
-application/json,\
-application/msword,\
-application/pdf,\
-application/vnd.ms-powerpoint,\
-application/vnd.openxmlformats-officedocument.presentationml.presentation,\
-application/vnd.openxmlformats-officedocument.wordprocessingml.document,\
-image/jpeg,\
-image/png,\
-message/rfc822,\
-text/html,\
-text/markdown,\
-text/plain,"
-
 
 def is_expected_response_type(media_type, response_type):
     if media_type == "application/json" and response_type not in [dict, list]:
@@ -78,15 +64,10 @@ def pipeline_api(
 
 def get_validated_mimetype(file):
     """
-    Return a file's mimetype, either via the file.content_type
-    or the mimetypes lib if that's too generic. If this is not
-    one of our allowed mimetypes, raise a HTTP 400 error.
+    Return a file's mimetype, either via the file.content_type or the mimetypes lib if that's too
+    generic. If the user has set UNSTRUCTURED_ALLOWED_MIMETYPES, validate against this list and
+    return HTTP 400 for an invalid type.
     """
-    allowed_mimetypes_str = os.environ.get(
-        "UNSTRUCTURED_ALLOWED_MIMETYPES", DEFAULT_MIMETYPES
-    )
-    allowed_mimetypes = allowed_mimetypes_str.split(",")
-
     content_type = file.content_type
     if content_type == "application/octet-stream":
         content_type = mimetypes.guess_type(str(file.filename))[0]
@@ -95,10 +76,14 @@ def get_validated_mimetype(file):
         if not content_type and ".md" in file.filename:
             content_type = "text/markdown"
 
-    if content_type not in allowed_mimetypes:
-        raise HTTPException(
-            status_code=400, detail=f"File type not supported: {file.filename}"
-        )
+    allowed_mimetypes_str = os.environ.get("UNSTRUCTURED_ALLOWED_MIMETYPES")
+    if allowed_mimetypes_str is not None:
+        allowed_mimetypes = allowed_mimetypes_str.split(",")
+
+        if content_type not in allowed_mimetypes:
+            raise HTTPException(
+                status_code=400, detail=f"File type not supported: {file.filename}"
+            )
 
     return content_type
 
