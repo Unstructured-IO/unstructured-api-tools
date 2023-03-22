@@ -114,7 +114,7 @@ check-version:
 .PHONY: tidy
 tidy:
 	black --line-length 100 ${PACKAGE_NAME}
-	black --line-length 100 test_${PACKAGE_NAME}
+	black --line-length 100 test_${PACKAGE_NAME} --exclude test_${PACKAGE_NAME}/pipeline-test-project
 
 ## version-sync:               update __version__.py with most recent version from CHANGELOG.md
 .PHONY: version-sync

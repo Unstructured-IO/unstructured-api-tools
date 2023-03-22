@@ -4,8 +4,18 @@
 #####################################################################
 
 import os
+import mimetypes
 from typing import List, Union
-from fastapi import status, FastAPI, File, Form, Request, UploadFile, APIRouter
+from fastapi import (
+    status,
+    FastAPI,
+    File,
+    Form,
+    Request,
+    UploadFile,
+    APIRouter,
+    HTTPException,
+)
 from fastapi.responses import PlainTextResponse
 import json
 from fastapi.responses import StreamingResponse
@@ -31,6 +41,32 @@ def pipeline_api(
             [str(len(file.read())), filename, file_content_type, str(m_input2)]
         )
     }
+
+
+def get_validated_mimetype(file):
+    """
+    Return a file's mimetype, either via the file.content_type or the mimetypes lib if that's too
+    generic. If the user has set UNSTRUCTURED_ALLOWED_MIMETYPES, validate against this list and
+    return HTTP 400 for an invalid type.
+    """
+    content_type = file.content_type
+    if content_type == "application/octet-stream":
+        content_type = mimetypes.guess_type(str(file.filename))[0]
+
+        # Markdown mimetype is too new for the library - just hardcode that one in for now
+        if not content_type and ".md" in file.filename:
+            content_type = "text/markdown"
+
+    allowed_mimetypes_str = os.environ.get("UNSTRUCTURED_ALLOWED_MIMETYPES")
+    if allowed_mimetypes_str is not None:
+        allowed_mimetypes = allowed_mimetypes_str.split(",")
+
+        if content_type not in allowed_mimetypes:
+            raise HTTPException(
+                status_code=400, detail=f"File type not supported: {file.filename}"
+            )
+
+    return content_type
 
 
 class MultipartMixedResponse(StreamingResponse):
@@ -116,13 +152,15 @@ async def pipeline_1(
 
             def response_generator(is_multipart):
                 for file in files:
+                    file_content_type = get_validated_mimetype(file)
+
                     _file = file.file
 
                     response = pipeline_api(
                         _file,
                         m_input2=input2,
                         filename=file.filename,
-                        file_content_type=file.content_type,
+                        file_content_type=file_content_type,
                     )
                     if is_multipart:
                         if type(response) not in [str, bytes]:
@@ -139,11 +177,13 @@ async def pipeline_1(
             file = files[0]
             _file = file.file
 
+            file_content_type = get_validated_mimetype(file)
+
             response = pipeline_api(
                 _file,
                 m_input2=input2,
                 filename=file.filename,
-                file_content_type=file.content_type,
+                file_content_type=file_content_type,
             )
 
             return response

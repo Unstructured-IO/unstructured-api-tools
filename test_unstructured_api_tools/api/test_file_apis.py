@@ -1,5 +1,6 @@
 import json
 from base64 import b64decode
+import os
 
 import pytest
 from fastapi.testclient import TestClient
@@ -29,6 +30,9 @@ from functions_and_variables import (
 
 # accepts: files, input2
 PROCESS_FILE_1_ROUTE = "/test-project/v1.2.3/process-file-1"
+
+# Pull this over here for test_supported_mimetypes
+PROCESS_FILE_TEXT_1_ROUTE = "/test-project/v1.2.3/process-text-file-1"
 
 # accepts: files
 PROCESS_FILE_2_ROUTE = "/test-project/v1.2.3/process-file-2"
@@ -180,7 +184,7 @@ def test_process_file_1(test_files, test_params, test_type_header, expected_stat
         PROCESS_FILE_1_ROUTE,
         files=convert_files_for_api(test_files),
         data=test_params,
-        **generate_header_kwargs(test_type_header)
+        **generate_header_kwargs(test_type_header),
     )
     assert response.status_code == expected_status
     if response.status_code == 200:
@@ -247,7 +251,7 @@ def test_process_file_3(test_files, response_type, response_schema, expected_sta
         PROCESS_FILE_3_ROUTE,
         files=convert_files_for_api(test_files),
         data={**response_schema, "output_format": response_type},
-        **generate_header_kwargs(response_type)
+        **generate_header_kwargs(response_type),
     )
     assert response.status_code == expected_status
     if response.status_code == 200:
@@ -270,7 +274,7 @@ def test_process_file_4(test_files, response_type, response_schema, m_input1, ex
         PROCESS_FILE_4_ROUTE,
         files=convert_files_for_api(test_files),
         data={**response_schema, **m_input1, "output_format": response_type},
-        **generate_header_kwargs(response_type)
+        **generate_header_kwargs(response_type),
     )
     assert response.status_code == expected_status
     if response.status_code == 200:
@@ -318,10 +322,83 @@ def test_process_file_5(
         PROCESS_FILE_5_ROUTE,
         files=convert_files_for_api(test_files),
         data={**response_schema, **m_input1, **m_input2, "output_format": response_type},
-        **generate_header_kwargs(response_type)
+        **generate_header_kwargs(response_type),
     )
     assert response.status_code == expected_status
     if response.status_code == 200:
         _assert_response_for_process_file_5(
             test_files, response, response_schema, response_type, m_input1, m_input2
         )
+
+
+def test_supported_mimetypes():
+    """
+    Verify that we return 400 if a filetype is not supported
+    (configured via UNSTRUCTURED_ALLOWED_MIMETYPES)
+    """
+    client = TestClient(app)
+
+    # get_validated_mimetype is inserted at 4 different points
+    # Let's disallow docx and make sure we get the right error in each case
+    os.environ["UNSTRUCTURED_ALLOWED_MIMETYPES"] = "image/jpeg"
+
+    # Sending one file
+    response = client.post(
+        PROCESS_FILE_1_ROUTE,
+        files=convert_files_for_api([FILE_DOCX]),
+    )
+    assert (
+        response.status_code == 400
+        and response.json()["detail"] == f"File type not supported: {FILE_DOCX}"
+    )
+
+    # Sending multiple files
+    response = client.post(
+        PROCESS_FILE_1_ROUTE,
+        files=convert_files_for_api([FILE_DOCX, FILE_IMAGE]),
+    )
+    assert (
+        response.status_code == 400
+        and response.json()["detail"] == f"File type not supported: {FILE_DOCX}"
+    )
+
+    # Sending one file (in an api that supports text files)
+    response = client.post(
+        PROCESS_FILE_TEXT_1_ROUTE,
+        files=convert_files_for_api([FILE_DOCX]),
+    )
+    assert (
+        response.status_code == 400
+        and response.json()["detail"] == f"File type not supported: {FILE_DOCX}"
+    )
+
+    # Multiple files (in an api that supports text files)
+    response = client.post(
+        PROCESS_FILE_TEXT_1_ROUTE,
+        files=convert_files_for_api([FILE_DOCX, FILE_IMAGE]),
+    )
+    assert (
+        response.status_code == 400
+        and response.json()["detail"] == f"File type not supported: {FILE_DOCX}"
+    )
+
+    # If the client doesn't set a mimetype, we may just see application/octet-stream
+    # Here we get the mimetype from the file extension
+    response = client.post(
+        PROCESS_FILE_1_ROUTE,
+        files=[("files", (FILE_DOCX, open(FILE_DOCX, "rb"), "application/octet-stream"))],
+    )
+    assert (
+        response.status_code == 400
+        and response.json()["detail"] == f"File type not supported: {FILE_DOCX}"
+    )
+
+    # Finally, allow all file types again
+    # Note that a failure before this line will cause cascading test errors
+    del os.environ["UNSTRUCTURED_ALLOWED_MIMETYPES"]
+
+    response = client.post(
+        PROCESS_FILE_1_ROUTE,
+        files=convert_files_for_api([FILE_DOCX]),
+    )
+    assert response.status_code == 200

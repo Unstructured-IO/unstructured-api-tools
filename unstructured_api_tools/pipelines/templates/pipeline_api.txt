@@ -1,7 +1,8 @@
 import os
+import mimetypes
 from typing import List, Union
 
-from fastapi import status, FastAPI, File, Form, Request, UploadFile, APIRouter
+from fastapi import status, FastAPI, File, Form, Request, UploadFile, APIRouter, HTTPException
 from fastapi.responses import PlainTextResponse
 
 import json
@@ -26,6 +27,28 @@ def is_expected_response_type(media_type, response_type):
 {% endif %}
 {{script}}
 
+def get_validated_mimetype(file):
+    """
+    Return a file's mimetype, either via the file.content_type or the mimetypes lib if that's too
+    generic. If the user has set UNSTRUCTURED_ALLOWED_MIMETYPES, validate against this list and
+    return HTTP 400 for an invalid type.
+    """
+    content_type = file.content_type
+    if content_type == "application/octet-stream":
+        content_type = mimetypes.guess_type(str(file.filename))[0]
+
+        # Markdown mimetype is too new for the library - just hardcode that one in for now
+        if not content_type and ".md" in file.filename:
+            content_type = "text/markdown"
+
+    allowed_mimetypes_str = os.environ.get("UNSTRUCTURED_ALLOWED_MIMETYPES")
+    if allowed_mimetypes_str is not None:
+        allowed_mimetypes = allowed_mimetypes_str.split(",")
+
+        if content_type not in allowed_mimetypes:
+            raise HTTPException(status_code=400, detail=f"File type not supported: {file.filename}")
+
+    return content_type
 
 {% if accepts_text or accepts_file %}
 
@@ -142,6 +165,12 @@ async def pipeline_1(request: Request,
             for file in files_list:
                 _file = file.file
 
+                {% if "file_content_type" in optional_param_value_map %}
+                file_content_type = get_validated_mimetype(file)
+                {% else %}
+                _ = get_validated_mimetype(file)
+                {% endif %}
+
                 response = pipeline_api(
                     text=None,
                     file=_file,
@@ -149,7 +178,7 @@ async def pipeline_1(request: Request,
                     {% if default_response_type %}response_type=media_type, {% endif %}
                     {% if default_response_schema %}response_schema=default_response_schema, {% endif %}
                     {% if "filename" in optional_param_value_map %}filename=file.filename, {%endif%}
-                    {% if "file_content_type" in optional_param_value_map %}file_content_type=file.content_type, {%endif%}
+                    {% if "file_content_type" in optional_param_value_map %}file_content_type=file_content_type, {%endif%}
                 )
                 if is_multipart:
                     if type(response) not in [str, bytes]:
@@ -176,6 +205,13 @@ async def pipeline_1(request: Request,
         elif has_files:
             file = files_list[0]
             _file = file.file
+
+            {% if "file_content_type" in optional_param_value_map %}
+            file_content_type = get_validated_mimetype(file)
+            {% else %}
+            _ = get_validated_mimetype(file)
+            {% endif %}
+
             response = pipeline_api(
                 text=None,
                 file=_file,
@@ -183,7 +219,7 @@ async def pipeline_1(request: Request,
                 {% if default_response_type %}response_type=media_type,{% endif %}
                 {% if default_response_schema %}response_schema=default_response_schema, {% endif %}
                 {% if "filename" in optional_param_value_map %}filename=file.filename, {%endif%}
-                {% if "file_content_type" in optional_param_value_map %}file_content_type=file.content_type, {%endif%}
+                {% if "file_content_type" in optional_param_value_map %}file_content_type=file_content_type, {%endif%}
             )
 
     {% if default_response_type %}
@@ -216,6 +252,13 @@ async def pipeline_1(request: Request,
                 )
             def response_generator(is_multipart):
                 for file in {{var_name}}:
+
+                    {% if "file_content_type" in optional_param_value_map %}
+                    file_content_type = get_validated_mimetype(file)
+                    {% else %}
+                    _ = get_validated_mimetype(file)
+                    {% endif %}
+
                     {% if accepts_text %}
                     text = file.file.read().decode("utf-8")
                     {% elif accepts_file %}
@@ -229,7 +272,7 @@ async def pipeline_1(request: Request,
                         {% if default_response_schema %}response_schema=default_response_schema, {% endif %}
                         {% if accepts_file %}
                             {% if "filename" in optional_param_value_map %}filename=file.filename, {%endif%}
-                            {% if "file_content_type" in optional_param_value_map %}file_content_type=file.content_type, {%endif%}
+                            {% if "file_content_type" in optional_param_value_map %}file_content_type=file_content_type, {%endif%}
                         {% endif %}
                     )
                     if is_multipart:
@@ -250,6 +293,12 @@ async def pipeline_1(request: Request,
             {% elif accepts_file %}
             file = files[0]
             _file = file.file
+
+            {% if "file_content_type" in optional_param_value_map %}
+            file_content_type = get_validated_mimetype(file)
+            {% else %}
+            _ = get_validated_mimetype(file)
+            {% endif %}
             {% endif %}
 
             response = pipeline_api(
@@ -259,7 +308,7 @@ async def pipeline_1(request: Request,
                 {% if default_response_schema %}response_schema=default_response_schema, {% endif %}
                 {% if accepts_file %}
                     {% if "filename" in optional_param_value_map %}filename=file.filename, {%endif%}
-                    {% if "file_content_type" in optional_param_value_map %}file_content_type=file.content_type, {%endif%}
+                    {% if "file_content_type" in optional_param_value_map %}file_content_type=file_content_type, {%endif%}
                 {% endif %}
             )
 
