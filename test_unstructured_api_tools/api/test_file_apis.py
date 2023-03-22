@@ -330,120 +330,59 @@ def test_process_file_5(
             test_files, response, response_schema, response_type, m_input1, m_input2
         )
 
-
-@pytest.mark.parametrize(
-    "mimetype,filename,expected_status",
-    [
-        ("application/epub+zip", "file.epub", 200),
-        ("application/json", "file.json", 200),
-        ("application/msword", "file.doc", 200),
-        ("application/pdf", "file.pdf", 200),
-        ("application/vnd.ms-powerpoint", "file.ppt", 200),
-        ("application/vnd.ms-excel", "file.xls", 400),
-        (
-            "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-            "file.pptx",
-            200,
-        ),
-        (
-            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            "file.docx",
-            200,
-        ),
-        (
-            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            "file.xlsx",
-            400,
-        ),
-        ("application/xml", "file.xml", 400),
-        ("application/zip", "file.zip", 400),
-        ("image/jpeg", "file.jpeg", 200),
-        ("image/png", "file.png", 200),
-        ("message/rfc822", "file.eml", 200),
-        ("text/html", "file.html", 200),
-        ("text/markdown", "file.md", 200),
-        ("text/plain", "file.txt", 200),
-        ("video/mp4", "file.mp4", 400),
-    ],
-)
-def test_supported_mimetypes(mimetype, filename, expected_status):
+def test_supported_mimetypes():
     """
-    Verify that we return 400 if a filetype is not supported.
-    Because we use the mimetype for this, let's just POST different content types
-    without caring what the actual file is.
+    Verify that we return 400 if a filetype is not supported
+    (configured via UNSTRUCTURED_ALLOWED_MIMETYPES)
     """
     client = TestClient(app)
 
-    # Keying off of the mimetype just works (there are 4 paths to test)
-    # One file
+    # get_validated_mimetype is inserted at 4 different points
+    # Let's disallow docx and make sure we get the right error in each case
+    os.environ["UNSTRUCTURED_ALLOWED_MIMETYPES"] = "image/jpeg"
+
+    # Sending one file
     response = client.post(
         PROCESS_FILE_1_ROUTE,
-        files=[("files", ("example-filename", open(FILE_DOCX, "rb"), mimetype))],
+        files=convert_files_for_api([FILE_DOCX]),
     )
-    assert response.status_code == expected_status
+    assert response.status_code == 400 and response.json()["detail"] == f"File type not supported: {FILE_DOCX}"
 
-    # Multiple files
+    # Sending multiple files
     response = client.post(
         PROCESS_FILE_1_ROUTE,
-        files=[
-            ("files", ("example-filename", open(FILE_DOCX, "rb"), mimetype)),
-            ("files", ("example-filename", open(FILE_DOCX, "rb"), mimetype)),
-        ],
+        files=convert_files_for_api([FILE_DOCX, FILE_IMAGE]),
     )
-    assert response.status_code == expected_status
+    assert response.status_code == 400 and response.json()["detail"] == f"File type not supported: {FILE_DOCX}"
 
-    # One file (in an api that supports text files)
+    # Sending one file (in an api that supports text files)
     response = client.post(
         PROCESS_FILE_TEXT_1_ROUTE,
-        files=[
-            ("files", ("example-filename", open(FILE_DOCX, "rb"), mimetype)),
-        ],
+        files=convert_files_for_api([FILE_DOCX]),
     )
-    assert response.status_code == expected_status
+    assert response.status_code == 400 and response.json()["detail"] == f"File type not supported: {FILE_DOCX}"
 
     # Multiple files (in an api that supports text files)
     response = client.post(
         PROCESS_FILE_TEXT_1_ROUTE,
-        files=[
-            ("files", ("example-filename", open(FILE_DOCX, "rb"), mimetype)),
-            ("files", ("example-filename", open(FILE_DOCX, "rb"), mimetype)),
-        ],
+        files=convert_files_for_api([FILE_DOCX, FILE_IMAGE]),
     )
-    assert response.status_code == expected_status
+    assert response.status_code == 400 and response.json()["detail"] == f"File type not supported: {FILE_DOCX}"
 
     # If the client doesn't set a mimetype, we may just see application/octet-stream
-    # Here we fall back to the file extension
+    # Here we get the mimetype from the file extension
     response = client.post(
         PROCESS_FILE_1_ROUTE,
-        files=[("files", (filename, open(FILE_DOCX, "rb"), "application/octet-stream"))],
+        files=[("files", (FILE_DOCX, open(FILE_DOCX, "rb"), "application/octet-stream"))],
     )
-    assert response.status_code == expected_status
+    assert response.status_code == 400 and response.json()["detail"] == f"File type not supported: {FILE_DOCX}"
 
-
-def test_reconfigure_supported_mimetypes():
-    """
-    Verify that we can change the supported mimetype list via env variable
-    """
-    client = TestClient(app)
-
-    response = client.post(
-        PROCESS_FILE_1_ROUTE,
-        files=[("files", (FILE_DOCX, open(FILE_DOCX, "rb"), FILENAME_FORMATS[FILE_DOCX]))],
-    )
-    assert response.status_code == 200
-
-    os.environ["UNSTRUCTURED_ALLOWED_MIMETYPES"] = "image/jpeg"
-
-    response = client.post(
-        PROCESS_FILE_1_ROUTE,
-        files=[("files", (FILE_DOCX, open(FILE_DOCX, "rb"), FILENAME_FORMATS[FILE_DOCX]))],
-    )
-    assert response.status_code == 400
-
-    response = client.post(
-        PROCESS_FILE_1_ROUTE,
-        files=[("files", (FILE_DOCX, open(FILE_IMAGE, "rb"), FILENAME_FORMATS[FILE_IMAGE]))],
-    )
-    assert response.status_code == 200
-
+    # Finally, allow all file types again
+    # Note that a failure before this line will cause cascading test errors
     del os.environ["UNSTRUCTURED_ALLOWED_MIMETYPES"]
+
+    response = client.post(
+        PROCESS_FILE_1_ROUTE,
+        files=convert_files_for_api([FILE_DOCX]),
+    )
+    assert response.status_code == 200
