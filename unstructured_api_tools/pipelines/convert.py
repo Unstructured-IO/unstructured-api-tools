@@ -12,7 +12,11 @@ from jinja2 import Environment, FileSystemLoader
 from nbconvert import ScriptExporter
 import nbformat
 
-from unstructured_api_tools.pipelines.api_conventions import get_pipeline_path, PipelineConfig
+from unstructured_api_tools.pipelines.api_conventions import (
+    get_pipeline_path,
+    PipelineConfig,
+    get_api_name_from_config,
+)
 import unstructured_api_tools.pipelines.lint as lint
 
 IMPORT_PATTERN = (
@@ -204,7 +208,11 @@ def build_root_app_module(
         version = ""
 
     content = template.render(
-        module_names=module_names, title=title, description=description, version=version
+        module_names=module_names,
+        title=title,
+        description=description,
+        version=version,
+        version_name=get_api_name_from_config(config_filename),
     )
     content = lint.format_black(content)
     lint.check_flake8(content, opts=flake8_opts)

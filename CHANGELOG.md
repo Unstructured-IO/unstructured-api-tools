@@ -1,3 +1,7 @@
+# 0.7.0
+
+* Add dynamic docs_url
+
 # 0.6.0
 
 * Add file type validation via `UNSTRUCTURED_ALLOWED_MIMETYPES`
