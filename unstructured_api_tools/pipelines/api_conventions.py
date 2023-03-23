@@ -5,6 +5,27 @@ import yaml
 import re
 
 
+def get_config(filename: Optional[str] = None):
+    if filename is None:
+        default = os.path.join(os.getcwd(), "preprocessing-pipeline-family.yaml")
+        filename = os.environ.get("PIPELINE_FAMILY_CONFIG", default)
+
+    if not os.path.exists(filename):
+        raise FileNotFoundError(
+            f"A pipeline family config was not found at {filename}."
+            "The config class looks for the config in the following "
+            "order:\n"
+            "    1. The filename parameter\n"
+            "    2. The PIPELINE_FAMILY_CONFIG environment variable\n"
+            '    3. "${PWD}"/pipeline-family.yaml'
+        )
+
+    with open(filename, "r") as f:
+        config = yaml.safe_load(f)
+
+    return config
+
+
 @dataclass
 class PipelineConfig:
     name: str
@@ -17,24 +38,7 @@ class PipelineConfig:
         """Parses pipeline family metadata from the pipeline-family.yaml file. If no
         filename is passed, reverts to the PIPELINE_FAMILY_CONFIG environment variable.
         Otherwise, looks for pipeline-family.yaml in the working directory."""
-        if filename is None:
-            default = os.path.join(os.getcwd(), "preprocessing-pipeline-family.yaml")
-            self.filename = os.environ.get("PIPELINE_FAMILY_CONFIG", default)
-        else:
-            self.filename = filename
-
-        if not os.path.exists(self.filename):
-            raise FileNotFoundError(
-                f"A pipeline family config was not found at {filename}."
-                "The config class looks for the config in the following "
-                "order:\n"
-                "    1. The filename parameter\n"
-                "    2. The PIPELINE_FAMILY_CONFIG environment variable\n"
-                '    3. "${PWD}"/pipeline-family.yaml'
-            )
-
-        with open(self.filename, "r") as f:
-            config = yaml.safe_load(f)
+        config = get_config(filename)
 
         self.name = config["name"]
         self.version = config["version"]
@@ -91,3 +95,10 @@ def get_pipeline_path(
     pipeline_name = filepath[-1].replace("_", "-").replace(".py", "")
 
     return f"/{pipeline_family}/v{semver}/{pipeline_name}"
+
+
+def get_api_name_from_config(filename: Optional[str] = None):
+    try:
+        return get_config(filename).get("name", None)
+    except FileNotFoundError:
+        return None

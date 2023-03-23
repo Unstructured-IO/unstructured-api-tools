@@ -25,6 +25,7 @@ app = FastAPI(
     title="Unstructured Pipeline API",
     description="""""",
     version="1.0.0",
+    docs_url="/test-project/docs",
 )
 
 app.include_router(process_file_1_router)
