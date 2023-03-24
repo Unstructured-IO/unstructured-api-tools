@@ -220,4 +220,6 @@ def test_process_text_4(test_files, response_type, response_schema, expected_sta
         )
         assert response.status_code == expected_status
         if response.status_code == 200:
-            _assert_response_for_process_text_4(test_files, response, response_type, response_schema)
+            _assert_response_for_process_text_4(
+                test_files, response, response_type, response_schema
+            )

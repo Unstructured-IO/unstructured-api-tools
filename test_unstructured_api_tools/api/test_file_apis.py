@@ -32,7 +32,10 @@ from functions_and_variables import (
 PROCESS_FILE_1_ROUTE = ["/test-project/v1.2.3/process-file-1", "/test-project/v1/process-file-1"]
 
 # Pull this over here for test_supported_mimetypes
-PROCESS_FILE_TEXT_1_ROUTE = ["/test-project/v1.2.3/process-text-file-1", "/test-project/v1/process-text-file-1"]
+PROCESS_FILE_TEXT_1_ROUTE = [
+    "/test-project/v1.2.3/process-text-file-1",
+    "/test-project/v1/process-text-file-1",
+]
 
 # accepts: files
 PROCESS_FILE_2_ROUTE = ["/test-project/v1.2.3/process-file-2", "/test-project/v1/process-file-2"]
@@ -91,7 +94,7 @@ def _assert_response_for_process_file_2(test_files, response):
 
 
 def _asert_response_for_process_file_3(
-        test_files, response, response_schema, response_type=TEXT_CSV
+    test_files, response, response_schema, response_type=TEXT_CSV
 ):
     def _json_for_one_file(test_file):
         return {
@@ -117,7 +120,7 @@ def _asert_response_for_process_file_3(
 
 
 def _assert_response_for_process_file_4(
-        test_files, response, response_schema, response_type, m_input1
+    test_files, response, response_schema, response_type, m_input1
 ):
     def _json_for_one_file(test_file):
         return {
@@ -139,7 +142,7 @@ def _assert_response_for_process_file_4(
 
 
 def _assert_response_for_process_file_5(
-        test_files, response, response_schema, response_type, m_input1, m_input2
+    test_files, response, response_schema, response_type, m_input1, m_input2
 ):
     def _json_for_one_file(test_file):
         return {
@@ -294,33 +297,33 @@ def test_process_file_4(test_files, response_type, response_schema, m_input1, ex
         ([FILE_DOCX], JSON, RESPONSE_SCHEMA_LABELSTUDIO, P_INPUT_1_EMPTY, P_INPUT_2_MULTI, 200),
         ([FILE_DOCX], JSON, RESPONSE_SCHEMA_LABELSTUDIO, P_INPUT_1_SINGLE, P_INPUT_2_EMPTY, 200),
         (
-                [FILE_DOCX, FILE_IMAGE],
-                JSON,
-                RESPONSE_SCHEMA_LABELSTUDIO,
-                P_INPUT_1_SINGLE,
-                P_INPUT_2_EMPTY,
-                200,
+            [FILE_DOCX, FILE_IMAGE],
+            JSON,
+            RESPONSE_SCHEMA_LABELSTUDIO,
+            P_INPUT_1_SINGLE,
+            P_INPUT_2_EMPTY,
+            200,
         ),
         (
-                [FILE_DOCX, FILE_IMAGE],
-                JSON,
-                RESPONSE_SCHEMA_LABELSTUDIO,
-                P_INPUT_1_EMPTY,
-                P_INPUT_2_EMPTY,
-                200,
+            [FILE_DOCX, FILE_IMAGE],
+            JSON,
+            RESPONSE_SCHEMA_LABELSTUDIO,
+            P_INPUT_1_EMPTY,
+            P_INPUT_2_EMPTY,
+            200,
         ),
         (
-                [FILE_DOCX, FILE_IMAGE],
-                JSON,
-                RESPONSE_SCHEMA_LABELSTUDIO,
-                P_INPUT_1_MULTI,
-                P_INPUT_2_EMPTY,
-                200,
+            [FILE_DOCX, FILE_IMAGE],
+            JSON,
+            RESPONSE_SCHEMA_LABELSTUDIO,
+            P_INPUT_1_MULTI,
+            P_INPUT_2_EMPTY,
+            200,
         ),
     ],
 )
 def test_process_file_5(
-        test_files, response_type, response_schema, m_input1, m_input2, expected_status
+    test_files, response_type, response_schema, m_input1, m_input2, expected_status
 ):
     for endpoint in PROCESS_FILE_5_ROUTE:
         response = client.post(
@@ -354,8 +357,8 @@ def test_supported_mimetypes():
             files=convert_files_for_api([FILE_DOCX]),
         )
         assert (
-                response.status_code == 400
-                and response.json()["detail"] == f"File type not supported: {FILE_DOCX}"
+            response.status_code == 400
+            and response.json()["detail"] == f"File type not supported: {FILE_DOCX}"
         )
 
         # Sending multiple files
@@ -364,22 +367,21 @@ def test_supported_mimetypes():
             files=convert_files_for_api([FILE_DOCX, FILE_IMAGE]),
         )
         assert (
-                response.status_code == 400
-                and response.json()["detail"] == f"File type not supported: {FILE_DOCX}"
+            response.status_code == 400
+            and response.json()["detail"] == f"File type not supported: {FILE_DOCX}"
         )
 
         # for process_file_text_endpoint in PROCESS_FILE_TEXT_1_ROUTE:
 
         for process_file_text_endpoint in PROCESS_FILE_TEXT_1_ROUTE:
-
             # Sending one file (in an api that supports text files)
             response = client.post(
                 process_file_text_endpoint,
                 files=convert_files_for_api([FILE_DOCX]),
             )
             assert (
-                    response.status_code == 400
-                    and response.json()["detail"] == f"File type not supported: {FILE_DOCX}"
+                response.status_code == 400
+                and response.json()["detail"] == f"File type not supported: {FILE_DOCX}"
             )
 
             # Multiple files (in an api that supports text files)
@@ -388,8 +390,8 @@ def test_supported_mimetypes():
                 files=convert_files_for_api([FILE_DOCX, FILE_IMAGE]),
             )
             assert (
-                    response.status_code == 400
-                    and response.json()["detail"] == f"File type not supported: {FILE_DOCX}"
+                response.status_code == 400
+                and response.json()["detail"] == f"File type not supported: {FILE_DOCX}"
             )
 
     # If the client doesn't set a mimetype, we may just see application/octet-stream
@@ -399,8 +401,8 @@ def test_supported_mimetypes():
         files=[("files", (FILE_DOCX, open(FILE_DOCX, "rb"), "application/octet-stream"))],
     )
     assert (
-            response.status_code == 400
-            and response.json()["detail"] == f"File type not supported: {FILE_DOCX}"
+        response.status_code == 400
+        and response.json()["detail"] == f"File type not supported: {FILE_DOCX}"
     )
 
     # Finally, allow all file types again

@@ -28,16 +28,28 @@ from test_unstructured_api_tools.api.functions_and_variables import (
 )
 
 # accepts: files, text files
-PROCESS_FILE_TEXT_1_ROUTE = ["/test-project/v1.2.3/process-text-file-1", "/test-project/v1/process-text-file-1"]
+PROCESS_FILE_TEXT_1_ROUTE = [
+    "/test-project/v1.2.3/process-text-file-1",
+    "/test-project/v1/process-text-file-1",
+]
 
 # accepts: files, text files, response_type, input2
-PROCESS_FILE_TEXT_2_ROUTE = ["/test-project/v1.2.3/process-text-file-2", "/test-project/v1/process-text-file-2"]
+PROCESS_FILE_TEXT_2_ROUTE = [
+    "/test-project/v1.2.3/process-text-file-2",
+    "/test-project/v1/process-text-file-2",
+]
 
 # accepts: files, text files, response_type, response_schema
-PROCESS_FILE_TEXT_3_ROUTE = ["/test-project/v1.2.3/process-text-file-3", "/test-project/v1/process-text-file-3"]
+PROCESS_FILE_TEXT_3_ROUTE = [
+    "/test-project/v1.2.3/process-text-file-3",
+    "/test-project/v1/process-text-file-3",
+]
 
 # accepts: files, text files, response_type, response_schema, input1, input2
-PROCESS_FILE_TEXT_4_ROUTE = ["/test-project/v1.2.3/process-text-file-4", "/test-project/v1/process-text-file-4"]
+PROCESS_FILE_TEXT_4_ROUTE = [
+    "/test-project/v1.2.3/process-text-file-4",
+    "/test-project/v1/process-text-file-4",
+]
 
 client = TestClient(app)
 
