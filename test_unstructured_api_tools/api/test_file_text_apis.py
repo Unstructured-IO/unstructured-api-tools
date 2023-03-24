@@ -28,16 +28,28 @@ from test_unstructured_api_tools.api.functions_and_variables import (
 )
 
 # accepts: files, text files
-PROCESS_FILE_TEXT_1_ROUTE = "/test-project/v1.2.3/process-text-file-1"
+PROCESS_FILE_TEXT_1_ROUTE = [
+    "/test-project/v1.2.3/process-text-file-1",
+    "/test-project/v1/process-text-file-1",
+]
 
 # accepts: files, text files, response_type, input2
-PROCESS_FILE_TEXT_2_ROUTE = "/test-project/v1.2.3/process-text-file-2"
+PROCESS_FILE_TEXT_2_ROUTE = [
+    "/test-project/v1.2.3/process-text-file-2",
+    "/test-project/v1/process-text-file-2",
+]
 
 # accepts: files, text files, response_type, response_schema
-PROCESS_FILE_TEXT_3_ROUTE = "/test-project/v1.2.3/process-text-file-3"
+PROCESS_FILE_TEXT_3_ROUTE = [
+    "/test-project/v1.2.3/process-text-file-3",
+    "/test-project/v1/process-text-file-3",
+]
 
 # accepts: files, text files, response_type, response_schema, input1, input2
-PROCESS_FILE_TEXT_4_ROUTE = "/test-project/v1.2.3/process-text-file-4"
+PROCESS_FILE_TEXT_4_ROUTE = [
+    "/test-project/v1.2.3/process-text-file-4",
+    "/test-project/v1/process-text-file-4",
+]
 
 client = TestClient(app)
 
@@ -241,13 +253,14 @@ def _assert_response_for_process_file_text_4(
     ],
 )
 def test_process_file_text_1(test_files, test_files_text, expected_status):
-    response = client.post(
-        PROCESS_FILE_TEXT_1_ROUTE,
-        files=convert_files_for_api(test_files) + convert_text_files_for_api(test_files_text),
-    )
-    assert response.status_code == expected_status
-    if response.status_code == 200:
-        _assert_response_for_process_file_text_1(test_files, test_files_text, response)
+    for endpoint in PROCESS_FILE_TEXT_1_ROUTE:
+        response = client.post(
+            endpoint,
+            files=convert_files_for_api(test_files) + convert_text_files_for_api(test_files_text),
+        )
+        assert response.status_code == expected_status
+        if response.status_code == 200:
+            _assert_response_for_process_file_text_1(test_files, test_files_text, response)
 
 
 @pytest.mark.parametrize(
@@ -264,17 +277,18 @@ def test_process_file_text_1(test_files, test_files_text, expected_status):
     ],
 )
 def test_process_file_text_2(test_files, test_files_text, response_type, m_input2, expected_status):
-    response = client.post(
-        PROCESS_FILE_TEXT_2_ROUTE,
-        files=convert_files_for_api(test_files) + convert_text_files_for_api(test_files_text),
-        data={**m_input2, "output_format": response_type},
-        **generate_header_kwargs(response_type)
-    )
-    assert response.status_code == expected_status
-    if response.status_code == 200:
-        _assert_response_for_process_file_text_2(
-            test_files, test_files_text, response_type, m_input2, response
+    for endpoint in PROCESS_FILE_TEXT_2_ROUTE:
+        response = client.post(
+            endpoint,
+            files=convert_files_for_api(test_files) + convert_text_files_for_api(test_files_text),
+            data={**m_input2, "output_format": response_type},
+            **generate_header_kwargs(response_type)
         )
+        assert response.status_code == expected_status
+        if response.status_code == 200:
+            _assert_response_for_process_file_text_2(
+                test_files, test_files_text, response_type, m_input2, response
+            )
 
 
 @pytest.mark.parametrize(
@@ -301,17 +315,18 @@ def test_process_file_text_2(test_files, test_files_text, response_type, m_input
 def test_process_file_text_3(
     test_files, test_files_text, response_type, response_schema, expected_status
 ):
-    response = client.post(
-        PROCESS_FILE_TEXT_3_ROUTE,
-        files=convert_files_for_api(test_files) + convert_text_files_for_api(test_files_text),
-        data={**response_schema, "output_format": response_type},
-        **generate_header_kwargs(response_type)
-    )
-    assert response.status_code == expected_status
-    if response.status_code == 200:
-        _assert_response_for_process_file_text_3(
-            test_files, test_files_text, response_type, response_schema, response
+    for endpoint in PROCESS_FILE_TEXT_3_ROUTE:
+        response = client.post(
+            endpoint,
+            files=convert_files_for_api(test_files) + convert_text_files_for_api(test_files_text),
+            data={**response_schema, "output_format": response_type},
+            **generate_header_kwargs(response_type)
         )
+        assert response.status_code == expected_status
+        if response.status_code == 200:
+            _assert_response_for_process_file_text_3(
+                test_files, test_files_text, response_type, response_schema, response
+            )
 
 
 @pytest.mark.parametrize(
@@ -394,20 +409,21 @@ def test_process_file_text_3(
 def test_process_file_text_4(
     test_files, test_files_text, response_type, response_schema, m_input1, m_input2, expected_status
 ):
-    response = client.post(
-        PROCESS_FILE_TEXT_4_ROUTE,
-        files=convert_files_for_api(test_files) + convert_text_files_for_api(test_files_text),
-        data={**m_input1, **m_input2, **response_schema, "output_format": response_type},
-        **generate_header_kwargs(response_type)
-    )
-    assert response.status_code == expected_status
-    if response.status_code == 200:
-        _assert_response_for_process_file_text_4(
-            test_files,
-            test_files_text,
-            response_type,
-            response_schema,
-            m_input1,
-            m_input2,
-            response,
+    for endpoint in PROCESS_FILE_TEXT_4_ROUTE:
+        response = client.post(
+            endpoint,
+            files=convert_files_for_api(test_files) + convert_text_files_for_api(test_files_text),
+            data={**m_input1, **m_input2, **response_schema, "output_format": response_type},
+            **generate_header_kwargs(response_type)
         )
+        assert response.status_code == expected_status
+        if response.status_code == 200:
+            _assert_response_for_process_file_text_4(
+                test_files,
+                test_files_text,
+                response_type,
+                response_schema,
+                m_input1,
+                m_input2,
+                response,
+            )

@@ -195,6 +195,19 @@ async def pipeline_1(
         )
 
 
+@router.post("/test-project/v1/process-file-1")
+async def short_pipeline_1(
+    request: Request,
+    files: Union[List[UploadFile], None] = File(default=None),
+    input2: List[str] = Form(default=[]),
+):
+    return await pipeline_1(
+        request=request,
+        files=files,
+        input2=input2,
+    )
+
+
 @app.get("/healthcheck", status_code=status.HTTP_200_OK)
 async def healthcheck(request: Request):
     return {"healthcheck": "HEALTHCHECK STATUS: EVERYTHING OK!"}

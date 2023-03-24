@@ -66,6 +66,7 @@ def get_pipeline_path(
     pipeline_family: Optional[str] = None,
     semver: Optional[str] = None,
     config_filename: Optional[str] = None,
+    shorter: Optional[bool] = False,
 ) -> str:
     """Builds the pipeline path according to the conventions outlined in the architecture docs.
     ref: https://github.com/Unstructured-IO/
@@ -88,6 +89,10 @@ def get_pipeline_path(
         semver = str(semver)
 
     raise_for_invalid_semver_string(semver)
+
+    if shorter:
+        semver = semver.split(".")[0]
+
     pipeline_family = pipeline_family.replace("_", "-")
 
     filepath = filename.split("/")

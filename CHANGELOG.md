@@ -1,3 +1,7 @@
+# 0.8.0
+
+* Add duplicate routes with semver major version
+
 # 0.7.0
 
 * Add dynamic docs_url
