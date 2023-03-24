@@ -51,11 +51,24 @@ def generate_pipeline_api(
         semver=semver,
         config_filename=config_filename,
     )
+
+    short_pipeline_path = get_pipeline_path(
+        filename=get_script_filename(filename),
+        pipeline_family=pipeline_family,
+        semver=semver,
+        config_filename=config_filename,
+        shorter=True,
+    )
     pipeline_api_params = _infer_params_from_pipeline_api(script)
 
     environment = Environment(loader=FileSystemLoader(TEMPLATE_PATH))
     template = environment.get_template("pipeline_api.txt")
-    content = template.render(pipeline_path=pipeline_path, script=script, **pipeline_api_params)
+    content = template.render(
+        pipeline_path=pipeline_path,
+        short_pipeline_path=short_pipeline_path,
+        script=script,
+        **pipeline_api_params,
+    )
     content = _organize_imports(content)
     content = (
         """

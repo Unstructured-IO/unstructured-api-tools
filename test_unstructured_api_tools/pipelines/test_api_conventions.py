@@ -112,6 +112,14 @@ def test_get_pipeline_path():
     assert path == "/sec-filings/v0.2.1/risk-narrative"
 
 
+def test_get_short_pipeline_path():
+    path = conventions.get_pipeline_path(
+        filename="risk_narrative.py", pipeline_family="sec_filings", semver="0.2.1", shorter=True,
+    )
+
+    assert path == "/sec-filings/v0/risk-narrative"
+
+
 def test_get_pipeline_path_raises_if_either_not_specified():
     with pytest.raises(ValueError):
         conventions.get_pipeline_path(

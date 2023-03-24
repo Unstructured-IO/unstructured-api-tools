@@ -26,16 +26,16 @@ from test_unstructured_api_tools.api.functions_and_variables import (
 )
 
 # accepts: text files
-PROCESS_TEXT_1_ROUTE = "/test-project/v1.2.3/process-text-1"
+PROCESS_TEXT_1_ROUTE = ["/test-project/v1.2.3/process-text-1", "/test-project/v1/process-text-1"]
 
 # accepts: text files, input1, input2
-PROCESS_TEXT_2_ROUTE = "/test-project/v1.2.3/process-text-2"
+PROCESS_TEXT_2_ROUTE = ["/test-project/v1.2.3/process-text-2", "/test-project/v1/process-text-2"]
 
 # accepts: text files, response_type
-PROCESS_TEXT_3_ROUTE = "/test-project/v1.2.3/process-text-3"
+PROCESS_TEXT_3_ROUTE = ["/test-project/v1.2.3/process-text-3", "/test-project/v1/process-text-3"]
 
 # accepts: text files, response_type, response_schema
-PROCESS_TEXT_4_ROUTE = "/test-project/v1.2.3/process-text-4"
+PROCESS_TEXT_4_ROUTE = ["/test-project/v1.2.3/process-text-4", "/test-project/v1/process-text-4"]
 
 client = TestClient(app)
 
@@ -129,10 +129,11 @@ def _assert_response_for_process_text_4(test_files, response, response_type, res
     ],
 )
 def test_process_text_1(test_files, expected_status):
-    response = client.post(PROCESS_TEXT_1_ROUTE, files=convert_text_files_for_api(test_files))
-    assert response.status_code == expected_status
-    if response.status_code == 200:
-        _assert_response_for_process_text_1(test_files, response)
+    for endpoint in PROCESS_TEXT_1_ROUTE:
+        response = client.post(endpoint, files=convert_text_files_for_api(test_files))
+        assert response.status_code == expected_status
+        if response.status_code == 200:
+            _assert_response_for_process_text_1(test_files, response)
 
 
 @pytest.mark.parametrize(
@@ -148,14 +149,15 @@ def test_process_text_1(test_files, expected_status):
     ],
 )
 def test_process_text_2(test_files, m_input1, m_input2, expected_status):
-    response = client.post(
-        PROCESS_TEXT_2_ROUTE,
-        files=convert_text_files_for_api(test_files),
-        data={**m_input1, **m_input2},
-    )
-    assert response.status_code == expected_status
-    if response.status_code == 200:
-        _assert_response_for_process_text_2(test_files, response, m_input1, m_input2)
+    for endpoint in PROCESS_TEXT_2_ROUTE:
+        response = client.post(
+            endpoint,
+            files=convert_text_files_for_api(test_files),
+            data={**m_input1, **m_input2},
+        )
+        assert response.status_code == expected_status
+        if response.status_code == 200:
+            _assert_response_for_process_text_2(test_files, response, m_input1, m_input2)
 
 
 @pytest.mark.parametrize(
@@ -185,15 +187,16 @@ def test_process_text_2(test_files, m_input1, m_input2, expected_status):
     ],
 )
 def test_process_text_3(test_files, response_type, expected_status):
-    response = client.post(
-        PROCESS_TEXT_3_ROUTE,
-        files=convert_text_files_for_api(test_files),
-        data={"output_format": response_type},
-        **generate_header_kwargs(response_type)
-    )
-    assert response.status_code == expected_status
-    if response.status_code == 200:
-        _assert_response_for_process_text_3(test_files, response, response_type)
+    for endpoint in PROCESS_TEXT_3_ROUTE:
+        response = client.post(
+            endpoint,
+            files=convert_text_files_for_api(test_files),
+            data={"output_format": response_type},
+            **generate_header_kwargs(response_type)
+        )
+        assert response.status_code == expected_status
+        if response.status_code == 200:
+            _assert_response_for_process_text_3(test_files, response, response_type)
 
 
 @pytest.mark.parametrize(
@@ -208,12 +211,13 @@ def test_process_text_3(test_files, response_type, expected_status):
     ],
 )
 def test_process_text_4(test_files, response_type, response_schema, expected_status):
-    response = client.post(
-        PROCESS_TEXT_4_ROUTE,
-        files=convert_text_files_for_api(test_files),
-        data={**response_schema, "output_format": response_type},
-        **generate_header_kwargs(response_type)
-    )
-    assert response.status_code == expected_status
-    if response.status_code == 200:
-        _assert_response_for_process_text_4(test_files, response, response_type, response_schema)
+    for endpoint in PROCESS_TEXT_4_ROUTE:
+        response = client.post(
+            endpoint,
+            files=convert_text_files_for_api(test_files),
+            data={**response_schema, "output_format": response_type},
+            **generate_header_kwargs(response_type)
+        )
+        assert response.status_code == expected_status
+        if response.status_code == 200:
+            _assert_response_for_process_text_4(test_files, response, response_type, response_schema)
