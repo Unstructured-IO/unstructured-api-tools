@@ -1,3 +1,8 @@
+# 0.8.1
+
+* Removed async/await from endpoints.
+* Refactored template for generating endpoints with shorter semver.
+
 # 0.8.0
 
 * Add duplicate routes with semver major version
