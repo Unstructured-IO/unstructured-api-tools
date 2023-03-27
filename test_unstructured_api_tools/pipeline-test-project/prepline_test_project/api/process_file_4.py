@@ -143,8 +143,9 @@ class MultipartMixedResponse(StreamingResponse):
         await send({"type": "http.response.body", "body": b"", "more_body": False})
 
 
+@router.post("/test-project/v1/process-file-4")
 @router.post("/test-project/v1.2.3/process-file-4")
-async def pipeline_1(
+def pipeline_1(
     request: Request,
     files: Union[List[UploadFile], None] = File(default=None),
     output_format: Union[str, None] = Form(default=None),
@@ -238,25 +239,8 @@ async def pipeline_1(
         )
 
 
-@router.post("/test-project/v1/process-file-4")
-async def short_pipeline_1(
-    request: Request,
-    files: Union[List[UploadFile], None] = File(default=None),
-    output_format: Union[str, None] = Form(default=None),
-    output_schema: str = Form(default=None),
-    input1: List[str] = Form(default=[]),
-):
-    return await pipeline_1(
-        request=request,
-        files=files,
-        output_format=output_format,
-        output_schema=output_schema,
-        input1=input1,
-    )
-
-
 @app.get("/healthcheck", status_code=status.HTTP_200_OK)
-async def healthcheck(request: Request):
+def healthcheck(request: Request):
     return {"healthcheck": "HEALTHCHECK STATUS: EVERYTHING OK!"}
 
 

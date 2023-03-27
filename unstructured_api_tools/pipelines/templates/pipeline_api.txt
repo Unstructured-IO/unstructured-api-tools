@@ -106,8 +106,9 @@ class MultipartMixedResponse(StreamingResponse):
 {% endif %}
 
 {% set default_response_schema = optional_param_value_map.pop("response_schema", None) %}
+@router.post("{{ short_pipeline_path }}")
 @router.post("{{pipeline_path}}")
-async def pipeline_1(request: Request,
+def pipeline_1(request: Request,
 {% if accepts_file %}files: Union[List[UploadFile], None] = File(default=None),{% endif %}
 {% if accepts_text %}text_files: Union[List[UploadFile], None] = File(default=None),{% endif %}
 {% if default_response_type %}output_format: Union[str, None] = Form(default=None),{% endif %}
@@ -356,29 +357,9 @@ async def pipeline_1(request: Request,
     {% endif %}
 {% endif %}
 
-@router.post("{{ short_pipeline_path }}")
-async def short_pipeline_1(request: Request,
-{% if accepts_file %}files: Union[List[UploadFile], None] = File(default=None),{% endif %}
-{% if accepts_text %}text_files: Union[List[UploadFile], None] = File(default=None),{% endif %}
-{% if default_response_type %}output_format: Union[str, None] = Form(default=None),{% endif %}
-{% if default_response_schema %}output_schema: str = Form(default=None),{% endif %}
-{% for param in multi_string_param_names %}
-{{param}}: List[str] = Form(default=[]),
-{% endfor %}
-):
-    return await pipeline_1(request=request,
-{% if accepts_file %}files=files,{% endif %}
-{% if accepts_text %}text_files=text_files,{% endif %}
-{% if default_response_type %}output_format=output_format,{% endif %}
-{% if default_response_schema %}output_schema=output_schema,{% endif %}
-{% for param in multi_string_param_names %}
-{{param}}={{param}},
-{% endfor %}
-)
-
 
 @app.get("/healthcheck", status_code=status.HTTP_200_OK)
-async def healthcheck(request: Request):
+def healthcheck(request: Request):
     return {
         "healthcheck": "HEALTHCHECK STATUS: EVERYTHING OK!"
     }
