@@ -52,10 +52,6 @@ explicitly with `--config-filename` or the `PIPELINE_FAMILY_CONFIG` environment 
 of those is specified, the fallback is to use the `preprocessing-pipeline-family.yaml` file in the
 current working directory.
 
-Generated APIs are rate limited. The default rate limit is 1 call per second. You can change
-the rate limit by using the `PIPELINE_API_RATE_LIMIT` environment variable. For example,
-`PIPELINE_API_RATE_LIMIT="15/minute"` will limit the API to 15 calls per minute.
-
 The API file undergoes `black`, `flake8` and `mypy` checks after being generated. If you want
 `flake8` to ignore specific errors, you can specify them through the CLI with
 `--flake8-ignore F401, E402`.
