@@ -1,5 +1,3 @@
-import mimetypes
-
 FILE_DOCX = "test_unstructured_api_tools/api/fixtures/fake.docx"
 FILE_IMAGE = "test_unstructured_api_tools/api/fixtures/example.jpg"
 FILE_TXT_1 = "test_unstructured_api_tools/api/fixtures/text_file.txt"
@@ -71,7 +69,3 @@ def generate_header_kwargs(value=None):
         if value
         else {}
     )
-
-
-def guess_mimetype_from_filename(filename):
-    return mimetypes.guess_type(filename)[0]
