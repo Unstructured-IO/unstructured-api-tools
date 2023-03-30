@@ -25,6 +25,10 @@ from test_unstructured_api_tools.api.functions_and_variables import (
     RESPONSE_SCHEMA_LABELSTUDIO,
     FILENAME_FORMATS,
     generate_header_kwargs,
+    GZIP_FILE_DOCX,
+    GZIP_FILE_IMAGE,
+    GZIP_FILE_TXT_2,
+    GZIP_FILE_TXT_1,
 )
 
 # accepts: files, text files
@@ -60,6 +64,12 @@ def _assert_response_for_process_file_text_1(test_files, test_files_text, respon
         file_read = None
         filename = test_file
         file_content_type = None
+
+        if test_file and test_file.endswith(".gz"):
+            test_file = test_file[:-3]
+            filename = test_file
+        if test_text_file and test_text_file.endswith(".gz"):
+            test_text_file = test_text_file[:-3]
 
         if test_text_file:
             with open(test_text_file, "r") as file:
@@ -100,6 +110,12 @@ def _assert_response_for_process_file_text_2(
         file_read = None
         filename = test_file
         file_content_type = None
+
+        if test_file and test_file.endswith(".gz"):
+            test_file = test_file[:-3]
+            filename = test_file
+        if test_text_file and test_text_file.endswith(".gz"):
+            test_text_file = test_text_file[:-3]
 
         if test_text_file:
             with open(test_text_file, "r") as file:
@@ -150,6 +166,12 @@ def _assert_response_for_process_file_text_3(
         filename = test_file
         file_content_type = None
 
+        if test_file and test_file.endswith(".gz"):
+            test_file = test_file[:-3]
+            filename = test_file
+        if test_text_file and test_text_file.endswith(".gz"):
+            test_text_file = test_text_file[:-3]
+
         if test_text_file:
             with open(test_text_file, "r") as file:
                 text = file.read()
@@ -198,6 +220,12 @@ def _assert_response_for_process_file_text_4(
         file_read = None
         filename = test_file
         file_content_type = None
+
+        if test_file and test_file.endswith(".gz"):
+            test_file = test_file[:-3]
+            filename = test_file
+        if test_text_file and test_text_file.endswith(".gz"):
+            test_text_file = test_text_file[:-3]
 
         if test_text_file:
             with open(test_text_file, "r") as file:
@@ -250,6 +278,12 @@ def _assert_response_for_process_file_text_4(
         ([FILE_DOCX, FILE_IMAGE], [FILE_TXT_1, FILE_TXT_2], 200),
         ([FILE_DOCX], [FILE_TXT_2], 200),
         ([FILE_IMAGE], [FILE_TXT_2], 200),
+        ([GZIP_FILE_DOCX], [FILE_TXT_1], 200),
+        ([FILE_DOCX, GZIP_FILE_IMAGE], [GZIP_FILE_TXT_1], 200),
+        ([GZIP_FILE_DOCX, GZIP_FILE_IMAGE], [GZIP_FILE_TXT_2], 200),
+        ([FILE_DOCX, FILE_IMAGE], [GZIP_FILE_TXT_1, GZIP_FILE_TXT_2], 200),
+        ([FILE_DOCX], [GZIP_FILE_TXT_2], 200),
+        ([GZIP_FILE_IMAGE], [GZIP_FILE_TXT_1], 200),
     ],
 )
 def test_process_file_text_1(test_files, test_files_text, expected_status):
@@ -274,6 +308,20 @@ def test_process_file_text_1(test_files, test_files_text, expected_status):
         ([FILE_DOCX], [FILE_TXT_1, FILE_TXT_2], JSON, P_INPUT_2_SINGLE, 200),
         ([FILE_IMAGE], [FILE_TXT_1], JSON, P_INPUT_2_MULTI, 200),
         ([FILE_IMAGE], [FILE_TXT_1], MIXED, P_INPUT_2_EMPTY, 200),
+        ([GZIP_FILE_DOCX], [FILE_TXT_1], JSON, P_INPUT_2_MULTI, 200),
+        ([GZIP_FILE_DOCX, FILE_IMAGE], [FILE_TXT_1], JSON, P_INPUT_2_MULTI, 200),
+        ([FILE_DOCX], [GZIP_FILE_TXT_1], MIXED, P_INPUT_2_SINGLE, 200),
+        ([FILE_DOCX, GZIP_FILE_IMAGE], [GZIP_FILE_TXT_1], MIXED, P_INPUT_2_EMPTY, 200),
+        (
+            [GZIP_FILE_DOCX, GZIP_FILE_IMAGE],
+            [GZIP_FILE_TXT_1, FILE_TXT_2],
+            JSON,
+            P_INPUT_2_MULTI,
+            200,
+        ),
+        ([GZIP_FILE_DOCX], [GZIP_FILE_TXT_1, GZIP_FILE_TXT_2], JSON, P_INPUT_2_SINGLE, 200),
+        ([GZIP_FILE_IMAGE], [GZIP_FILE_TXT_1], JSON, P_INPUT_2_MULTI, 200),
+        ([GZIP_FILE_IMAGE], [FILE_TXT_1], MIXED, P_INPUT_2_EMPTY, 200),
     ],
 )
 def test_process_file_text_2(test_files, test_files_text, response_type, m_input2, expected_status):
@@ -306,6 +354,28 @@ def test_process_file_text_2(test_files, test_files_text, response_type, m_input
         (
             [FILE_DOCX, FILE_IMAGE],
             [FILE_TXT_1, FILE_TXT_2],
+            MIXED,
+            RESPONSE_SCHEMA_LABELSTUDIO,
+            200,
+        ),
+        ([GZIP_FILE_DOCX], [FILE_TXT_1], JSON, RESPONSE_SCHEMA_ISD, 200),
+        ([FILE_DOCX], [GZIP_FILE_TXT_1], MIXED, RESPONSE_SCHEMA_ISD, 200),
+        ([GZIP_FILE_DOCX, GZIP_FILE_IMAGE], [FILE_TXT_1], JSON, RESPONSE_SCHEMA_ISD, 200),
+        ([FILE_DOCX, GZIP_FILE_IMAGE], [GZIP_FILE_TXT_1], MIXED, RESPONSE_SCHEMA_ISD, 200),
+        ([FILE_DOCX], [GZIP_FILE_TXT_1], JSON, RESPONSE_SCHEMA_LABELSTUDIO, 200),
+        ([GZIP_FILE_DOCX], [GZIP_FILE_TXT_1], MIXED, RESPONSE_SCHEMA_LABELSTUDIO, 200),
+        ([GZIP_FILE_DOCX, GZIP_FILE_IMAGE], [FILE_TXT_1], JSON, RESPONSE_SCHEMA_LABELSTUDIO, 200),
+        ([FILE_DOCX, GZIP_FILE_IMAGE], [GZIP_FILE_TXT_1], MIXED, RESPONSE_SCHEMA_LABELSTUDIO, 200),
+        (
+            [FILE_DOCX, GZIP_FILE_IMAGE],
+            [GZIP_FILE_TXT_1, GZIP_FILE_TXT_2],
+            MIXED,
+            RESPONSE_SCHEMA_ISD,
+            200,
+        ),
+        (
+            [GZIP_FILE_DOCX, GZIP_FILE_IMAGE],
+            [GZIP_FILE_TXT_1, GZIP_FILE_TXT_2],
             MIXED,
             RESPONSE_SCHEMA_LABELSTUDIO,
             200,
@@ -398,6 +468,78 @@ def test_process_file_text_3(
         (
             [FILE_DOCX, FILE_IMAGE],
             [FILE_TXT_1, FILE_TXT_2],
+            MIXED,
+            RESPONSE_SCHEMA_ISD,
+            P_INPUT_1_MULTI,
+            P_INPUT_2_MULTI,
+            200,
+        ),
+        (
+            [GZIP_FILE_DOCX],
+            [FILE_TXT_1],
+            JSON,
+            RESPONSE_SCHEMA_LABELSTUDIO,
+            P_INPUT_1_MULTI,
+            P_INPUT_2_SINGLE,
+            200,
+        ),
+        (
+            [FILE_DOCX, GZIP_FILE_IMAGE],
+            [GZIP_FILE_TXT_1],
+            JSON,
+            RESPONSE_SCHEMA_LABELSTUDIO,
+            P_INPUT_1_SINGLE,
+            P_INPUT_2_SINGLE,
+            200,
+        ),
+        (
+            [FILE_DOCX],
+            [GZIP_FILE_TXT_1, GZIP_FILE_TXT_2],
+            JSON,
+            RESPONSE_SCHEMA_ISD,
+            P_INPUT_1_MULTI,
+            P_INPUT_2_MULTI,
+            200,
+        ),
+        (
+            [GZIP_FILE_DOCX, GZIP_FILE_IMAGE],
+            [FILE_TXT_1, GZIP_FILE_TXT_2],
+            JSON,
+            RESPONSE_SCHEMA_LABELSTUDIO,
+            P_INPUT_1_MULTI,
+            P_INPUT_2_SINGLE,
+            200,
+        ),
+        (
+            [GZIP_FILE_DOCX],
+            [GZIP_FILE_TXT_1],
+            MIXED,
+            RESPONSE_SCHEMA_ISD,
+            P_INPUT_1_MULTI,
+            P_INPUT_2_EMPTY,
+            200,
+        ),
+        (
+            [GZIP_FILE_DOCX, FILE_IMAGE],
+            [FILE_TXT_1],
+            MIXED,
+            RESPONSE_SCHEMA_LABELSTUDIO,
+            P_INPUT_1_SINGLE,
+            P_INPUT_2_SINGLE,
+            200,
+        ),
+        (
+            [GZIP_FILE_DOCX],
+            [FILE_TXT_1, GZIP_FILE_TXT_2],
+            MIXED,
+            RESPONSE_SCHEMA_ISD,
+            P_INPUT_1_EMPTY,
+            P_INPUT_2_EMPTY,
+            200,
+        ),
+        (
+            [GZIP_FILE_DOCX, GZIP_FILE_IMAGE],
+            [GZIP_FILE_TXT_1, GZIP_FILE_TXT_2],
             MIXED,
             RESPONSE_SCHEMA_ISD,
             P_INPUT_1_MULTI,

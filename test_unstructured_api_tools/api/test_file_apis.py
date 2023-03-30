@@ -26,6 +26,8 @@ from functions_and_variables import (
     TEXT_CSV,
     convert_files_for_api,
     generate_header_kwargs,
+    GZIP_FILE_IMAGE,
+    GZIP_FILE_DOCX,
 )
 
 # accepts: files, input2
@@ -59,6 +61,8 @@ def _assert_response_for_process_file_1(test_files, test_params, test_type_heade
         api_param_value = test_params["input2"]
 
     def _json_for_one_file(test_file):
+        if test_file.endswith(".gz"):
+            test_file = test_file[:-3]
         return {
             "silly_result": " : ".join(
                 [
@@ -85,6 +89,8 @@ def _assert_response_for_process_file_1(test_files, test_params, test_type_heade
 
 def _assert_response_for_process_file_2(test_files, response):
     def _json_for_one_file(test_file):
+        if test_file.endswith(".gz"):
+            test_file = test_file[:-3]
         return {"silly_result": " : ".join([str(FILENAME_LENGTHS[test_file])])}
 
     if len(test_files) == 1:
@@ -97,6 +103,8 @@ def _asert_response_for_process_file_3(
     test_files, response, response_schema, response_type=TEXT_CSV
 ):
     def _json_for_one_file(test_file):
+        if test_file.endswith(".gz"):
+            test_file = test_file[:-3]
         return {
             "silly_result": " : ".join(
                 [
@@ -123,6 +131,8 @@ def _assert_response_for_process_file_4(
     test_files, response, response_schema, response_type, m_input1
 ):
     def _json_for_one_file(test_file):
+        if test_file.endswith(".gz"):
+            test_file = test_file[:-3]
         return {
             "silly_result": " : ".join(
                 [
@@ -145,6 +155,8 @@ def _assert_response_for_process_file_5(
     test_files, response, response_schema, response_type, m_input1, m_input2
 ):
     def _json_for_one_file(test_file):
+        if test_file.endswith(".gz"):
+            test_file = test_file[:-3]
         return {
             "silly_result": " : ".join(
                 [
@@ -180,6 +192,8 @@ def _assert_response_for_process_file_5(
         pytest.param([FILE_DOCX], P_INPUT_1_MULTI, MIXED, 200, marks=pytest.mark.xfail),
         # json returned though csv requested
         pytest.param([FILE_IMAGE], P_INPUT_1_AND_2_MULTI, TEXT_CSV, 200, marks=pytest.mark.xfail),
+        ([GZIP_FILE_IMAGE], P_INPUT_1_EMPTY, JSON, 200),
+        ([GZIP_FILE_DOCX], P_INPUT_1_EMPTY, JSON, 200),
     ],
 )
 def test_process_file_1(test_files, test_params, test_type_header, expected_status):
@@ -249,6 +263,14 @@ def test_process_file_2(test_files, expected_status):
             marks=pytest.mark.xfail,
         ),
         ([FILE_DOCX, FILE_IMAGE], None, RESPONSE_SCHEMA_LABELSTUDIO, 200),
+        ([FILE_DOCX, FILE_IMAGE, GZIP_FILE_IMAGE], None, RESPONSE_SCHEMA_LABELSTUDIO, 200),
+        ([FILE_DOCX, FILE_IMAGE, GZIP_FILE_DOCX], None, RESPONSE_SCHEMA_LABELSTUDIO, 200),
+        (
+            [FILE_DOCX, FILE_IMAGE, GZIP_FILE_IMAGE, GZIP_FILE_DOCX],
+            None,
+            RESPONSE_SCHEMA_LABELSTUDIO,
+            200,
+        ),
     ],
 )
 def test_process_file_3(test_files, response_type, response_schema, expected_status):
@@ -273,6 +295,12 @@ def test_process_file_3(test_files, response_type, response_schema, expected_sta
         ([FILE_DOCX, FILE_IMAGE], JSON, RESPONSE_SCHEMA_LABELSTUDIO, P_INPUT_1_EMPTY, 200),
         ([FILE_DOCX, FILE_IMAGE], JSON, RESPONSE_SCHEMA_ISD, P_INPUT_1_MULTI, 200),
         ([FILE_DOCX, FILE_IMAGE], JSON, RESPONSE_SCHEMA_ISD, P_INPUT_1_SINGLE, 200),
+        ([GZIP_FILE_DOCX], JSON, RESPONSE_SCHEMA_ISD, P_INPUT_1_EMPTY, 200),
+        ([GZIP_FILE_DOCX], JSON, RESPONSE_SCHEMA_ISD, P_INPUT_1_MULTI, 200),
+        ([GZIP_FILE_DOCX], JSON, RESPONSE_SCHEMA_LABELSTUDIO, P_INPUT_1_SINGLE, 200),
+        ([GZIP_FILE_DOCX, FILE_IMAGE], JSON, RESPONSE_SCHEMA_LABELSTUDIO, P_INPUT_1_EMPTY, 200),
+        ([FILE_DOCX, GZIP_FILE_IMAGE], JSON, RESPONSE_SCHEMA_ISD, P_INPUT_1_MULTI, 200),
+        ([GZIP_FILE_DOCX, GZIP_FILE_IMAGE], JSON, RESPONSE_SCHEMA_ISD, P_INPUT_1_SINGLE, 200),
     ],
 )
 def test_process_file_4(test_files, response_type, response_schema, m_input1, expected_status):
@@ -314,6 +342,47 @@ def test_process_file_4(test_files, response_type, response_schema, m_input1, ex
         ),
         (
             [FILE_DOCX, FILE_IMAGE],
+            JSON,
+            RESPONSE_SCHEMA_LABELSTUDIO,
+            P_INPUT_1_MULTI,
+            P_INPUT_2_EMPTY,
+            200,
+        ),
+        ([GZIP_FILE_DOCX], JSON, RESPONSE_SCHEMA_ISD, P_INPUT_1_MULTI, P_INPUT_2_MULTI, 200),
+        (
+            [GZIP_FILE_DOCX],
+            JSON,
+            RESPONSE_SCHEMA_LABELSTUDIO,
+            P_INPUT_1_EMPTY,
+            P_INPUT_2_MULTI,
+            200,
+        ),
+        (
+            [GZIP_FILE_DOCX],
+            JSON,
+            RESPONSE_SCHEMA_LABELSTUDIO,
+            P_INPUT_1_SINGLE,
+            P_INPUT_2_EMPTY,
+            200,
+        ),
+        (
+            [GZIP_FILE_DOCX, FILE_IMAGE],
+            JSON,
+            RESPONSE_SCHEMA_LABELSTUDIO,
+            P_INPUT_1_SINGLE,
+            P_INPUT_2_EMPTY,
+            200,
+        ),
+        (
+            [FILE_DOCX, GZIP_FILE_IMAGE],
+            JSON,
+            RESPONSE_SCHEMA_LABELSTUDIO,
+            P_INPUT_1_EMPTY,
+            P_INPUT_2_EMPTY,
+            200,
+        ),
+        (
+            [GZIP_FILE_DOCX, GZIP_FILE_IMAGE],
             JSON,
             RESPONSE_SCHEMA_LABELSTUDIO,
             P_INPUT_1_MULTI,

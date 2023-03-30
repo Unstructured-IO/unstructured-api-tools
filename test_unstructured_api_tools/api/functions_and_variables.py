@@ -1,14 +1,34 @@
+import mimetypes
+
 FILE_DOCX = "test_unstructured_api_tools/api/fixtures/fake.docx"
 FILE_IMAGE = "test_unstructured_api_tools/api/fixtures/example.jpg"
 FILE_TXT_1 = "test_unstructured_api_tools/api/fixtures/text_file.txt"
 FILE_TXT_2 = "test_unstructured_api_tools/api/fixtures/text_file_2.txt"
 
-FILENAME_LENGTHS = {FILE_DOCX: 36602, FILE_IMAGE: 32764, FILE_TXT_1: 26, FILE_TXT_2: 30}
+GZIP_FILE_DOCX = "test_unstructured_api_tools/api/fixtures/fake.docx.gz"
+GZIP_FILE_IMAGE = "test_unstructured_api_tools/api/fixtures/example.jpg.gz"
+GZIP_FILE_TXT_1 = "test_unstructured_api_tools/api/fixtures/text_file.txt.gz"
+GZIP_FILE_TXT_2 = "test_unstructured_api_tools/api/fixtures/text_file_2.txt.gz"
+
+FILENAME_LENGTHS = {
+    FILE_DOCX: 36602,
+    GZIP_FILE_DOCX: 36602,
+    FILE_IMAGE: 32764,
+    GZIP_FILE_IMAGE: 32764,
+    FILE_TXT_1: 26,
+    GZIP_FILE_TXT_1: 26,
+    FILE_TXT_2: 30,
+    GZIP_FILE_TXT_2: 30,
+}
 FILENAME_FORMATS = {
     FILE_DOCX: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     FILE_IMAGE: "image/jpeg",
     FILE_TXT_1: "text/plain",
     FILE_TXT_2: "text/plain",
+    GZIP_FILE_DOCX: "application/gzip",
+    GZIP_FILE_IMAGE: "application/gzip",
+    GZIP_FILE_TXT_1: "application/gzip",
+    GZIP_FILE_TXT_2: "application/gzip",
 }
 
 P_INPUT_1_SINGLE = {"input1": ["hi"]}
@@ -51,3 +71,7 @@ def generate_header_kwargs(value=None):
         if value
         else {}
     )
+
+
+def guess_mimetype_from_filename(filename):
+    return mimetypes.guess_type(filename)[0]
