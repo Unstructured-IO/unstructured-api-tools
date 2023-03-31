@@ -1,3 +1,7 @@
+# 0.9.1
+ 
+* Add code coverage for generated test APIs
+
 # 0.9.0
 
 * Add supporting gzip compressed files
