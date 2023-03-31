@@ -272,6 +272,7 @@ def pipeline_1(request: Request,
                         {% if default_response_type %}response_type=media_type, {% endif %}
                         {% if default_response_schema %}response_schema=default_response_schema, {% endif %}
                         {% if accepts_file %}
+                            {% if "file_filename" in optional_param_value_map %}file_filename=file.filename, {%endif%}
                             {% if "filename" in optional_param_value_map %}filename=file.filename, {%endif%}
                             {% if "file_content_type" in optional_param_value_map %}file_content_type=file_content_type, {%endif%}
                         {% endif %}
