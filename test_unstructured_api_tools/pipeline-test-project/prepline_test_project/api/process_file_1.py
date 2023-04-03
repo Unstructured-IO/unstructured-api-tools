@@ -32,7 +32,10 @@ app = FastAPI()
 router = APIRouter()
 
 
-# pipeline-api
+# test accessing os in a #pipeline-api cell does not break things
+_ = os.environ
+
+
 def pipeline_api(
     file,
     filename=None,
