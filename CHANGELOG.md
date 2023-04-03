@@ -1,7 +1,10 @@
+# 0.9.1
+
+* Allow references to standard imports in pipeline cells
+
 # 0.9.0
 
 * Add supporting gzip compressed files
-
 
 # 0.8.1
 
