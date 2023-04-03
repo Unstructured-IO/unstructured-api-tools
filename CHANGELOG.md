@@ -1,11 +1,11 @@
 # 0.9.1
- 
+
+* Allow references to standard imports in pipeline cells
 * Add code coverage for generated test APIs
 
 # 0.9.0
 
 * Add supporting gzip compressed files
-
 
 # 0.8.1
 
