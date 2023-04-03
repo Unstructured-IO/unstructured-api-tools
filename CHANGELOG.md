@@ -1,3 +1,8 @@
+# 0.9.0
+
+* Add supporting gzip compressed files
+
+
 # 0.8.1
 
 * Removed async/await from endpoints.

@@ -23,6 +23,8 @@ from test_unstructured_api_tools.api.functions_and_variables import (
     RESPONSE_SCHEMA_ISD,
     RESPONSE_SCHEMA_LABELSTUDIO,
     generate_header_kwargs,
+    GZIP_FILE_TXT_1,
+    GZIP_FILE_TXT_2,
 )
 
 # accepts: text files
@@ -42,6 +44,8 @@ client = TestClient(app)
 
 def _assert_response_for_process_text_1(test_files, response):
     def _json_for_one_file(test_file):
+        if test_file.endswith(".gz"):
+            test_file = test_file[:-3]
         with open(test_file, "r") as file:
             return {
                 "silly_result": " : ".join([str(FILENAME_LENGTHS[test_file]), str(file.read())])
@@ -55,6 +59,8 @@ def _assert_response_for_process_text_1(test_files, response):
 
 def _assert_response_for_process_text_2(test_files, response, m_input1, m_input2):
     def _json_for_one_file(test_file):
+        if test_file.endswith(".gz"):
+            test_file = test_file[:-3]
         with open(test_file, "r") as file:
             return {
                 "silly_result": " : ".join(
@@ -75,6 +81,8 @@ def _assert_response_for_process_text_2(test_files, response, m_input1, m_input2
 
 def _assert_response_for_process_text_3(test_files, response, response_type=TEXT_CSV):
     def _json_for_one_file(test_file):
+        if test_file.endswith(".gz"):
+            test_file = test_file[:-3]
         with open(test_file, "r") as file:
             return {
                 "silly_result": " : ".join(
@@ -96,6 +104,8 @@ def _assert_response_for_process_text_3(test_files, response, response_type=TEXT
 
 def _assert_response_for_process_text_4(test_files, response, response_type, response_schema):
     def _json_for_one_file(test_file):
+        if test_file.endswith(".gz"):
+            test_file = test_file[:-3]
         with open(test_file, "r") as file:
             return {
                 "silly_result": " : ".join(
@@ -146,6 +156,13 @@ def test_process_text_1(test_files, expected_status):
         ([FILE_TXT_1, FILE_TXT_2], P_INPUT_1_SINGLE, P_INPUT_2_EMPTY, 200),
         ([FILE_TXT_1, FILE_TXT_2], P_INPUT_1_SINGLE, P_INPUT_2_SINGLE, 200),
         ([FILE_TXT_1, FILE_TXT_2], P_INPUT_1_MULTI, P_INPUT_2_MULTI, 200),
+        ([GZIP_FILE_TXT_1], P_INPUT_1_SINGLE, P_INPUT_2_SINGLE, 200),
+        ([GZIP_FILE_TXT_1], P_INPUT_1_EMPTY, P_INPUT_2_SINGLE, 200),
+        ([GZIP_FILE_TXT_1], P_INPUT_1_EMPTY, P_INPUT_2_MULTI, 200),
+        ([GZIP_FILE_TXT_1, FILE_TXT_2], P_INPUT_1_EMPTY, P_INPUT_2_EMPTY, 200),
+        ([FILE_TXT_1, GZIP_FILE_TXT_2], P_INPUT_1_SINGLE, P_INPUT_2_EMPTY, 200),
+        ([GZIP_FILE_TXT_1, GZIP_FILE_TXT_2], P_INPUT_1_SINGLE, P_INPUT_2_SINGLE, 200),
+        ([GZIP_FILE_TXT_1, GZIP_FILE_TXT_2], P_INPUT_1_MULTI, P_INPUT_2_MULTI, 200),
     ],
 )
 def test_process_text_2(test_files, m_input1, m_input2, expected_status):
@@ -164,6 +181,7 @@ def test_process_text_2(test_files, m_input1, m_input2, expected_status):
     "test_files,response_type,expected_status",
     [
         ([FILE_TXT_1], JSON, 200),
+        ([GZIP_FILE_TXT_1], JSON, 200),
         # endpoint doesn't accept mixed media type for one file
         pytest.param([FILE_TXT_1], MIXED, 200, marks=pytest.mark.xfail),
         # endpoint fails because media type text/csv should have response type str
@@ -173,10 +191,17 @@ def test_process_text_2(test_files, m_input1, m_input2, expected_status):
         pytest.param([FILE_TXT_1], None, 200, marks=pytest.mark.xfail),
         ([FILE_TXT_1, FILE_TXT_2], JSON, 200),
         ([FILE_TXT_1, FILE_TXT_2], MIXED, 200),
+        ([GZIP_FILE_TXT_1, FILE_TXT_2], JSON, 200),
+        ([FILE_TXT_1, GZIP_FILE_TXT_2], MIXED, 200),
+        ([GZIP_FILE_TXT_1, GZIP_FILE_TXT_2], MIXED, 200),
         # endpoint fails because media type text/csv should have response type str
         pytest.param([FILE_TXT_1, FILE_TXT_2], TEXT_CSV, 200, marks=pytest.mark.xfail),
+        pytest.param([GZIP_FILE_TXT_1, FILE_TXT_2], TEXT_CSV, 200, marks=pytest.mark.xfail),
+        pytest.param([FILE_TXT_1, GZIP_FILE_TXT_2], TEXT_CSV, 200, marks=pytest.mark.xfail),
+        pytest.param([GZIP_FILE_TXT_1, GZIP_FILE_TXT_2], TEXT_CSV, 200, marks=pytest.mark.xfail),
         ([FILE_TXT_1, FILE_TXT_2], None, 200),
         ([FILE_TXT_2], JSON, 200),
+        ([GZIP_FILE_TXT_2], JSON, 200),
         # endpoint doesn't accept mixed media type for one file
         pytest.param([FILE_TXT_2], MIXED, 200, marks=pytest.mark.xfail),
         # endpoint fails because media type text/csv should have response type str
@@ -208,6 +233,12 @@ def test_process_text_3(test_files, response_type, expected_status):
         ([FILE_TXT_1, FILE_TXT_2], JSON, RESPONSE_SCHEMA_LABELSTUDIO, 200),
         ([FILE_TXT_1, FILE_TXT_2], MIXED, RESPONSE_SCHEMA_ISD, 200),
         ([FILE_TXT_1, FILE_TXT_2], MIXED, RESPONSE_SCHEMA_LABELSTUDIO, 200),
+        ([GZIP_FILE_TXT_1], JSON, RESPONSE_SCHEMA_ISD, 200),
+        ([GZIP_FILE_TXT_1], JSON, RESPONSE_SCHEMA_LABELSTUDIO, 200),
+        ([GZIP_FILE_TXT_1, FILE_TXT_2], JSON, RESPONSE_SCHEMA_ISD, 200),
+        ([FILE_TXT_1, GZIP_FILE_TXT_2], JSON, RESPONSE_SCHEMA_LABELSTUDIO, 200),
+        ([GZIP_FILE_TXT_1, GZIP_FILE_TXT_2], MIXED, RESPONSE_SCHEMA_ISD, 200),
+        ([GZIP_FILE_TXT_1, GZIP_FILE_TXT_2], MIXED, RESPONSE_SCHEMA_LABELSTUDIO, 200),
     ],
 )
 def test_process_text_4(test_files, response_type, response_schema, expected_status):
