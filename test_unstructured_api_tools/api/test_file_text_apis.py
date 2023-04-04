@@ -29,6 +29,10 @@ from test_unstructured_api_tools.api.functions_and_variables import (
     GZIP_FILE_IMAGE,
     GZIP_FILE_TXT_2,
     GZIP_FILE_TXT_1,
+    FILE_MARKDOWN,
+    reset_env_variables,
+    set_env_variables,
+    TEXT_CSV,
 )
 
 # accepts: files, text files
@@ -58,7 +62,7 @@ PROCESS_FILE_TEXT_4_ROUTE = [
 client = TestClient(app)
 
 
-def _assert_response_for_process_file_text_1(test_files, test_files_text, response):
+def _assert_response_for_process_file_text_1(test_files, test_files_text, response, response_type):
     def _json_for_one_file(test_file=None, test_text_file=None):
         text = None
         file_read = None
@@ -99,7 +103,17 @@ def _assert_response_for_process_file_text_1(test_files, test_files_text, respon
         test_text_files_arr = [
             _json_for_one_file(test_text_file=test_file) for test_file in test_files_text
         ]
-    assert response.json() == test_text_files_arr + test_files_arr
+    if response_type == JSON:
+        result = test_text_files_arr + test_files_arr
+        if len(result) == 1:
+            result = result[0]
+        assert response.json() == result
+    elif response_type == MIXED:
+        response_array = []
+        data = decoder.MultipartDecoder.from_response(response)
+        for i, part in enumerate(data.parts):
+            response_array.append(json.loads(b64decode(part.content)))
+        assert response_array == test_text_files_arr + test_files_arr
 
 
 def _assert_response_for_process_file_text_2(
@@ -148,7 +162,10 @@ def _assert_response_for_process_file_text_2(
             _json_for_one_file(test_text_file=test_file) for test_file in test_files_text
         ]
     if response_type == JSON:
-        assert response.json() == test_text_files_arr + test_files_arr
+        result = test_text_files_arr + test_files_arr
+        if len(result) == 1:
+            result = result[0]
+        assert response.json() == result
     elif response_type == MIXED:
         response_array = []
         data = decoder.MultipartDecoder.from_response(response)
@@ -203,7 +220,10 @@ def _assert_response_for_process_file_text_3(
             _json_for_one_file(test_text_file=test_file) for test_file in test_files_text
         ]
     if response_type == JSON:
-        assert response.json() == test_text_files_arr + test_files_arr
+        result = test_text_files_arr + test_files_arr
+        if len(result) == 1:
+            result = result[0]
+        assert response.json() == result
     elif response_type == MIXED:
         response_array = []
         data = decoder.MultipartDecoder.from_response(response)
@@ -260,7 +280,10 @@ def _assert_response_for_process_file_text_4(
             _json_for_one_file(test_text_file=test_file) for test_file in test_files_text
         ]
     if response_type == JSON:
-        assert response.json() == test_text_files_arr + test_files_arr
+        result = test_text_files_arr + test_files_arr
+        if len(result) == 1:
+            result = result[0]
+        assert response.json() == result
     elif response_type == MIXED:
         response_array = []
         data = decoder.MultipartDecoder.from_response(response)
@@ -269,68 +292,150 @@ def _assert_response_for_process_file_text_4(
         assert response_array == test_text_files_arr + test_files_arr
 
 
+@reset_env_variables
 @pytest.mark.parametrize(
-    "test_files,test_files_text,expected_status",
+    "test_files,test_files_text,expected_status,response_type,another_md_mimetype,allowed_mimetypes_str",
     [
-        ([FILE_DOCX], [FILE_TXT_1], 200),
-        ([FILE_DOCX, FILE_IMAGE], [FILE_TXT_1], 200),
-        ([FILE_DOCX, FILE_IMAGE], [FILE_TXT_2], 200),
-        ([FILE_DOCX, FILE_IMAGE], [FILE_TXT_1, FILE_TXT_2], 200),
-        ([FILE_DOCX], [FILE_TXT_2], 200),
-        ([FILE_IMAGE], [FILE_TXT_2], 200),
-        ([GZIP_FILE_DOCX], [FILE_TXT_1], 200),
-        ([FILE_DOCX, GZIP_FILE_IMAGE], [GZIP_FILE_TXT_1], 200),
-        ([GZIP_FILE_DOCX, GZIP_FILE_IMAGE], [GZIP_FILE_TXT_2], 200),
-        ([FILE_DOCX, FILE_IMAGE], [GZIP_FILE_TXT_1, GZIP_FILE_TXT_2], 200),
-        ([FILE_DOCX], [GZIP_FILE_TXT_2], 200),
-        ([GZIP_FILE_IMAGE], [GZIP_FILE_TXT_1], 200),
+        ([FILE_DOCX], [FILE_TXT_1], 200, JSON, False, None),
+        ([FILE_DOCX, FILE_IMAGE], [FILE_TXT_1], 200, JSON, False, None),
+        ([FILE_DOCX, FILE_IMAGE], [FILE_TXT_2], 200, JSON, False, None),
+        ([FILE_DOCX, FILE_IMAGE], [FILE_TXT_1, FILE_TXT_2], 200, JSON, False, None),
+        ([FILE_DOCX], [FILE_TXT_2], 200, JSON, False, None),
+        ([FILE_IMAGE], [FILE_TXT_2], 200, JSON, False, None),
+        ([GZIP_FILE_DOCX], [FILE_TXT_1], 200, JSON, False, None),
+        ([FILE_DOCX, GZIP_FILE_IMAGE], [GZIP_FILE_TXT_1], 200, JSON, False, None),
+        ([GZIP_FILE_DOCX, GZIP_FILE_IMAGE], [GZIP_FILE_TXT_2], 200, JSON, False, None),
+        ([FILE_DOCX, FILE_IMAGE], [GZIP_FILE_TXT_1, GZIP_FILE_TXT_2], 200, JSON, False, None),
+        ([FILE_DOCX], [GZIP_FILE_TXT_2], 200, JSON, False, None),
+        ([GZIP_FILE_IMAGE], [GZIP_FILE_TXT_1], 200, JSON, False, None),
+        ([FILE_MARKDOWN], [GZIP_FILE_TXT_1], 200, JSON, True, None),
+        (
+            [FILE_MARKDOWN],
+            [GZIP_FILE_TXT_1],
+            200,
+            JSON,
+            False,
+            f"{FILENAME_FORMATS[FILE_MARKDOWN]},{FILENAME_FORMATS[FILE_TXT_1]}",
+        ),
+        ([FILE_MARKDOWN], [GZIP_FILE_TXT_1], 400, JSON, False, FILENAME_FORMATS[FILE_TXT_1]),
+        ([FILE_MARKDOWN, FILE_DOCX], [GZIP_FILE_TXT_1, FILE_TXT_2], 200, MIXED, False, None),
+        ([], [], 400, JSON, False, None),
+        ([FILE_MARKDOWN, FILE_DOCX], [GZIP_FILE_TXT_1, FILE_TXT_2], 406, TEXT_CSV, False, None),
+        ([], [FILE_TXT_1], 200, JSON, False, None),
+        ([FILE_DOCX], [], 200, JSON, False, None),
     ],
 )
-def test_process_file_text_1(test_files, test_files_text, expected_status):
+def test_process_file_text_1(
+    test_files,
+    test_files_text,
+    expected_status,
+    response_type,
+    another_md_mimetype,
+    allowed_mimetypes_str,
+):
+    set_env_variables("UNSTRUCTURED_ALLOWED_MIMETYPES", allowed_mimetypes_str)
     for endpoint in PROCESS_FILE_TEXT_1_ROUTE:
         response = client.post(
             endpoint,
-            files=convert_files_for_api(test_files) + convert_text_files_for_api(test_files_text),
+            files=convert_files_for_api(test_files, another_md_mimetype)
+            + convert_text_files_for_api(test_files_text),
+            **generate_header_kwargs(response_type),
         )
         assert response.status_code == expected_status
         if response.status_code == 200:
-            _assert_response_for_process_file_text_1(test_files, test_files_text, response)
+            _assert_response_for_process_file_text_1(
+                test_files, test_files_text, response, response_type
+            )
 
 
+@reset_env_variables
 @pytest.mark.parametrize(
-    "test_files,test_files_text,response_type,m_input2,expected_status",
+    "test_files,test_files_text,response_type,m_input2,expected_status,another_md_mimetype,allowed_mimetypes_str",
     [
-        ([FILE_DOCX], [FILE_TXT_1], JSON, P_INPUT_2_MULTI, 200),
-        ([FILE_DOCX, FILE_IMAGE], [FILE_TXT_1], JSON, P_INPUT_2_MULTI, 200),
-        ([FILE_DOCX], [FILE_TXT_1], MIXED, P_INPUT_2_SINGLE, 200),
-        ([FILE_DOCX, FILE_IMAGE], [FILE_TXT_1], MIXED, P_INPUT_2_EMPTY, 200),
-        ([FILE_DOCX, FILE_IMAGE], [FILE_TXT_1, FILE_TXT_2], JSON, P_INPUT_2_MULTI, 200),
-        ([FILE_DOCX], [FILE_TXT_1, FILE_TXT_2], JSON, P_INPUT_2_SINGLE, 200),
-        ([FILE_IMAGE], [FILE_TXT_1], JSON, P_INPUT_2_MULTI, 200),
-        ([FILE_IMAGE], [FILE_TXT_1], MIXED, P_INPUT_2_EMPTY, 200),
-        ([GZIP_FILE_DOCX], [FILE_TXT_1], JSON, P_INPUT_2_MULTI, 200),
-        ([GZIP_FILE_DOCX, FILE_IMAGE], [FILE_TXT_1], JSON, P_INPUT_2_MULTI, 200),
-        ([FILE_DOCX], [GZIP_FILE_TXT_1], MIXED, P_INPUT_2_SINGLE, 200),
-        ([FILE_DOCX, GZIP_FILE_IMAGE], [GZIP_FILE_TXT_1], MIXED, P_INPUT_2_EMPTY, 200),
+        ([FILE_DOCX], [FILE_TXT_1], JSON, P_INPUT_2_MULTI, 200, False, None),
+        ([FILE_DOCX, FILE_IMAGE], [FILE_TXT_1], JSON, P_INPUT_2_MULTI, 200, False, None),
+        ([FILE_DOCX], [FILE_TXT_1], MIXED, P_INPUT_2_SINGLE, 200, False, None),
+        ([FILE_DOCX, FILE_IMAGE], [FILE_TXT_1], MIXED, P_INPUT_2_EMPTY, 200, False, None),
+        (
+            [FILE_DOCX, FILE_IMAGE],
+            [FILE_TXT_1, FILE_TXT_2],
+            JSON,
+            P_INPUT_2_MULTI,
+            200,
+            False,
+            None,
+        ),
+        ([FILE_DOCX], [FILE_TXT_1, FILE_TXT_2], JSON, P_INPUT_2_SINGLE, 200, False, None),
+        ([FILE_IMAGE], [FILE_TXT_1], JSON, P_INPUT_2_MULTI, 200, False, None),
+        ([FILE_IMAGE], [FILE_TXT_1], MIXED, P_INPUT_2_EMPTY, 200, False, None),
+        ([GZIP_FILE_DOCX], [FILE_TXT_1], JSON, P_INPUT_2_MULTI, 200, False, None),
+        ([GZIP_FILE_DOCX, FILE_IMAGE], [FILE_TXT_1], JSON, P_INPUT_2_MULTI, 200, False, None),
+        ([FILE_DOCX], [GZIP_FILE_TXT_1], MIXED, P_INPUT_2_SINGLE, 200, False, None),
+        ([FILE_DOCX, GZIP_FILE_IMAGE], [GZIP_FILE_TXT_1], MIXED, P_INPUT_2_EMPTY, 200, False, None),
         (
             [GZIP_FILE_DOCX, GZIP_FILE_IMAGE],
             [GZIP_FILE_TXT_1, FILE_TXT_2],
             JSON,
             P_INPUT_2_MULTI,
             200,
+            False,
+            None,
         ),
-        ([GZIP_FILE_DOCX], [GZIP_FILE_TXT_1, GZIP_FILE_TXT_2], JSON, P_INPUT_2_SINGLE, 200),
-        ([GZIP_FILE_IMAGE], [GZIP_FILE_TXT_1], JSON, P_INPUT_2_MULTI, 200),
-        ([GZIP_FILE_IMAGE], [FILE_TXT_1], MIXED, P_INPUT_2_EMPTY, 200),
+        (
+            [GZIP_FILE_DOCX],
+            [GZIP_FILE_TXT_1, GZIP_FILE_TXT_2],
+            JSON,
+            P_INPUT_2_SINGLE,
+            200,
+            False,
+            None,
+        ),
+        ([GZIP_FILE_IMAGE], [GZIP_FILE_TXT_1], JSON, P_INPUT_2_MULTI, 200, False, None),
+        ([], [FILE_TXT_1], TEXT_CSV, P_INPUT_2_EMPTY, 406, False, None),
+        ([], [FILE_TXT_1], JSON, P_INPUT_2_EMPTY, 200, False, None),
+        ([FILE_MARKDOWN], [FILE_TXT_1], JSON, P_INPUT_2_EMPTY, 200, True, None),
+        (
+            [FILE_MARKDOWN],
+            [FILE_TXT_1],
+            JSON,
+            P_INPUT_2_MULTI,
+            200,
+            False,
+            f"{FILENAME_FORMATS[FILE_MARKDOWN]},{FILENAME_FORMATS[FILE_TXT_1]}",
+        ),
+        (
+            [FILE_MARKDOWN],
+            [FILE_TXT_1],
+            JSON,
+            P_INPUT_2_SINGLE,
+            400,
+            False,
+            FILENAME_FORMATS[FILE_TXT_1],
+        ),
+        ([], [], JSON, P_INPUT_2_EMPTY, 400, False, None),
+        ([FILE_MARKDOWN], [FILE_TXT_1], TEXT_CSV, P_INPUT_2_MULTI, 406, False, None),
+        ([], [FILE_TXT_1], JSON, P_INPUT_2_SINGLE, 200, False, None),
+        ([FILE_DOCX], [], JSON, P_INPUT_2_SINGLE, 200, False, None),
+        ([], [FILE_TXT_1], MIXED, P_INPUT_2_EMPTY, 406, False, None),
     ],
 )
-def test_process_file_text_2(test_files, test_files_text, response_type, m_input2, expected_status):
+def test_process_file_text_2(
+    test_files,
+    test_files_text,
+    response_type,
+    m_input2,
+    expected_status,
+    another_md_mimetype,
+    allowed_mimetypes_str,
+):
+    set_env_variables("UNSTRUCTURED_ALLOWED_MIMETYPES", allowed_mimetypes_str)
     for endpoint in PROCESS_FILE_TEXT_2_ROUTE:
         response = client.post(
             endpoint,
-            files=convert_files_for_api(test_files) + convert_text_files_for_api(test_files_text),
+            files=convert_files_for_api(test_files, another_md_mimetype)
+            + convert_text_files_for_api(test_files_text),
             data={**m_input2, "output_format": response_type},
-            **generate_header_kwargs(response_type)
+            **generate_header_kwargs(response_type),
         )
         assert response.status_code == expected_status
         if response.status_code == 200:
@@ -339,39 +444,100 @@ def test_process_file_text_2(test_files, test_files_text, response_type, m_input
             )
 
 
+@reset_env_variables
 @pytest.mark.parametrize(
-    "test_files,test_files_text,response_type,response_schema,expected_status",
+    "test_files,test_files_text,response_type,response_schema,expected_status,another_md_mimetype,allowed_mimetypes_str",
     [
-        ([FILE_DOCX], [FILE_TXT_1], JSON, RESPONSE_SCHEMA_ISD, 200),
-        ([FILE_DOCX], [FILE_TXT_1], MIXED, RESPONSE_SCHEMA_ISD, 200),
-        ([FILE_DOCX, FILE_IMAGE], [FILE_TXT_1], JSON, RESPONSE_SCHEMA_ISD, 200),
-        ([FILE_DOCX, FILE_IMAGE], [FILE_TXT_1], MIXED, RESPONSE_SCHEMA_ISD, 200),
-        ([FILE_DOCX], [FILE_TXT_1], JSON, RESPONSE_SCHEMA_LABELSTUDIO, 200),
-        ([FILE_DOCX], [FILE_TXT_1], MIXED, RESPONSE_SCHEMA_LABELSTUDIO, 200),
-        ([FILE_DOCX, FILE_IMAGE], [FILE_TXT_1], JSON, RESPONSE_SCHEMA_LABELSTUDIO, 200),
-        ([FILE_DOCX, FILE_IMAGE], [FILE_TXT_1], MIXED, RESPONSE_SCHEMA_LABELSTUDIO, 200),
-        ([FILE_DOCX, FILE_IMAGE], [FILE_TXT_1, FILE_TXT_2], MIXED, RESPONSE_SCHEMA_ISD, 200),
+        ([FILE_DOCX], [FILE_TXT_1], JSON, RESPONSE_SCHEMA_ISD, 200, False, None),
+        ([FILE_DOCX], [FILE_TXT_1], MIXED, RESPONSE_SCHEMA_ISD, 200, False, None),
+        ([FILE_DOCX, FILE_IMAGE], [FILE_TXT_1], JSON, RESPONSE_SCHEMA_ISD, 200, False, None),
+        ([FILE_DOCX, FILE_IMAGE], [FILE_TXT_1], MIXED, RESPONSE_SCHEMA_ISD, 200, False, None),
+        ([FILE_DOCX], [FILE_TXT_1], JSON, RESPONSE_SCHEMA_LABELSTUDIO, 200, False, None),
+        ([FILE_DOCX], [FILE_TXT_1], MIXED, RESPONSE_SCHEMA_LABELSTUDIO, 200, False, None),
+        (
+            [FILE_DOCX, FILE_IMAGE],
+            [FILE_TXT_1],
+            JSON,
+            RESPONSE_SCHEMA_LABELSTUDIO,
+            200,
+            False,
+            None,
+        ),
+        (
+            [FILE_DOCX, FILE_IMAGE],
+            [FILE_TXT_1],
+            MIXED,
+            RESPONSE_SCHEMA_LABELSTUDIO,
+            200,
+            False,
+            None,
+        ),
+        (
+            [FILE_DOCX, FILE_IMAGE],
+            [FILE_TXT_1, FILE_TXT_2],
+            MIXED,
+            RESPONSE_SCHEMA_ISD,
+            200,
+            False,
+            None,
+        ),
         (
             [FILE_DOCX, FILE_IMAGE],
             [FILE_TXT_1, FILE_TXT_2],
             MIXED,
             RESPONSE_SCHEMA_LABELSTUDIO,
             200,
+            False,
+            None,
         ),
-        ([GZIP_FILE_DOCX], [FILE_TXT_1], JSON, RESPONSE_SCHEMA_ISD, 200),
-        ([FILE_DOCX], [GZIP_FILE_TXT_1], MIXED, RESPONSE_SCHEMA_ISD, 200),
-        ([GZIP_FILE_DOCX, GZIP_FILE_IMAGE], [FILE_TXT_1], JSON, RESPONSE_SCHEMA_ISD, 200),
-        ([FILE_DOCX, GZIP_FILE_IMAGE], [GZIP_FILE_TXT_1], MIXED, RESPONSE_SCHEMA_ISD, 200),
-        ([FILE_DOCX], [GZIP_FILE_TXT_1], JSON, RESPONSE_SCHEMA_LABELSTUDIO, 200),
-        ([GZIP_FILE_DOCX], [GZIP_FILE_TXT_1], MIXED, RESPONSE_SCHEMA_LABELSTUDIO, 200),
-        ([GZIP_FILE_DOCX, GZIP_FILE_IMAGE], [FILE_TXT_1], JSON, RESPONSE_SCHEMA_LABELSTUDIO, 200),
-        ([FILE_DOCX, GZIP_FILE_IMAGE], [GZIP_FILE_TXT_1], MIXED, RESPONSE_SCHEMA_LABELSTUDIO, 200),
+        ([GZIP_FILE_DOCX], [FILE_TXT_1], JSON, RESPONSE_SCHEMA_ISD, 200, False, None),
+        ([FILE_DOCX], [GZIP_FILE_TXT_1], MIXED, RESPONSE_SCHEMA_ISD, 200, False, None),
+        (
+            [GZIP_FILE_DOCX, GZIP_FILE_IMAGE],
+            [FILE_TXT_1],
+            JSON,
+            RESPONSE_SCHEMA_ISD,
+            200,
+            False,
+            None,
+        ),
+        (
+            [FILE_DOCX, GZIP_FILE_IMAGE],
+            [GZIP_FILE_TXT_1],
+            MIXED,
+            RESPONSE_SCHEMA_ISD,
+            200,
+            False,
+            None,
+        ),
+        ([FILE_DOCX], [GZIP_FILE_TXT_1], JSON, RESPONSE_SCHEMA_LABELSTUDIO, 200, False, None),
+        ([GZIP_FILE_DOCX], [GZIP_FILE_TXT_1], MIXED, RESPONSE_SCHEMA_LABELSTUDIO, 200, False, None),
+        (
+            [GZIP_FILE_DOCX, GZIP_FILE_IMAGE],
+            [FILE_TXT_1],
+            JSON,
+            RESPONSE_SCHEMA_LABELSTUDIO,
+            200,
+            False,
+            None,
+        ),
+        (
+            [FILE_DOCX, GZIP_FILE_IMAGE],
+            [GZIP_FILE_TXT_1],
+            MIXED,
+            RESPONSE_SCHEMA_LABELSTUDIO,
+            200,
+            False,
+            None,
+        ),
         (
             [FILE_DOCX, GZIP_FILE_IMAGE],
             [GZIP_FILE_TXT_1, GZIP_FILE_TXT_2],
             MIXED,
             RESPONSE_SCHEMA_ISD,
             200,
+            False,
+            None,
         ),
         (
             [GZIP_FILE_DOCX, GZIP_FILE_IMAGE],
@@ -379,18 +545,54 @@ def test_process_file_text_2(test_files, test_files_text, response_type, m_input
             MIXED,
             RESPONSE_SCHEMA_LABELSTUDIO,
             200,
+            False,
+            None,
         ),
+        ([], [GZIP_FILE_TXT_1], TEXT_CSV, RESPONSE_SCHEMA_LABELSTUDIO, 406, False, None),
+        ([], [GZIP_FILE_TXT_1], JSON, RESPONSE_SCHEMA_LABELSTUDIO, 200, False, None),
+        ([FILE_DOCX, FILE_MARKDOWN], [GZIP_FILE_TXT_1], JSON, RESPONSE_SCHEMA_ISD, 200, True, None),
+        (
+            [FILE_DOCX],
+            [GZIP_FILE_TXT_1],
+            JSON,
+            RESPONSE_SCHEMA_ISD,
+            200,
+            False,
+            f"{FILENAME_FORMATS[FILE_DOCX]},{FILENAME_FORMATS[FILE_TXT_1]}",
+        ),
+        (
+            [FILE_DOCX, FILE_MARKDOWN],
+            [GZIP_FILE_TXT_1],
+            JSON,
+            RESPONSE_SCHEMA_ISD,
+            400,
+            False,
+            FILENAME_FORMATS[FILE_TXT_1],
+        ),
+        ([], [], JSON, RESPONSE_SCHEMA_LABELSTUDIO, 400, False, None),
+        ([], [FILE_TXT_1, FILE_TXT_2], TEXT_CSV, RESPONSE_SCHEMA_LABELSTUDIO, 406, False, None),
+        ([], [FILE_TXT_1], JSON, RESPONSE_SCHEMA_LABELSTUDIO, 200, False, None),
+        ([FILE_DOCX], [], JSON, RESPONSE_SCHEMA_LABELSTUDIO, 200, False, None),
+        ([FILE_DOCX], [], MIXED, RESPONSE_SCHEMA_LABELSTUDIO, 406, False, None),
     ],
 )
 def test_process_file_text_3(
-    test_files, test_files_text, response_type, response_schema, expected_status
+    test_files,
+    test_files_text,
+    response_type,
+    response_schema,
+    expected_status,
+    another_md_mimetype,
+    allowed_mimetypes_str,
 ):
+    set_env_variables("UNSTRUCTURED_ALLOWED_MIMETYPES", allowed_mimetypes_str)
     for endpoint in PROCESS_FILE_TEXT_3_ROUTE:
         response = client.post(
             endpoint,
-            files=convert_files_for_api(test_files) + convert_text_files_for_api(test_files_text),
+            files=convert_files_for_api(test_files, another_md_mimetype)
+            + convert_text_files_for_api(test_files_text),
             data={**response_schema, "output_format": response_type},
-            **generate_header_kwargs(response_type)
+            **generate_header_kwargs(response_type),
         )
         assert response.status_code == expected_status
         if response.status_code == 200:
@@ -399,8 +601,9 @@ def test_process_file_text_3(
             )
 
 
+@reset_env_variables
 @pytest.mark.parametrize(
-    "test_files,test_files_text,response_type,response_schema,m_input1,m_input2,expected_status",
+    "test_files,test_files_text,response_type,response_schema,m_input1,m_input2,expected_status,another_md_mimetype,allowed_mimetypes_str",
     [
         (
             [FILE_DOCX],
@@ -410,6 +613,8 @@ def test_process_file_text_3(
             P_INPUT_1_MULTI,
             P_INPUT_2_SINGLE,
             200,
+            False,
+            None,
         ),
         (
             [FILE_DOCX, FILE_IMAGE],
@@ -419,6 +624,8 @@ def test_process_file_text_3(
             P_INPUT_1_SINGLE,
             P_INPUT_2_SINGLE,
             200,
+            False,
+            None,
         ),
         (
             [FILE_DOCX],
@@ -428,6 +635,8 @@ def test_process_file_text_3(
             P_INPUT_1_MULTI,
             P_INPUT_2_MULTI,
             200,
+            False,
+            None,
         ),
         (
             [FILE_DOCX, FILE_IMAGE],
@@ -437,6 +646,8 @@ def test_process_file_text_3(
             P_INPUT_1_MULTI,
             P_INPUT_2_SINGLE,
             200,
+            False,
+            None,
         ),
         (
             [FILE_DOCX],
@@ -446,6 +657,8 @@ def test_process_file_text_3(
             P_INPUT_1_MULTI,
             P_INPUT_2_EMPTY,
             200,
+            False,
+            None,
         ),
         (
             [FILE_DOCX, FILE_IMAGE],
@@ -455,6 +668,8 @@ def test_process_file_text_3(
             P_INPUT_1_SINGLE,
             P_INPUT_2_SINGLE,
             200,
+            False,
+            None,
         ),
         (
             [FILE_DOCX],
@@ -464,6 +679,8 @@ def test_process_file_text_3(
             P_INPUT_1_EMPTY,
             P_INPUT_2_EMPTY,
             200,
+            False,
+            None,
         ),
         (
             [FILE_DOCX, FILE_IMAGE],
@@ -473,6 +690,8 @@ def test_process_file_text_3(
             P_INPUT_1_MULTI,
             P_INPUT_2_MULTI,
             200,
+            False,
+            None,
         ),
         (
             [GZIP_FILE_DOCX],
@@ -482,6 +701,8 @@ def test_process_file_text_3(
             P_INPUT_1_MULTI,
             P_INPUT_2_SINGLE,
             200,
+            False,
+            None,
         ),
         (
             [FILE_DOCX, GZIP_FILE_IMAGE],
@@ -491,6 +712,8 @@ def test_process_file_text_3(
             P_INPUT_1_SINGLE,
             P_INPUT_2_SINGLE,
             200,
+            False,
+            None,
         ),
         (
             [FILE_DOCX],
@@ -500,6 +723,8 @@ def test_process_file_text_3(
             P_INPUT_1_MULTI,
             P_INPUT_2_MULTI,
             200,
+            False,
+            None,
         ),
         (
             [GZIP_FILE_DOCX, GZIP_FILE_IMAGE],
@@ -509,6 +734,8 @@ def test_process_file_text_3(
             P_INPUT_1_MULTI,
             P_INPUT_2_SINGLE,
             200,
+            False,
+            None,
         ),
         (
             [GZIP_FILE_DOCX],
@@ -518,6 +745,8 @@ def test_process_file_text_3(
             P_INPUT_1_MULTI,
             P_INPUT_2_EMPTY,
             200,
+            False,
+            None,
         ),
         (
             [GZIP_FILE_DOCX, FILE_IMAGE],
@@ -527,6 +756,8 @@ def test_process_file_text_3(
             P_INPUT_1_SINGLE,
             P_INPUT_2_SINGLE,
             200,
+            False,
+            None,
         ),
         (
             [GZIP_FILE_DOCX],
@@ -536,6 +767,8 @@ def test_process_file_text_3(
             P_INPUT_1_EMPTY,
             P_INPUT_2_EMPTY,
             200,
+            False,
+            None,
         ),
         (
             [GZIP_FILE_DOCX, GZIP_FILE_IMAGE],
@@ -545,18 +778,140 @@ def test_process_file_text_3(
             P_INPUT_1_MULTI,
             P_INPUT_2_MULTI,
             200,
+            False,
+            None,
+        ),
+        (
+            [],
+            [GZIP_FILE_TXT_1, GZIP_FILE_TXT_2],
+            TEXT_CSV,
+            RESPONSE_SCHEMA_ISD,
+            P_INPUT_1_MULTI,
+            P_INPUT_2_MULTI,
+            406,
+            False,
+            None,
+        ),
+        (
+            [],
+            [GZIP_FILE_TXT_2],
+            TEXT_CSV,
+            RESPONSE_SCHEMA_ISD,
+            P_INPUT_1_MULTI,
+            P_INPUT_2_MULTI,
+            406,
+            False,
+            None,
+        ),
+        (
+            [],
+            [FILE_TXT_2],
+            JSON,
+            RESPONSE_SCHEMA_ISD,
+            P_INPUT_1_MULTI,
+            P_INPUT_2_MULTI,
+            200,
+            False,
+            None,
+        ),
+        (
+            [FILE_MARKDOWN],
+            [FILE_TXT_2],
+            JSON,
+            RESPONSE_SCHEMA_ISD,
+            P_INPUT_1_MULTI,
+            P_INPUT_2_MULTI,
+            200,
+            True,
+            None,
+        ),
+        (
+            [FILE_MARKDOWN],
+            [FILE_TXT_2],
+            JSON,
+            RESPONSE_SCHEMA_ISD,
+            P_INPUT_1_MULTI,
+            P_INPUT_2_MULTI,
+            200,
+            False,
+            f"{FILENAME_FORMATS[FILE_MARKDOWN]},{FILENAME_FORMATS[FILE_TXT_2]}",
+        ),
+        (
+            [FILE_MARKDOWN],
+            [FILE_TXT_2],
+            JSON,
+            RESPONSE_SCHEMA_ISD,
+            P_INPUT_1_MULTI,
+            P_INPUT_2_MULTI,
+            400,
+            False,
+            FILENAME_FORMATS[FILE_TXT_1],
+        ),
+        (
+            [],
+            [],
+            JSON,
+            RESPONSE_SCHEMA_LABELSTUDIO,
+            P_INPUT_1_EMPTY,
+            P_INPUT_2_EMPTY,
+            400,
+            False,
+            None,
+        ),
+        (
+            [],
+            [FILE_TXT_1],
+            JSON,
+            RESPONSE_SCHEMA_LABELSTUDIO,
+            P_INPUT_1_EMPTY,
+            P_INPUT_2_EMPTY,
+            200,
+            False,
+            None,
+        ),
+        (
+            [FILE_DOCX],
+            [],
+            JSON,
+            RESPONSE_SCHEMA_LABELSTUDIO,
+            P_INPUT_1_EMPTY,
+            P_INPUT_2_EMPTY,
+            200,
+            False,
+            None,
+        ),
+        (
+            [FILE_DOCX],
+            [],
+            MIXED,
+            RESPONSE_SCHEMA_LABELSTUDIO,
+            P_INPUT_1_EMPTY,
+            P_INPUT_2_EMPTY,
+            406,
+            False,
+            None,
         ),
     ],
 )
 def test_process_file_text_4(
-    test_files, test_files_text, response_type, response_schema, m_input1, m_input2, expected_status
+    test_files,
+    test_files_text,
+    response_type,
+    response_schema,
+    m_input1,
+    m_input2,
+    expected_status,
+    another_md_mimetype,
+    allowed_mimetypes_str,
 ):
+    set_env_variables("UNSTRUCTURED_ALLOWED_MIMETYPES", allowed_mimetypes_str)
     for endpoint in PROCESS_FILE_TEXT_4_ROUTE:
         response = client.post(
             endpoint,
-            files=convert_files_for_api(test_files) + convert_text_files_for_api(test_files_text),
+            files=convert_files_for_api(test_files, another_md_mimetype)
+            + convert_text_files_for_api(test_files_text),
             data={**m_input1, **m_input2, **response_schema, "output_format": response_type},
-            **generate_header_kwargs(response_type)
+            **generate_header_kwargs(response_type),
         )
         assert response.status_code == expected_status
         if response.status_code == 200:

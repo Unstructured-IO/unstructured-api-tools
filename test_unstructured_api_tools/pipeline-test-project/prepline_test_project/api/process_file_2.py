@@ -162,7 +162,7 @@ def pipeline_1(
 
             def response_generator(is_multipart):
                 for file in files:
-                    _ = get_validated_mimetype(file)
+                    get_validated_mimetype(file)
 
                     _file = file.file
 
@@ -184,7 +184,7 @@ def pipeline_1(
             file = files[0]
             _file = file.file
 
-            _ = get_validated_mimetype(file)
+            get_validated_mimetype(file)
 
             response = pipeline_api(
                 _file,
@@ -197,11 +197,6 @@ def pipeline_1(
             content='Request parameter "files" is required.\n',
             status_code=status.HTTP_400_BAD_REQUEST,
         )
-
-
-@app.get("/healthcheck", status_code=status.HTTP_200_OK)
-def healthcheck(request: Request):
-    return {"healthcheck": "HEALTHCHECK STATUS: EVERYTHING OK!"}
 
 
 app.include_router(router)

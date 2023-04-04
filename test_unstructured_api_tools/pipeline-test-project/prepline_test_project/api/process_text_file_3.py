@@ -295,9 +295,4 @@ def pipeline_1(
             )
 
 
-@app.get("/healthcheck", status_code=status.HTTP_200_OK)
-def healthcheck(request: Request):
-    return {"healthcheck": "HEALTHCHECK STATUS: EVERYTHING OK!"}
-
-
 app.include_router(router)
