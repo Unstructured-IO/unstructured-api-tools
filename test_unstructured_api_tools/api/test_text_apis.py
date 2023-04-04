@@ -181,7 +181,13 @@ def test_process_text_1(
 
 @reset_env_variables
 @pytest.mark.parametrize(
-    "test_files,m_input1,m_input2,expected_status,another_md_mimetype,allowed_mimetypes_str,response_type",
+    "test_files,"
+    "m_input1,"
+    "m_input2,"
+    "expected_status,"
+    "another_md_mimetype,"
+    "allowed_mimetypes_str,"
+    "response_type",
     [
         ([FILE_TXT_1], P_INPUT_1_SINGLE, P_INPUT_2_SINGLE, 200, False, None, JSON),
         ([FILE_TXT_1], P_INPUT_1_EMPTY, P_INPUT_2_SINGLE, 200, False, None, JSON),
@@ -333,7 +339,12 @@ def test_process_text_3(
 
 @reset_env_variables
 @pytest.mark.parametrize(
-    "test_files,response_type,response_schema,expected_status,another_md_mimetype,allowed_mimetypes_str",
+    "test_files,"
+    "response_type,"
+    "response_schema,"
+    "expected_status,"
+    "another_md_mimetype,"
+    "allowed_mimetypes_str",
     [
         ([FILE_TXT_1], JSON, RESPONSE_SCHEMA_ISD, 200, False, None),
         ([FILE_TXT_1], JSON, RESPONSE_SCHEMA_LABELSTUDIO, 200, False, None),

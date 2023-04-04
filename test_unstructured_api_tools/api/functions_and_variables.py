@@ -95,14 +95,12 @@ def generate_header_kwargs(value=None):
 def reset_env_variables(func):
     @functools.wraps(func)
     def create(*args, **kwargs):
-        print("save envs")
         env_variables = dict(os.environ)
         try:
             func(*args, **kwargs)
         finally:
             os.environ.clear()
             os.environ.update(env_variables)
-            print("update envs")
 
     return create
 

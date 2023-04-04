@@ -294,7 +294,12 @@ def _assert_response_for_process_file_text_4(
 
 @reset_env_variables
 @pytest.mark.parametrize(
-    "test_files,test_files_text,expected_status,response_type,another_md_mimetype,allowed_mimetypes_str",
+    "test_files,"
+    "test_files_text,"
+    "expected_status,"
+    "response_type,"
+    "another_md_mimetype,"
+    "allowed_mimetypes_str",
     [
         ([FILE_DOCX], [FILE_TXT_1], 200, JSON, False, None),
         ([FILE_DOCX, FILE_IMAGE], [FILE_TXT_1], 200, JSON, False, None),
@@ -350,7 +355,13 @@ def test_process_file_text_1(
 
 @reset_env_variables
 @pytest.mark.parametrize(
-    "test_files,test_files_text,response_type,m_input2,expected_status,another_md_mimetype,allowed_mimetypes_str",
+    "test_files,"
+    "test_files_text,"
+    "response_type,"
+    "m_input2,"
+    "expected_status,"
+    "another_md_mimetype,"
+    "allowed_mimetypes_str",
     [
         ([FILE_DOCX], [FILE_TXT_1], JSON, P_INPUT_2_MULTI, 200, False, None),
         ([FILE_DOCX, FILE_IMAGE], [FILE_TXT_1], JSON, P_INPUT_2_MULTI, 200, False, None),
@@ -446,7 +457,13 @@ def test_process_file_text_2(
 
 @reset_env_variables
 @pytest.mark.parametrize(
-    "test_files,test_files_text,response_type,response_schema,expected_status,another_md_mimetype,allowed_mimetypes_str",
+    "test_files,"
+    "test_files_text,"
+    "response_type,"
+    "response_schema,"
+    "expected_status,"
+    "another_md_mimetype,"
+    "allowed_mimetypes_str",
     [
         ([FILE_DOCX], [FILE_TXT_1], JSON, RESPONSE_SCHEMA_ISD, 200, False, None),
         ([FILE_DOCX], [FILE_TXT_1], MIXED, RESPONSE_SCHEMA_ISD, 200, False, None),
@@ -603,7 +620,15 @@ def test_process_file_text_3(
 
 @reset_env_variables
 @pytest.mark.parametrize(
-    "test_files,test_files_text,response_type,response_schema,m_input1,m_input2,expected_status,another_md_mimetype,allowed_mimetypes_str",
+    "test_files,"
+    "test_files_text,"
+    "response_type,"
+    "response_schema,"
+    "m_input1,"
+    "m_input2,"
+    "expected_status,"
+    "another_md_mimetype,"
+    "allowed_mimetypes_str",
     [
         (
             [FILE_DOCX],

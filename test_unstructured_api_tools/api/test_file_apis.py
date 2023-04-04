@@ -272,7 +272,12 @@ def test_process_file_2(
 
 @reset_env_variables
 @pytest.mark.parametrize(
-    "test_files,response_type,response_schema,expected_status,another_md_mimetype,allowed_mimetypes_str",
+    "test_files,"
+    "response_type,"
+    "response_schema,"
+    "expected_status,"
+    "another_md_mimetype,"
+    "allowed_mimetypes_str",
     [
         ([FILE_DOCX], JSON, RESPONSE_SCHEMA_ISD, 200, False, None),
         # endpoint doesn't accept mixed media type for one file
@@ -413,7 +418,13 @@ def test_process_file_3(
 
 @reset_env_variables
 @pytest.mark.parametrize(
-    "test_files,response_type,response_schema,m_input1,expected_status,allowed_mimetypes_str,another_md_mimetype",
+    "test_files,"
+    "response_type,"
+    "response_schema,"
+    "m_input1,"
+    "expected_status,"
+    "allowed_mimetypes_str,"
+    "another_md_mimetype",
     [
         ([FILE_DOCX], JSON, RESPONSE_SCHEMA_ISD, P_INPUT_1_EMPTY, 200, None, False),
         ([FILE_DOCX], JSON, RESPONSE_SCHEMA_ISD, P_INPUT_1_MULTI, 200, None, False),
@@ -537,7 +548,14 @@ def test_process_file_4(
 
 @reset_env_variables
 @pytest.mark.parametrize(
-    "test_files,response_type,response_schema,m_input1,m_input2,expected_status,another_md_mimetype,allowed_mimetypes_str",
+    "test_files,"
+    "response_type,"
+    "response_schema,"
+    "m_input1,"
+    "m_input2,"
+    "expected_status,"
+    "another_md_mimetype,"
+    "allowed_mimetypes_str",
     [
         (
             [FILE_DOCX],
