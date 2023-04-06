@@ -1,3 +1,7 @@
+# 0.9.2
+
+* Add content_type to error message for unsupported file types
+  
 # 0.9.1
 
 * Allow references to standard imports in pipeline cells
