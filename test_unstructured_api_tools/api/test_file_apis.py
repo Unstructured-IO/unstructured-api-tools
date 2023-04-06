@@ -419,6 +419,11 @@ def test_supported_mimetypes():
     # Let's disallow docx and make sure we get the right error in each case
     os.environ["UNSTRUCTURED_ALLOWED_MIMETYPES"] = "image/jpeg"
 
+    docx_content_type = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    docx_unsupported_error_message = (
+        f"Unable to process {FILE_DOCX}: " f"File type {docx_content_type} is not supported."
+    )
+
     for process_file_endpoint in PROCESS_FILE_1_ROUTE:
         # Sending one file
         response = client.post(
@@ -427,7 +432,7 @@ def test_supported_mimetypes():
         )
         assert (
             response.status_code == 400
-            and response.json()["detail"] == f"File type not supported: {FILE_DOCX}"
+            and response.json()["detail"] == docx_unsupported_error_message
         )
 
         # Sending multiple files
@@ -437,7 +442,7 @@ def test_supported_mimetypes():
         )
         assert (
             response.status_code == 400
-            and response.json()["detail"] == f"File type not supported: {FILE_DOCX}"
+            and response.json()["detail"] == docx_unsupported_error_message
         )
 
         # for process_file_text_endpoint in PROCESS_FILE_TEXT_1_ROUTE:
@@ -450,7 +455,7 @@ def test_supported_mimetypes():
             )
             assert (
                 response.status_code == 400
-                and response.json()["detail"] == f"File type not supported: {FILE_DOCX}"
+                and response.json()["detail"] == docx_unsupported_error_message
             )
 
             # Multiple files (in an api that supports text files)
@@ -460,7 +465,7 @@ def test_supported_mimetypes():
             )
             assert (
                 response.status_code == 400
-                and response.json()["detail"] == f"File type not supported: {FILE_DOCX}"
+                and response.json()["detail"] == docx_unsupported_error_message
             )
 
     # If the client doesn't set a mimetype, we may just see application/octet-stream
@@ -470,8 +475,7 @@ def test_supported_mimetypes():
         files=[("files", (FILE_DOCX, open(FILE_DOCX, "rb"), "application/octet-stream"))],
     )
     assert (
-        response.status_code == 400
-        and response.json()["detail"] == f"File type not supported: {FILE_DOCX}"
+        response.status_code == 400 and response.json()["detail"] == docx_unsupported_error_message
     )
 
     # Finally, allow all file types again
