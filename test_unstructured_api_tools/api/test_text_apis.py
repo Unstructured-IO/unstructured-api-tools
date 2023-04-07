@@ -161,7 +161,12 @@ def _assert_response_for_process_text_4(test_files, response, response_type, res
     ],
 )
 def test_process_text_1(
-    test_files, expected_status, another_md_mimetype, allowed_mimetypes_str, response_type, monkeypatch
+    test_files,
+    expected_status,
+    another_md_mimetype,
+    allowed_mimetypes_str,
+    response_type,
+    monkeypatch,
 ):
     if allowed_mimetypes_str:
         monkeypatch.setenv("UNSTRUCTURED_ALLOWED_MIMETYPES", allowed_mimetypes_str)
@@ -325,7 +330,12 @@ def test_process_text_2(
     ],
 )
 def test_process_text_3(
-    test_files, response_type, expected_status, another_md_mimetype, allowed_mimetypes_str, monkeypatch
+    test_files,
+    response_type,
+    expected_status,
+    another_md_mimetype,
+    allowed_mimetypes_str,
+    monkeypatch,
 ):
     if allowed_mimetypes_str:
         monkeypatch.setenv("UNSTRUCTURED_ALLOWED_MIMETYPES", allowed_mimetypes_str)

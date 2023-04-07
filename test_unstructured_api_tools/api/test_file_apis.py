@@ -252,7 +252,12 @@ def test_process_file_1(test_files, test_params, test_type_header, expected_stat
     ],
 )
 def test_process_file_2(
-    test_files, response_type, expected_status, allowed_mimetypes_str, another_md_mimetype, monkeypatch
+    test_files,
+    response_type,
+    expected_status,
+    allowed_mimetypes_str,
+    another_md_mimetype,
+    monkeypatch,
 ):
     if allowed_mimetypes_str:
         monkeypatch.setenv("UNSTRUCTURED_ALLOWED_MIMETYPES", allowed_mimetypes_str)
