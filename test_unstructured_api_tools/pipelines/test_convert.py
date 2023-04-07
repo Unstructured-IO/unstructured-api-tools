@@ -108,7 +108,7 @@ def test_get_api_cells(sample_notebook):
 
 
 def tests_notebook_to_script(sample_notebook):
-    script = convert.notebook_to_script(sample_notebook)
+    script, _script_with_standar_imports = convert.notebook_to_script(sample_notebook)
     script_start = "import random\n\n"
 
     assert script.startswith(script_start)

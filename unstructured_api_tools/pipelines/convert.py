@@ -44,7 +44,7 @@ def generate_pipeline_api(
     """Given the filename for a pipeline notebooks, generates the a FastAPI
     application with the appropriate REST routes."""
     notebook = read_notebook(filename)
-    script = notebook_to_script(notebook)
+    script, script_with_standard_imports = notebook_to_script(notebook)
     pipeline_path = get_pipeline_path(
         filename=get_script_filename(filename),
         pipeline_family=pipeline_family,
@@ -59,7 +59,7 @@ def generate_pipeline_api(
         config_filename=config_filename,
         shorter=True,
     )
-    pipeline_api_params = _infer_params_from_pipeline_api(script)
+    pipeline_api_params = _infer_params_from_pipeline_api(script_with_standard_imports)
 
     environment = Environment(loader=FileSystemLoader(TEMPLATE_PATH))
     template = environment.get_template("pipeline_api.txt")
@@ -295,12 +295,35 @@ def get_pipeline_api_cells(notebook: nbformat.NotebookNode) -> nbformat.Notebook
     return api_notebook
 
 
-def notebook_to_script(notebook: nbformat.NotebookNode) -> str:
-    """Converts a notebook to a Python script, looking for cells that beging with # pipeline-api"""
+def notebook_to_script(notebook: nbformat.NotebookNode) -> Tuple[str, str]:
+    """Converts a notebook to a Python script, looking for cells that beging with # pipeline-api.
+
+    Returns (clean_script, clean_script_with_standard_imports) where
+    clean_script is strictly equivalent to the concatenation of the # pipeline-api cells
+    and clean_script_with_standard_imports includes standard imports that will
+    be available in any FastAPI pipeline API module.
+    """
     script_exporter = ScriptExporter()
     api_notebook = get_pipeline_api_cells(notebook)
     body, _ = script_exporter.from_notebook_node(api_notebook)
-    return _cleanup_script(body)
+    # add template imports to the body since these will be accessible at runtime in the FastAPI
+    body = (
+        """import io
+import os
+import gzip
+import mimetypes
+import json\n"""
+        + body
+    )
+    clean_script_with_standard_imports = _cleanup_script(body)
+    match = re.search(r"import json\s*(.*)", clean_script_with_standard_imports, re.DOTALL)
+    clean_script = ""
+    if match:
+        clean_script = match.group(1).lstrip()
+    else:
+        # separated to satisfy mypy
+        raise RuntimeError("there should always be a regex match here")
+    return clean_script, clean_script_with_standard_imports
 
 
 def _cleanup_script(script: str) -> str:

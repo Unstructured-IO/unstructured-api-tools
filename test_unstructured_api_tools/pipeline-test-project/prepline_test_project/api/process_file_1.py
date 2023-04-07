@@ -32,7 +32,10 @@ app = FastAPI()
 router = APIRouter()
 
 
-# pipeline-api
+# test accessing os in a #pipeline-api cell does not break things
+_ = os.environ
+
+
 def pipeline_api(
     file,
     filename=None,
@@ -66,7 +69,11 @@ def get_validated_mimetype(file):
 
         if content_type not in allowed_mimetypes:
             raise HTTPException(
-                status_code=400, detail=f"File type not supported: {file.filename}"
+                status_code=400,
+                detail=(
+                    f"Unable to process {file.filename}: "
+                    f"File type {content_type} is not supported."
+                ),
             )
 
     return content_type
