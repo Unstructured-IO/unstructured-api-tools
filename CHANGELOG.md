@@ -1,6 +1,7 @@
 # 0.9.2
 
 * Add content_type to error message for unsupported file types
+* Removed /healthcheck endpoint from docs
   
 # 0.9.1
 
