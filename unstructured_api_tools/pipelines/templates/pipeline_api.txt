@@ -209,7 +209,7 @@ def pipeline_1(request: Request,
                 {% if "file_content_type" in optional_param_value_map %}
                 file_content_type = get_validated_mimetype(file)
                 {% else %}
-                _ = get_validated_mimetype(file)
+                get_validated_mimetype(file)
                 {% endif %}
 
                 response = pipeline_api(
@@ -250,7 +250,7 @@ def pipeline_1(request: Request,
             {% if "file_content_type" in optional_param_value_map %}
             file_content_type = get_validated_mimetype(file)
             {% else %}
-            _ = get_validated_mimetype(file)
+            get_validated_mimetype(file)
             {% endif %}
 
             response = pipeline_api(
@@ -297,7 +297,7 @@ def pipeline_1(request: Request,
                     {% if "file_content_type" in optional_param_value_map %}
                     file_content_type = get_validated_mimetype(file)
                     {% else %}
-                    _ = get_validated_mimetype(file)
+                    get_validated_mimetype(file)
                     {% endif %}
 
                     {% if accepts_text %}
@@ -338,7 +338,7 @@ def pipeline_1(request: Request,
             {% if "file_content_type" in optional_param_value_map %}
             file_content_type = get_validated_mimetype(file)
             {% else %}
-            _ = get_validated_mimetype(file)
+            get_validated_mimetype(file)
             {% endif %}
             {% endif %}
 
@@ -396,13 +396,6 @@ def pipeline_1(request: Request,
     return response
     {% endif %}
 {% endif %}
-
-
-@app.get("/healthcheck", status_code=status.HTTP_200_OK)
-def healthcheck(request: Request):
-    return {
-        "healthcheck": "HEALTHCHECK STATUS: EVERYTHING OK!"
-    }
 
 
 app.include_router(router)
