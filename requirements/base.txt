@@ -10,7 +10,7 @@ anyio==3.6.2
     #   watchfiles
 attrs==22.2.0
     # via jsonschema
-beautifulsoup4==4.11.2
+beautifulsoup4==4.12.1
     # via nbconvert
 bleach==6.0.0
     # via nbconvert
@@ -20,7 +20,7 @@ click==8.1.3
     #   uvicorn
 defusedxml==0.7.1
     # via nbconvert
-fastapi==0.94.1
+fastapi==0.95.0
     # via unstructured-api-tools (setup.py)
 fastjsonschema==2.16.3
     # via nbformat
@@ -30,7 +30,7 @@ httptools==0.5.0
     # via uvicorn
 idna==3.4
     # via anyio
-importlib-metadata==6.0.0
+importlib-metadata==6.1.0
     # via
     #   jupyter-client
     #   nbconvert
@@ -42,9 +42,9 @@ jinja2==3.1.2
     #   unstructured-api-tools (setup.py)
 jsonschema==4.17.3
     # via nbformat
-jupyter-client==8.0.3
+jupyter-client==8.1.0
     # via nbclient
-jupyter-core==5.2.0
+jupyter-core==5.3.0
     # via
     #   jupyter-client
     #   nbclient
@@ -58,15 +58,15 @@ markupsafe==2.1.2
     #   nbconvert
 mistune==2.0.5
     # via nbconvert
-mypy==1.1.1
+mypy==1.2.0
     # via unstructured-api-tools (setup.py)
 mypy-extensions==1.0.0
     # via mypy
-nbclient==0.7.2
+nbclient==0.7.3
     # via nbconvert
-nbconvert==7.2.10
+nbconvert==7.3.0
     # via unstructured-api-tools (setup.py)
-nbformat==5.7.3
+nbformat==5.8.0
     # via
     #   nbclient
     #   nbconvert
@@ -76,9 +76,9 @@ pandocfilters==1.5.0
     # via nbconvert
 pkgutil-resolve-name==1.3.10
     # via jsonschema
-platformdirs==3.1.1
+platformdirs==3.2.0
     # via jupyter-core
-pydantic==1.10.6
+pydantic==1.10.7
     # via fastapi
 pygments==2.14.0
     # via nbconvert
@@ -92,7 +92,7 @@ python-multipart==0.0.6
     # via unstructured-api-tools (setup.py)
 pyyaml==6.0
     # via uvicorn
-pyzmq==25.0.1
+pyzmq==25.0.2
     # via jupyter-client
 six==1.16.0
     # via
@@ -117,28 +117,28 @@ traitlets==5.9.0
     #   nbclient
     #   nbconvert
     #   nbformat
-types-requests==2.28.11.15
+types-requests==2.28.11.17
     # via unstructured-api-tools (setup.py)
 types-ujson==5.7.0.1
     # via unstructured-api-tools (setup.py)
-types-urllib3==1.26.25.8
+types-urllib3==1.26.25.10
     # via types-requests
 typing-extensions==4.5.0
     # via
     #   mypy
     #   pydantic
     #   starlette
-uvicorn[standard]==0.21.0
+uvicorn[standard]==0.21.1
     # via unstructured-api-tools (setup.py)
 uvloop==0.17.0
     # via uvicorn
-watchfiles==0.18.1
+watchfiles==0.19.0
     # via uvicorn
 webencodings==0.5.1
     # via
     #   bleach
     #   tinycss2
-websockets==10.4
+websockets==11.0.1
     # via uvicorn
 zipp==3.15.0
     # via

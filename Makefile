@@ -80,7 +80,7 @@ api-check-test:
 ## test:                       runs all unittests
 .PHONY: test
 test:
-	PYTHONPATH=.:./test_unstructured_api_tools/pipeline-test-project pytest test_${PACKAGE_NAME} --cov=${PACKAGE_NAME} --cov-report term-missing -vvv
+	PYTHONPATH=.:./test_unstructured_api_tools/pipeline-test-project pytest test_${PACKAGE_NAME} --cov=${PACKAGE_NAME} --cov=prepline_test_project --cov-report term-missing -vvv
 
 ## check:                      runs linters (includes tests)
 .PHONY: check
