@@ -2,6 +2,7 @@ FILE_DOCX = "test_unstructured_api_tools/api/fixtures/fake.docx"
 FILE_IMAGE = "test_unstructured_api_tools/api/fixtures/example.jpg"
 FILE_TXT_1 = "test_unstructured_api_tools/api/fixtures/text_file.txt"
 FILE_TXT_2 = "test_unstructured_api_tools/api/fixtures/text_file_2.txt"
+FILE_MARKDOWN = "test_unstructured_api_tools/api/fixtures/markdown.md"
 
 GZIP_FILE_DOCX = "test_unstructured_api_tools/api/fixtures/fake.docx.gz"
 GZIP_FILE_IMAGE = "test_unstructured_api_tools/api/fixtures/example.jpg.gz"
@@ -17,6 +18,7 @@ FILENAME_LENGTHS = {
     GZIP_FILE_TXT_1: 26,
     FILE_TXT_2: 30,
     GZIP_FILE_TXT_2: 30,
+    FILE_MARKDOWN: 91,
 }
 FILENAME_FORMATS = {
     FILE_DOCX: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -27,6 +29,8 @@ FILENAME_FORMATS = {
     GZIP_FILE_IMAGE: "application/gzip",
     GZIP_FILE_TXT_1: "application/gzip",
     GZIP_FILE_TXT_2: "application/gzip",
+    FILE_MARKDOWN: "text/markdown",
+    "octet_stream": "application/octet-stream",
 }
 
 P_INPUT_1_SINGLE = {"input1": ["hi"]}
@@ -45,16 +49,30 @@ RESPONSE_SCHEMA_ISD = {"output_schema": "isd"}
 RESPONSE_SCHEMA_LABELSTUDIO = {"output_schema": "labelstudio"}
 
 
-def convert_files_for_api(files):
+def convert_files_for_api(files, is_another_md_mimetype=False):
     return [
-        ("files", (test_file, open(test_file, "rb"), FILENAME_FORMATS[test_file]))
+        (
+            "files",
+            (
+                test_file,
+                open(test_file, "rb"),
+                FILENAME_FORMATS["octet_stream" if is_another_md_mimetype else test_file],
+            ),
+        )
         for test_file in files
     ]
 
 
-def convert_text_files_for_api(files):
+def convert_text_files_for_api(files, is_another_md_mimetype=False):
     return [
-        ("text_files", (test_file, open(test_file, "rb"), FILENAME_FORMATS[test_file]))
+        (
+            "text_files",
+            (
+                test_file,
+                open(test_file, "rb"),
+                FILENAME_FORMATS["octet_stream" if is_another_md_mimetype else test_file],
+            ),
+        )
         for test_file in files
     ]
 

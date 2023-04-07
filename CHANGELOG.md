@@ -5,6 +5,7 @@
 # 0.9.1
 
 * Allow references to standard imports in pipeline cells
+* Removed unused /healthcheck endpoints
 
 # 0.9.0
 

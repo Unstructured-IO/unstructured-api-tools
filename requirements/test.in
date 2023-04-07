@@ -10,3 +10,4 @@ pytest-cov
 requests
 requests_toolbelt
 nbdev
+pytest-mock
