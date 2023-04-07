@@ -126,14 +126,20 @@ class MultipartMixedResponse(StreamingResponse):
         await send({"type": "http.response.body", "body": b"", "more_body": False})
 
 
-def ungz_file(file: UploadFile) -> UploadFile:
+def ungz_file(file: UploadFile, gz_uncompressed_content_type) -> UploadFile:
+    def return_content_type(filename):
+        if gz_uncompressed_content_type:
+            return gz_uncompressed_content_type
+        else:
+            return str(mimetypes.guess_type(filename)[0])
+
     filename = str(file.filename) if file.filename else ""
     gzip_file = gzip.open(file.file)
     return UploadFile(
         file=io.BytesIO(gzip_file.read()),
         size=len(gzip_file.read()),
         filename=filename[:-3] if len(filename) > 3 else "",
-        headers=Headers({"content-type": str(mimetypes.guess_type(filename)[0])}),
+        headers=Headers({"content-type": return_content_type(filename)}),
     )
 
 
@@ -141,12 +147,15 @@ def ungz_file(file: UploadFile) -> UploadFile:
 @router.post("/test-project/v1.2.3/process-text-1")
 def pipeline_1(
     request: Request,
+    gz_uncompressed_content_type: Optional[str] = Form(default=None),
     text_files: Union[List[UploadFile], None] = File(default=None),
 ):
     if text_files:
         for file_index in range(len(text_files)):
             if text_files[file_index].content_type == "application/gzip":
-                text_files[file_index] = ungz_file(text_files[file_index])
+                text_files[file_index] = ungz_file(
+                    text_files[file_index], gz_uncompressed_content_type
+                )
 
     content_type = request.headers.get("Accept")
 
