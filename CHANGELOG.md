@@ -5,7 +5,7 @@
 # 0.9.1
 
 * Allow references to standard imports in pipeline cells
-* Add code coverage for generated test APIs
+* Removed unused /healthcheck endpoints
 
 # 0.9.0
 

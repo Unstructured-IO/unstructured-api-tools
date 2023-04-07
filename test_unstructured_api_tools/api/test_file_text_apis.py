@@ -30,8 +30,6 @@ from test_unstructured_api_tools.api.functions_and_variables import (
     GZIP_FILE_TXT_2,
     GZIP_FILE_TXT_1,
     FILE_MARKDOWN,
-    reset_env_variables,
-    set_env_variables,
     TEXT_CSV,
 )
 
@@ -292,7 +290,6 @@ def _assert_response_for_process_file_text_4(
         assert response_array == test_text_files_arr + test_files_arr
 
 
-@reset_env_variables
 @pytest.mark.parametrize(
     "test_files,"
     "test_files_text,"
@@ -337,8 +334,12 @@ def test_process_file_text_1(
     response_type,
     another_md_mimetype,
     allowed_mimetypes_str,
+    monkeypatch,
 ):
-    set_env_variables("UNSTRUCTURED_ALLOWED_MIMETYPES", allowed_mimetypes_str)
+    if allowed_mimetypes_str:
+        monkeypatch.setenv("UNSTRUCTURED_ALLOWED_MIMETYPES", allowed_mimetypes_str)
+    else:
+        monkeypatch.delenv("UNSTRUCTURED_ALLOWED_MIMETYPES", False)
     for endpoint in PROCESS_FILE_TEXT_1_ROUTE:
         response = client.post(
             endpoint,
@@ -353,7 +354,6 @@ def test_process_file_text_1(
             )
 
 
-@reset_env_variables
 @pytest.mark.parametrize(
     "test_files,"
     "test_files_text,"
@@ -438,8 +438,12 @@ def test_process_file_text_2(
     expected_status,
     another_md_mimetype,
     allowed_mimetypes_str,
+    monkeypatch,
 ):
-    set_env_variables("UNSTRUCTURED_ALLOWED_MIMETYPES", allowed_mimetypes_str)
+    if allowed_mimetypes_str:
+        monkeypatch.setenv("UNSTRUCTURED_ALLOWED_MIMETYPES", allowed_mimetypes_str)
+    else:
+        monkeypatch.delenv("UNSTRUCTURED_ALLOWED_MIMETYPES", False)
     for endpoint in PROCESS_FILE_TEXT_2_ROUTE:
         response = client.post(
             endpoint,
@@ -455,7 +459,6 @@ def test_process_file_text_2(
             )
 
 
-@reset_env_variables
 @pytest.mark.parametrize(
     "test_files,"
     "test_files_text,"
@@ -601,8 +604,12 @@ def test_process_file_text_3(
     expected_status,
     another_md_mimetype,
     allowed_mimetypes_str,
+    monkeypatch,
 ):
-    set_env_variables("UNSTRUCTURED_ALLOWED_MIMETYPES", allowed_mimetypes_str)
+    if allowed_mimetypes_str:
+        monkeypatch.setenv("UNSTRUCTURED_ALLOWED_MIMETYPES", allowed_mimetypes_str)
+    else:
+        monkeypatch.delenv("UNSTRUCTURED_ALLOWED_MIMETYPES", False)
     for endpoint in PROCESS_FILE_TEXT_3_ROUTE:
         response = client.post(
             endpoint,
@@ -618,7 +625,6 @@ def test_process_file_text_3(
             )
 
 
-@reset_env_variables
 @pytest.mark.parametrize(
     "test_files,"
     "test_files_text,"
@@ -928,8 +934,12 @@ def test_process_file_text_4(
     expected_status,
     another_md_mimetype,
     allowed_mimetypes_str,
+    monkeypatch,
 ):
-    set_env_variables("UNSTRUCTURED_ALLOWED_MIMETYPES", allowed_mimetypes_str)
+    if allowed_mimetypes_str:
+        monkeypatch.setenv("UNSTRUCTURED_ALLOWED_MIMETYPES", allowed_mimetypes_str)
+    else:
+        monkeypatch.delenv("UNSTRUCTURED_ALLOWED_MIMETYPES", False)
     for endpoint in PROCESS_FILE_TEXT_4_ROUTE:
         response = client.post(
             endpoint,

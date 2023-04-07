@@ -90,23 +90,3 @@ def generate_header_kwargs(value=None):
         if value
         else {}
     )
-
-
-def reset_env_variables(func):
-    @functools.wraps(func)
-    def create(*args, **kwargs):
-        env_variables = dict(os.environ)
-        try:
-            func(*args, **kwargs)
-        finally:
-            os.environ.clear()
-            os.environ.update(env_variables)
-
-    return create
-
-
-def set_env_variables(variable_name, variable_value):
-    if variable_value:
-        os.environ[variable_name] = variable_value
-    else:
-        os.environ.pop(variable_name, None)
