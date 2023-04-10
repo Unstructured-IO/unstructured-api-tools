@@ -1,6 +1,7 @@
-# 0.9.3-dev0
+# 0.9.3
 
 * Removed /healthcheck endpoint from docs
+* Add fix for handling content type sent as None
 
 # 0.9.2
 

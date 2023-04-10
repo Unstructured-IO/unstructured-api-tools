@@ -53,7 +53,7 @@ def get_validated_mimetype(file):
     return HTTP 400 for an invalid type.
     """
     content_type = file.content_type
-    if content_type == "application/octet-stream":
+    if not content_type or content_type == "application/octet-stream":
         content_type = mimetypes.guess_type(str(file.filename))[0]
 
         # Markdown mimetype is too new for the library - just hardcode that one in for now
