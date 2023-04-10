@@ -125,7 +125,7 @@ class MultipartMixedResponse(StreamingResponse):
         await send({"type": "http.response.body", "body": b"", "more_body": False})
 
 
-def ungz_file(file: UploadFile, gz_uncompressed_content_type) -> UploadFile:
+def ungz_file(file: UploadFile, gz_uncompressed_content_type=None) -> UploadFile:
     def return_content_type(filename):
         if gz_uncompressed_content_type:
             return gz_uncompressed_content_type
@@ -133,11 +133,14 @@ def ungz_file(file: UploadFile, gz_uncompressed_content_type) -> UploadFile:
             return str(mimetypes.guess_type(filename)[0])
 
     filename = str(file.filename) if file.filename else ""
-    gzip_file = gzip.open(file.file)
+    if filename.endswith(".gz"):
+        filename = filename[:-3]
+
+    gzip_file = gzip.open(file.file).read()
     return UploadFile(
-        file=io.BytesIO(gzip_file.read()),
-        size=len(gzip_file.read()),
-        filename=filename[:-3] if len(filename) > 3 else "",
+        file=io.BytesIO(gzip_file),
+        size=len(gzip_file),
+        filename=filename,
         headers=Headers({"content-type": return_content_type(filename)}),
     )
 
