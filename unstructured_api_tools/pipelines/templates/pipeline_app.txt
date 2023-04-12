@@ -14,7 +14,8 @@ app = FastAPI(
   title="{{ title }}",
   description="""{{ description }}""",
   version="{{ version or '1.0.0' }}",
-  docs_url="{{ '/' ~ version_name ~ '/docs' if version_name else '/docs' }}"
+  docs_url="{{ '/' ~ version_name ~ '/docs' if version_name else '/docs' }}",
+  openapi_url="{{ '/' ~ version_name ~ '/openapi.json' if version_name else '/openapi.json' }}"
 )
 
 {% for module in module_names -%}
