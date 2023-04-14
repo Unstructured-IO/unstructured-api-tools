@@ -1,3 +1,7 @@
+# 0.9.4
+
+* Add dynamic openapi_url to match docs_url
+
 # 0.9.3
 
 * Removed /healthcheck endpoint from docs
