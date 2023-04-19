@@ -127,14 +127,23 @@ class MultipartMixedResponse(StreamingResponse):
         await send({"type": "http.response.body", "body": b"", "more_body": False})
 
 
-def ungz_file(file: UploadFile) -> UploadFile:
+def ungz_file(file: UploadFile, gz_uncompressed_content_type=None) -> UploadFile:
+    def return_content_type(filename):
+        if gz_uncompressed_content_type:
+            return gz_uncompressed_content_type
+        else:
+            return str(mimetypes.guess_type(filename)[0])
+
     filename = str(file.filename) if file.filename else ""
-    gzip_file = gzip.open(file.file)
+    if filename.endswith(".gz"):
+        filename = filename[:-3]
+
+    gzip_file = gzip.open(file.file).read()
     return UploadFile(
-        file=io.BytesIO(gzip_file.read()),
-        size=len(gzip_file.read()),
-        filename=filename[:-3] if len(filename) > 3 else "",
-        headers=Headers({"content-type": str(mimetypes.guess_type(filename)[0])}),
+        file=io.BytesIO(gzip_file),
+        size=len(gzip_file),
+        filename=filename,
+        headers=Headers({"content-type": return_content_type(filename)}),
     )
 
 
@@ -142,6 +151,7 @@ def ungz_file(file: UploadFile) -> UploadFile:
 @router.post("/test-project/v1.2.3/process-text-2")
 def pipeline_1(
     request: Request,
+    gz_uncompressed_content_type: Optional[str] = Form(default=None),
     text_files: Union[List[UploadFile], None] = File(default=None),
     input1: List[str] = Form(default=[]),
     input2: List[str] = Form(default=[]),

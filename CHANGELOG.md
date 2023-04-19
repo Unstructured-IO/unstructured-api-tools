@@ -1,3 +1,8 @@
+# 0.10.0
+
+* Update templates for generated API. 
+* Improve code for accepting gzip files.
+
 # 0.9.4
 
 * Add dynamic openapi_url to match docs_url
