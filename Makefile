@@ -109,7 +109,7 @@ check-scripts:
 check-version:
     # Fail if syncing version would produce changes
 	scripts/version-sync.sh -c \
-		-f ${PACKAGE_NAME}/__version__.py
+		-f ${PACKAGE_NAME}/__version__.py semver
 
 ## tidy:                       run black
 .PHONY: tidy
@@ -121,7 +121,7 @@ tidy:
 .PHONY: version-sync
 version-sync:
 	scripts/version-sync.sh \
-		-f ${PACKAGE_NAME}/__version__.py
+		-f ${PACKAGE_NAME}/__version__.py semver
 
 .PHONY: check-coverage
 check-coverage:
