@@ -456,7 +456,7 @@ def test_process_file_text_1(
         ([FILE_MARKDOWN], [FILE_TXT_1], TEXT_CSV, P_INPUT_2_MULTI, 406, False, None, None),
         ([], [FILE_TXT_1], JSON, P_INPUT_2_SINGLE, 200, False, None, None),
         ([FILE_DOCX], [], JSON, P_INPUT_2_SINGLE, 200, False, None, None),
-        ([], [FILE_TXT_1], MIXED, P_INPUT_2_EMPTY, 406, False, None, None),
+        ([], [FILE_TXT_1], MIXED, P_INPUT_2_EMPTY, 200, False, None, None),
         (
             [GZIP_FILE_DOCX],
             [FILE_TXT_1],
@@ -687,7 +687,7 @@ def test_process_file_text_2(
         ),
         ([], [FILE_TXT_1], JSON, RESPONSE_SCHEMA_LABELSTUDIO, 200, False, None, None),
         ([FILE_DOCX], [], JSON, RESPONSE_SCHEMA_LABELSTUDIO, 200, False, None, None),
-        ([FILE_DOCX], [], MIXED, RESPONSE_SCHEMA_LABELSTUDIO, 406, False, None, None),
+        ([FILE_DOCX], [], MIXED, RESPONSE_SCHEMA_LABELSTUDIO, 200, False, None, None),
         (
             [GZIP_FILE_DOCX],
             [FILE_TXT_1],
@@ -1063,7 +1063,7 @@ def test_process_file_text_3(
             RESPONSE_SCHEMA_LABELSTUDIO,
             P_INPUT_1_EMPTY,
             P_INPUT_2_EMPTY,
-            406,
+            200,
             False,
             None,
             None,

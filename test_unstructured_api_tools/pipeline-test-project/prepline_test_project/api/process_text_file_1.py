@@ -185,21 +185,28 @@ def pipeline_1(
     has_text = isinstance(text_files, list) and len(text_files)
     has_files = isinstance(files, list) and len(files)
     if not has_text and not has_files:
-        return PlainTextResponse(
-            content='One of the request parameters "text_files" or "files" is required.\n',
+        raise HTTPException(
+            detail='One of the request parameters "text_files" or "files" is required.\n',
             status_code=status.HTTP_400_BAD_REQUEST,
         )
     files_list: List = files or []
     text_files_list: List = text_files or []
 
-    if len(files_list) + len(text_files_list) > 1:
-        if content_type and content_type not in [
-            "*/*",
-            "multipart/mixed",
-            "application/json",
-        ]:
-            return PlainTextResponse(
-                content=(
+    if len(files_list) or len(text_files_list):
+        if all(
+            [
+                content_type,
+                content_type
+                not in [
+                    "*/*",
+                    "multipart/mixed",
+                    "application/json",
+                ],
+                len(files_list) + len(text_files_list) > 1,
+            ]
+        ):
+            raise HTTPException(
+                detail=(
                     f"Conflict in media type {content_type}"
                     ' with response type "multipart/mixed".\n'
                 ),
@@ -214,6 +221,7 @@ def pipeline_1(
                     text=text,
                     file=None,
                 )
+
                 if is_multipart:
                     if type(response) not in [str, bytes]:
                         response = json.dumps(response)
@@ -230,6 +238,7 @@ def pipeline_1(
                     filename=file.filename,
                     file_content_type=file_content_type,
                 )
+
                 if is_multipart:
                     if type(response) not in [str, bytes]:
                         response = json.dumps(response)
@@ -240,29 +249,16 @@ def pipeline_1(
                 response_generator(is_multipart=True),
             )
         else:
-            return response_generator(is_multipart=False)
+            return (
+                list(response_generator(is_multipart=False))[0]
+                if len(files_list + text_files_list) == 1
+                else response_generator(is_multipart=False)
+            )
     else:
-        if has_text:
-            text_file = text_files_list[0]
-            text = text_file.file.read().decode("utf-8")
-            response = pipeline_api(
-                text=text,
-                file=None,
-            )
-        elif has_files:
-            file = files_list[0]
-            _file = file.file
-
-            file_content_type = get_validated_mimetype(file)
-
-            response = pipeline_api(
-                text=None,
-                file=_file,
-                filename=file.filename,
-                file_content_type=file_content_type,
-            )
-
-        return response
+        raise HTTPException(
+            detail='Request parameters "files" or "text_files" are required.\n',
+            status_code=status.HTTP_400_BAD_REQUEST,
+        )
 
 
 app.include_router(router)
