@@ -8,16 +8,7 @@ import os
 import gzip
 import mimetypes
 from typing import List, Union
-from fastapi import (
-    status,
-    FastAPI,
-    File,
-    Form,
-    Request,
-    UploadFile,
-    APIRouter,
-    HTTPException,
-)
+from fastapi import status, FastAPI, File, Form, Request, UploadFile, APIRouter, HTTPException
 from fastapi.responses import PlainTextResponse
 import json
 from fastapi.responses import StreamingResponse
@@ -107,10 +98,7 @@ class MultipartMixedResponse(StreamingResponse):
 
     def build_part(self, chunk: bytes) -> bytes:
         part = self.boundary + self.CRLF
-        part_headers = {
-            "Content-Length": len(chunk),
-            "Content-Transfer-Encoding": "base64",
-        }
+        part_headers = {"Content-Length": len(chunk), "Content-Transfer-Encoding": "base64"}
         if self.content_type is not None:
             part_headers["Content-Type"] = self.content_type
         part += self._build_part_headers(part_headers)
@@ -130,11 +118,7 @@ class MultipartMixedResponse(StreamingResponse):
                 chunk = chunk.encode(self.charset)
                 chunk = b64encode(chunk)
             await send(
-                {
-                    "type": "http.response.body",
-                    "body": self.build_part(chunk),
-                    "more_body": True,
-                }
+                {"type": "http.response.body", "body": self.build_part(chunk), "more_body": True}
             )
 
         await send({"type": "http.response.body", "body": b"", "more_body": False})
@@ -171,9 +155,7 @@ def pipeline_1(
     if files:
         for file_index in range(len(files)):
             if files[file_index].content_type == "application/gzip":
-                files[file_index] = ungz_file(
-                    files[file_index], gz_uncompressed_content_type
-                )
+                files[file_index] = ungz_file(files[file_index], gz_uncompressed_content_type)
 
     if text_files:
         for file_index in range(len(text_files)):
