@@ -182,64 +182,64 @@ def pipeline_1(
                 "multipart/mixed",
                 "application/json",
             ]:
-                return PlainTextResponse(
-                    content=(
+                raise HTTPException(
+                    detail=(
                         f"Conflict in media type {content_type}"
                         ' with response type "multipart/mixed".\n'
                     ),
                     status_code=status.HTTP_406_NOT_ACCEPTABLE,
                 )
 
-            def response_generator(is_multipart):
-                for file in text_files:
-                    get_validated_mimetype(file)
+        def response_generator(is_multipart):
+            for file in text_files:
+                get_validated_mimetype(file)
 
-                    text = file.file.read().decode("utf-8")
+                text = file.file.read().decode("utf-8")
 
-                    response = pipeline_api(
-                        text,
-                        response_type=media_type,
+                response = pipeline_api(
+                    text,
+                    response_type=media_type,
+                )
+
+                if is_expected_response_type(media_type, type(response)):
+                    raise HTTPException(
+                        detail=(
+                            f"Conflict in media type {media_type}"
+                            f" with response type {type(response)}.\n"
+                        ),
+                        status_code=status.HTTP_406_NOT_ACCEPTABLE,
                     )
+
+                valid_response_types = [
+                    "application/json",
+                    "text/csv",
+                    "*/*",
+                    "multipart/mixed",
+                ]
+                if media_type in valid_response_types:
                     if is_multipart:
                         if type(response) not in [str, bytes]:
                             response = json.dumps(response)
                     yield response
+                else:
+                    raise HTTPException(
+                        detail=f"Unsupported media type {media_type}.\n",
+                        status_code=status.HTTP_406_NOT_ACCEPTABLE,
+                    )
 
-            if content_type == "multipart/mixed":
-                return MultipartMixedResponse(
-                    response_generator(is_multipart=True), content_type=media_type
-                )
-            else:
-                return response_generator(is_multipart=False)
-        else:
-            text_file = text_files[0]
-            text = text_file.file.read().decode("utf-8")
-
-            response = pipeline_api(
-                text,
-                response_type=media_type,
+        if content_type == "multipart/mixed":
+            return MultipartMixedResponse(
+                response_generator(is_multipart=True), content_type=media_type
             )
-
-            if is_expected_response_type(media_type, type(response)):
-                return PlainTextResponse(
-                    content=(
-                        f"Conflict in media type {media_type}"
-                        f" with response type {type(response)}.\n"
-                    ),
-                    status_code=status.HTTP_406_NOT_ACCEPTABLE,
-                )
-            valid_response_types = ["application/json", "text/csv", "*/*"]
-            if media_type in valid_response_types:
-                return response
-            else:
-                return PlainTextResponse(
-                    content=f"Unsupported media type {media_type}.\n",
-                    status_code=status.HTTP_406_NOT_ACCEPTABLE,
-                )
-
+        else:
+            return (
+                list(response_generator(is_multipart=False))[0]
+                if len(text_files) == 1
+                else response_generator(is_multipart=False)
+            )
     else:
-        return PlainTextResponse(
-            content='Request parameter "text_files" is required.\n',
+        raise HTTPException(
+            detail='Request parameter "text_files" is required.\n',
             status_code=status.HTTP_400_BAD_REQUEST,
         )
 

@@ -390,8 +390,7 @@ def test_process_text_2(
     [
         ([FILE_TXT_1], JSON, 200, False, None, None),
         ([GZIP_FILE_TXT_1], JSON, 200, False, None, None),
-        # endpoint doesn't accept mixed media type for one file
-        pytest.param([FILE_TXT_1], MIXED, 200, False, None, None, marks=pytest.mark.xfail),
+        ([FILE_TXT_1], MIXED, 200, False, None, None),
         # endpoint fails because media type text/csv should have response type str
         pytest.param([FILE_TXT_1], TEXT_CSV, 200, False, None, None, marks=pytest.mark.xfail),
         # endpoint fails because media type text/csv should have response type str
@@ -421,19 +420,18 @@ def test_process_text_2(
             None,
             marks=pytest.mark.xfail,
         ),
-        ([FILE_TXT_1, FILE_TXT_2], None, 200, False, None, None),
+        ([FILE_TXT_1, FILE_TXT_2], None, 406, False, None, None),
         ([FILE_TXT_2], JSON, 200, False, None, None),
         ([GZIP_FILE_TXT_2], JSON, 200, False, None, None),
-        # endpoint doesn't accept mixed media type for one file
-        pytest.param([FILE_TXT_2], MIXED, 200, False, None, None, marks=pytest.mark.xfail),
+        ([FILE_TXT_2], MIXED, 200, False, None, None),
         # endpoint fails because media type text/csv should have response type str
         pytest.param([FILE_TXT_2], TEXT_CSV, 200, False, None, None, marks=pytest.mark.xfail),
         # endpoint fails because media type text/csv should have response type str
         # because None response type has default text/csv value
         pytest.param([FILE_TXT_2], None, 200, False, None, None, marks=pytest.mark.xfail),
-        ([FILE_TXT_2, FILE_MARKDOWN], None, 200, True, None, None),
-        ([FILE_TXT_2, FILE_TXT_1], None, 200, False, FILENAME_FORMATS[FILE_TXT_1], None),
-        ([FILE_TXT_2, FILE_MARKDOWN], None, 400, False, FILENAME_FORMATS[FILE_TXT_1], None),
+        ([FILE_TXT_2, FILE_MARKDOWN], None, 406, True, None, None),
+        ([FILE_TXT_2, FILE_TXT_1], None, 406, False, FILENAME_FORMATS[FILE_TXT_1], None),
+        ([FILE_TXT_2, FILE_MARKDOWN], None, 406, False, FILENAME_FORMATS[FILE_TXT_1], None),
         ([], None, 400, False, None, None),
         ([GZIP_FILE_TXT_1], JSON, 200, False, None, FILENAME_FORMATS[FILE_TXT_1]),
     ],
@@ -513,7 +511,7 @@ def test_process_text_3(
             None,
         ),
         ([FILE_TXT_1, FILE_TXT_2], TEXT_CSV, RESPONSE_SCHEMA_ISD, 406, False, None, None),
-        ([FILE_TXT_1], MIXED, RESPONSE_SCHEMA_ISD, 406, False, None, None),
+        ([FILE_TXT_1], MIXED, RESPONSE_SCHEMA_ISD, 200, False, None, None),
         ([], JSON, RESPONSE_SCHEMA_ISD, 400, False, None, None),
         (
             [GZIP_FILE_TXT_1],

@@ -1,3 +1,7 @@
+# 0.10.1
+
+* Add Ability to request one file as multipart/form data
+
 # 0.10.0
 
 * Update templates for generated API. 
