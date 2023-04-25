@@ -1,3 +1,7 @@
+# 0.10.2
+
+* Set black line length to 100
+
 # 0.10.1
 
 * Add Ability to request one file as multipart/form data
