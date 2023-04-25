@@ -99,4 +99,4 @@ def check_black(file_text: str) -> bool:
 
 def format_black(file_text: str) -> str:
     """Auto-formats a file using black."""
-    return format_str(file_text, mode=FileMode())
+    return format_str(file_text, mode=FileMode(line_length=100))
