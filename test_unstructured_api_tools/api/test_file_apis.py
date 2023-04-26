@@ -209,8 +209,7 @@ def _assert_response_for_process_file_5(
         ([FILE_IMAGE], P_INPUT_1_AND_2_MULTI, JSON, 200, None),
         ([FILE_DOCX, FILE_IMAGE], P_INPUT_1_AND_2_MULTI, JSON, 200, None),
         ([FILE_DOCX, FILE_IMAGE], P_INPUT_1_AND_2_MULTI, MIXED, 200, None),
-        # json returned though mixed requested (maybe not a bug for 1 file?)
-        pytest.param([FILE_DOCX], P_INPUT_1_MULTI, MIXED, 200, None, marks=pytest.mark.xfail),
+        ([FILE_DOCX], P_INPUT_1_MULTI, MIXED, 200, None),
         # json returned though csv requested
         pytest.param(
             [FILE_IMAGE], P_INPUT_1_AND_2_MULTI, TEXT_CSV, 200, None, marks=pytest.mark.xfail
@@ -309,10 +308,7 @@ def test_process_file_2(
     "gz_content_type",
     [
         ([FILE_DOCX], JSON, RESPONSE_SCHEMA_ISD, 200, False, None, None),
-        # endpoint doesn't accept mixed media type for one file
-        pytest.param(
-            [FILE_DOCX], MIXED, RESPONSE_SCHEMA_ISD, 200, False, None, None, marks=pytest.mark.xfail
-        ),
+        ([FILE_DOCX], MIXED, RESPONSE_SCHEMA_ISD, 200, False, None, None),
         # endpoint fails because media type text/csv should have response type str
         pytest.param(
             [FILE_DOCX],
@@ -330,7 +326,6 @@ def test_process_file_2(
             [FILE_DOCX], None, RESPONSE_SCHEMA_ISD, 200, False, None, None, marks=pytest.mark.xfail
         ),
         ([FILE_DOCX], JSON, RESPONSE_SCHEMA_LABELSTUDIO, 200, False, None, None),
-        # endpoint doesn't accept mixed media type for one file
         pytest.param(
             [FILE_DOCX],
             MIXED,
@@ -339,7 +334,6 @@ def test_process_file_2(
             False,
             None,
             None,
-            marks=pytest.mark.xfail,
         ),
         # endpoint fails because media type text/csv should have response type str
         pytest.param(
@@ -377,7 +371,7 @@ def test_process_file_2(
             None,
             marks=pytest.mark.xfail,
         ),
-        ([FILE_DOCX, FILE_IMAGE], None, RESPONSE_SCHEMA_ISD, 200, False, None, None),
+        ([FILE_DOCX, FILE_IMAGE], None, RESPONSE_SCHEMA_ISD, 406, False, None, None),
         ([FILE_DOCX, FILE_IMAGE], JSON, RESPONSE_SCHEMA_LABELSTUDIO, 200, False, None, None),
         ([FILE_DOCX, FILE_IMAGE], MIXED, RESPONSE_SCHEMA_LABELSTUDIO, 200, False, None, None),
         # endpoint fails because text/csv is not acceptable for multiple files
@@ -391,12 +385,12 @@ def test_process_file_2(
             None,
             marks=pytest.mark.xfail,
         ),
-        ([FILE_DOCX, FILE_IMAGE], None, RESPONSE_SCHEMA_LABELSTUDIO, 200, False, None, None),
+        ([FILE_DOCX, FILE_IMAGE], None, RESPONSE_SCHEMA_LABELSTUDIO, 406, False, None, None),
         (
             [FILE_DOCX, FILE_IMAGE, GZIP_FILE_IMAGE],
             None,
             RESPONSE_SCHEMA_LABELSTUDIO,
-            200,
+            406,
             False,
             None,
             None,
@@ -405,7 +399,7 @@ def test_process_file_2(
             [FILE_DOCX, FILE_IMAGE, GZIP_FILE_DOCX],
             None,
             RESPONSE_SCHEMA_LABELSTUDIO,
-            200,
+            406,
             False,
             None,
             None,
@@ -414,7 +408,7 @@ def test_process_file_2(
             [FILE_DOCX, FILE_IMAGE, GZIP_FILE_IMAGE, GZIP_FILE_DOCX],
             None,
             RESPONSE_SCHEMA_LABELSTUDIO,
-            200,
+            406,
             False,
             None,
             None,
@@ -629,7 +623,7 @@ def test_process_file_3(
             False,
             None,
         ),
-        ([FILE_DOCX], MIXED, RESPONSE_SCHEMA_ISD, P_INPUT_1_SINGLE, 406, None, False, None),
+        ([FILE_DOCX], MIXED, RESPONSE_SCHEMA_ISD, P_INPUT_1_SINGLE, 200, None, False, None),
         ([], MIXED, RESPONSE_SCHEMA_ISD, P_INPUT_1_SINGLE, 400, None, False, None),
         (
             [GZIP_FILE_DOCX],
@@ -914,7 +908,7 @@ def test_process_file_4(
             RESPONSE_SCHEMA_ISD,
             P_INPUT_1_MULTI,
             P_INPUT_2_EMPTY,
-            406,
+            200,
             False,
             None,
             None,
