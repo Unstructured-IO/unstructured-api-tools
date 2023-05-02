@@ -48,8 +48,13 @@ def get_validated_mimetype(file):
         content_type = mimetypes.guess_type(str(file.filename))[0]
 
         # Markdown mimetype is too new for the library - just hardcode that one in for now
-        if not content_type and ".md" in file.filename:
-            content_type = "text/markdown"
+        if not content_type:
+            if ".md" in file.filename:
+                content_type = "text/markdown"
+            if ".json" in file.filename:
+                content_type = "application/json"
+            if ".msg" in file.filename:
+                content_type = "message/rfc82"
 
     allowed_mimetypes_str = os.environ.get("UNSTRUCTURED_ALLOWED_MIMETYPES")
     if allowed_mimetypes_str is not None:

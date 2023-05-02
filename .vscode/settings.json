@@ -1,0 +1,7 @@
+{
+    "python.testing.pytestArgs": [
+        "test_unstructured_api_tools"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true
+}

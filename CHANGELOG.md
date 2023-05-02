@@ -1,3 +1,7 @@
+# 0.10.3
+
+* Add support for json and msg file types
+
 # 0.10.2
 
 * Set black line length to 100
