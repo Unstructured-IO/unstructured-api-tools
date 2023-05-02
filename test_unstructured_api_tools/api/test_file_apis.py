@@ -216,6 +216,8 @@ def _assert_response_for_process_file_5(
         pytest.param(
             [FILE_IMAGE], P_INPUT_1_AND_2_MULTI, TEXT_CSV, 200, None, marks=pytest.mark.xfail
         ),
+        ([FILE_JSON], None, JSON, 200, None),
+        ([FILE_MSG], None, JSON, 200, None),
         ([GZIP_FILE_IMAGE], P_INPUT_1_EMPTY, JSON, 200, None),
         ([GZIP_FILE_DOCX], P_INPUT_1_EMPTY, JSON, 200, None),
         ([GZIP_FILE_DOCX, FILE_IMAGE], P_INPUT_1_EMPTY, TEXT_CSV, 406, None),
@@ -595,6 +597,26 @@ def test_process_file_3(
             False,
             None,
             marks=pytest.mark.xfail,
+        ),
+        (
+            [FILE_JSON],
+            JSON,
+            RESPONSE_SCHEMA_ISD,
+            P_INPUT_1_SINGLE,
+            200,
+            FILENAME_FORMATS[FILE_JSON],
+            False,
+            None,
+        ),
+        (
+            [FILE_MSG],
+            JSON,
+            RESPONSE_SCHEMA_ISD,
+            P_INPUT_1_SINGLE,
+            200,
+            FILENAME_FORMATS[FILE_MSG],
+            False,
+            None,
         ),
         (
             [FILE_DOCX],
