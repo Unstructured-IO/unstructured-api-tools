@@ -365,6 +365,8 @@ def test_process_file_2(
             marks=pytest.mark.xfail,
         ),
         ([FILE_DOCX, FILE_IMAGE], JSON, RESPONSE_SCHEMA_ISD, 200, False, None, None),
+        ([FILE_JSON, FILE_IMAGE], JSON, RESPONSE_SCHEMA_ISD, 200, False, None, None),
+        ([FILE_MSG, FILE_IMAGE], JSON, RESPONSE_SCHEMA_ISD, 200, False, None, None),
         ([FILE_DOCX, FILE_IMAGE], MIXED, RESPONSE_SCHEMA_ISD, 200, False, None, None),
         # endpoint fails because text/csv is not acceptable for multiple files
         pytest.param(
@@ -861,6 +863,28 @@ def test_process_file_4(
             None,
             None,
             marks=pytest.mark.xfail,
+        ),
+        (
+            [FILE_JSON],
+            JSON,
+            RESPONSE_SCHEMA_LABELSTUDIO,
+            P_INPUT_1_MULTI,
+            P_INPUT_2_EMPTY,
+            200,
+            False,
+            None,
+            None,
+        ),
+        (
+            [FILE_MSG],
+            JSON,
+            RESPONSE_SCHEMA_LABELSTUDIO,
+            P_INPUT_1_MULTI,
+            P_INPUT_2_EMPTY,
+            200,
+            False,
+            None,
+            None,
         ),
         (
             [FILE_MARKDOWN],
