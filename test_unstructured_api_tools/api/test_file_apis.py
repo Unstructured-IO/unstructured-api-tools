@@ -607,7 +607,7 @@ def test_process_file_3(
             P_INPUT_1_SINGLE,
             200,
             FILENAME_FORMATS[FILE_MSG],
-            True, 
+            True,
             None,
         ),
         (
