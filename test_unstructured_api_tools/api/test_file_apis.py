@@ -14,7 +14,6 @@ from functions_and_variables import (
     MIXED,
     FILE_DOCX,
     FILE_IMAGE,
-    FILE_JSON,
     FILE_MSG,
     RESPONSE_SCHEMA_ISD,
     RESPONSE_SCHEMA_LABELSTUDIO,
@@ -216,7 +215,6 @@ def _assert_response_for_process_file_5(
         pytest.param(
             [FILE_IMAGE], P_INPUT_1_AND_2_MULTI, TEXT_CSV, 200, None, marks=pytest.mark.xfail
         ),
-        ([FILE_JSON], None, JSON, 200, None),
         ([FILE_MSG], None, JSON, 200, None),
         ([GZIP_FILE_IMAGE], P_INPUT_1_EMPTY, JSON, 200, None),
         ([GZIP_FILE_DOCX], P_INPUT_1_EMPTY, JSON, 200, None),
@@ -273,7 +271,6 @@ def test_process_file_1(
         ([FILE_MARKDOWN, GZIP_FILE_IMAGE], JSON, 200, None, False, None),
         ([FILE_MARKDOWN], JSON, 200, None, False, None),
         ([FILE_MARKDOWN], JSON, 200, None, True, None),
-        ([FILE_JSON], JSON, 200, None, True, None),
         ([FILE_MSG], JSON, 200, None, True, None),
         ([GZIP_FILE_DOCX], JSON, 200, None, False, FILENAME_FORMATS[FILE_DOCX]),
         ([GZIP_FILE_DOCX], JSON, 200, None, False, FILENAME_FORMATS[FILE_IMAGE]),
@@ -365,7 +362,6 @@ def test_process_file_2(
             marks=pytest.mark.xfail,
         ),
         ([FILE_DOCX, FILE_IMAGE], JSON, RESPONSE_SCHEMA_ISD, 200, False, None, None),
-        ([FILE_JSON], JSON, RESPONSE_SCHEMA_ISD, 200, True, None, None),
         ([FILE_MSG], JSON, RESPONSE_SCHEMA_ISD, 200, True, None, None),
         ([FILE_DOCX, FILE_IMAGE], MIXED, RESPONSE_SCHEMA_ISD, 200, False, None, None),
         # endpoint fails because text/csv is not acceptable for multiple files

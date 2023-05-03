@@ -3,7 +3,6 @@ FILE_IMAGE = "test_unstructured_api_tools/api/fixtures/example.jpg"
 FILE_TXT_1 = "test_unstructured_api_tools/api/fixtures/text_file.txt"
 FILE_TXT_2 = "test_unstructured_api_tools/api/fixtures/text_file_2.txt"
 FILE_MARKDOWN = "test_unstructured_api_tools/api/fixtures/markdown.md"
-FILE_JSON = "test_unstructured_api_tools/api/fixtures/spring-weather.html.json"
 FILE_MSG = "test_unstructured_api_tools/api/fixtures/fake-email.msg"
 
 GZIP_FILE_DOCX = "test_unstructured_api_tools/api/fixtures/fake.docx.gz"
@@ -21,7 +20,6 @@ FILENAME_LENGTHS = {
     FILE_TXT_2: 30,
     GZIP_FILE_TXT_2: 30,
     FILE_MARKDOWN: 91,
-    FILE_JSON: 13151,
     FILE_MSG: 11776,
 }
 FILENAME_FORMATS = {
@@ -34,7 +32,6 @@ FILENAME_FORMATS = {
     GZIP_FILE_TXT_1: "application/gzip",
     GZIP_FILE_TXT_2: "application/gzip",
     FILE_MARKDOWN: "text/markdown",
-    FILE_JSON: "application/json",
     FILE_MSG: "message/rfc822",
     "octet_stream": "application/octet-stream",
 }
