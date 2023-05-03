@@ -147,7 +147,7 @@ def _assert_response_for_process_text_4(test_files, response, response_type, res
 @pytest.mark.parametrize(
     "test_files,"
     "expected_status,"
-    "another_md_mimetype,"
+    "use_octet_stream_type,"
     "allowed_mimetypes_str,"
     "response_type,"
     "gz_content_type",
@@ -169,7 +169,7 @@ def _assert_response_for_process_text_4(test_files, response, response_type, res
 def test_process_text_1(
     test_files,
     expected_status,
-    another_md_mimetype,
+    use_octet_stream_type,
     allowed_mimetypes_str,
     response_type,
     gz_content_type,
@@ -182,7 +182,7 @@ def test_process_text_1(
     for endpoint in PROCESS_TEXT_1_ROUTE:
         response = client.post(
             endpoint,
-            files=convert_text_files_for_api(test_files, another_md_mimetype),
+            files=convert_text_files_for_api(test_files, use_octet_stream_type),
             data={"output_format": response_type, "gz_uncompressed_content_type": gz_content_type},
             **generate_header_kwargs(response_type),
         )
@@ -198,7 +198,7 @@ def test_process_text_1(
     "m_input1,"
     "m_input2,"
     "expected_status,"
-    "another_md_mimetype,"
+    "use_octet_stream_type,"
     "allowed_mimetypes_str,"
     "response_type,"
     "gz_content_type",
@@ -351,7 +351,7 @@ def test_process_text_2(
     m_input1,
     m_input2,
     expected_status,
-    another_md_mimetype,
+    use_octet_stream_type,
     allowed_mimetypes_str,
     response_type,
     gz_content_type,
@@ -364,7 +364,7 @@ def test_process_text_2(
     for endpoint in PROCESS_TEXT_2_ROUTE:
         response = client.post(
             endpoint,
-            files=convert_text_files_for_api(test_files, another_md_mimetype),
+            files=convert_text_files_for_api(test_files, use_octet_stream_type),
             data={
                 **m_input1,
                 **m_input2,
@@ -384,7 +384,7 @@ def test_process_text_2(
     "test_files,"
     "response_type,"
     "expected_status,"
-    "another_md_mimetype,"
+    "use_octet_stream_type,"
     "allowed_mimetypes_str,"
     "gz_content_type",
     [
@@ -440,7 +440,7 @@ def test_process_text_3(
     test_files,
     response_type,
     expected_status,
-    another_md_mimetype,
+    use_octet_stream_type,
     allowed_mimetypes_str,
     gz_content_type,
     monkeypatch,
@@ -452,7 +452,7 @@ def test_process_text_3(
     for endpoint in PROCESS_TEXT_3_ROUTE:
         response = client.post(
             endpoint,
-            files=convert_text_files_for_api(test_files, another_md_mimetype),
+            files=convert_text_files_for_api(test_files, use_octet_stream_type),
             data={"output_format": response_type, "gz_uncompressed_content_type": gz_content_type},
             **generate_header_kwargs(response_type),
         )
@@ -466,7 +466,7 @@ def test_process_text_3(
     "response_type,"
     "response_schema,"
     "expected_status,"
-    "another_md_mimetype,"
+    "use_octet_stream_type,"
     "allowed_mimetypes_str,"
     "gz_content_type",
     [
@@ -529,7 +529,7 @@ def test_process_text_4(
     response_type,
     response_schema,
     expected_status,
-    another_md_mimetype,
+    use_octet_stream_type,
     allowed_mimetypes_str,
     gz_content_type,
     monkeypatch,
@@ -541,7 +541,7 @@ def test_process_text_4(
     for endpoint in PROCESS_TEXT_4_ROUTE:
         response = client.post(
             endpoint,
-            files=convert_text_files_for_api(test_files, another_md_mimetype),
+            files=convert_text_files_for_api(test_files, use_octet_stream_type),
             data={
                 **response_schema,
                 "output_format": response_type,
