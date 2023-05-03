@@ -53,9 +53,9 @@ def get_validated_mimetype(file):
 
         # Some filetypes missing for this library, just hardcode them for now
         if not content_type:
-            if ".md" in file.filename:
+            if file.filename.endswith(".md"):
                 content_type = "text/markdown"
-            if ".msg" in file.filename:
+            elif file.filename.endswith(".msg"):
                 content_type = "message/rfc822"
 
     allowed_mimetypes_str = os.environ.get("UNSTRUCTURED_ALLOWED_MIMETYPES")
