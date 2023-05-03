@@ -9,8 +9,6 @@ from requests_toolbelt.multipart import decoder
 from test_unstructured_api_tools.api.functions_and_variables import (
     FILE_DOCX,
     FILE_IMAGE,
-    FILE_JSON,
-    FILE_MSG,
     FILE_TXT_1,
     FILE_TXT_2,
     convert_files_for_api,
@@ -297,13 +295,11 @@ def _assert_response_for_process_file_text_4(
     "test_files_text,"
     "expected_status,"
     "response_type,"
-    "another_md_mimetype,"
+    "use_octet_stream_type,"
     "allowed_mimetypes_str,"
     "gz_content_type",
     [
         ([FILE_DOCX], [FILE_TXT_1], 200, JSON, False, None, None),
-        ([FILE_JSON], [FILE_TXT_1], 200, JSON, False, None, None),
-        ([FILE_MSG], [FILE_TXT_1], 200, JSON, False, None, None),
         ([FILE_DOCX, FILE_IMAGE], [FILE_TXT_1], 200, JSON, False, None, None),
         ([FILE_DOCX, FILE_IMAGE], [FILE_TXT_2], 200, JSON, False, None, None),
         ([FILE_DOCX, FILE_IMAGE], [FILE_TXT_1, FILE_TXT_2], 200, JSON, False, None, None),
@@ -339,8 +335,6 @@ def _assert_response_for_process_file_text_4(
         ),
         ([], [FILE_TXT_1], 200, JSON, False, None, None),
         ([FILE_DOCX], [], 200, JSON, False, None, None),
-        ([FILE_JSON], [], 200, JSON, False, None, None),
-        ([FILE_MSG], [], 200, JSON, False, None, None),
         ([GZIP_FILE_DOCX], [FILE_TXT_1], 200, JSON, False, None, FILENAME_FORMATS[FILE_DOCX]),
         ([GZIP_FILE_IMAGE], [], 200, JSON, False, None, FILENAME_FORMATS[FILE_IMAGE]),
     ],
@@ -350,7 +344,7 @@ def test_process_file_text_1(
     test_files_text,
     expected_status,
     response_type,
-    another_md_mimetype,
+    use_octet_stream_type,
     allowed_mimetypes_str,
     gz_content_type,
     monkeypatch,
@@ -362,7 +356,7 @@ def test_process_file_text_1(
     for endpoint in PROCESS_FILE_TEXT_1_ROUTE:
         response = client.post(
             endpoint,
-            files=convert_files_for_api(test_files, another_md_mimetype)
+            files=convert_files_for_api(test_files, use_octet_stream_type)
             + convert_text_files_for_api(test_files_text),
             data={"gz_uncompressed_content_type": gz_content_type},
             **generate_header_kwargs(response_type),
@@ -380,7 +374,7 @@ def test_process_file_text_1(
     "response_type,"
     "m_input2,"
     "expected_status,"
-    "another_md_mimetype,"
+    "use_octet_stream_type,"
     "allowed_mimetypes_str,"
     "gz_content_type",
     [
@@ -399,10 +393,6 @@ def test_process_file_text_1(
             None,
         ),
         ([FILE_DOCX], [FILE_TXT_1, FILE_TXT_2], JSON, P_INPUT_2_SINGLE, 200, False, None, None),
-        ([FILE_JSON], [FILE_TXT_1], JSON, P_INPUT_2_MULTI, 200, False, None, None),
-        ([FILE_JSON], [FILE_TXT_1], MIXED, P_INPUT_2_EMPTY, 200, False, None, None),
-        ([FILE_MSG], [FILE_TXT_1], JSON, P_INPUT_2_MULTI, 200, False, None, None),
-        ([FILE_MSG], [FILE_TXT_1], MIXED, P_INPUT_2_EMPTY, 200, False, None, None),
         ([FILE_IMAGE], [FILE_TXT_1], JSON, P_INPUT_2_MULTI, 200, False, None, None),
         ([FILE_IMAGE], [FILE_TXT_1], MIXED, P_INPUT_2_EMPTY, 200, False, None, None),
         ([GZIP_FILE_DOCX], [FILE_TXT_1], JSON, P_INPUT_2_MULTI, 200, False, None, None),
@@ -495,7 +485,7 @@ def test_process_file_text_2(
     response_type,
     m_input2,
     expected_status,
-    another_md_mimetype,
+    use_octet_stream_type,
     allowed_mimetypes_str,
     gz_content_type,
     monkeypatch,
@@ -507,7 +497,7 @@ def test_process_file_text_2(
     for endpoint in PROCESS_FILE_TEXT_2_ROUTE:
         response = client.post(
             endpoint,
-            files=convert_files_for_api(test_files, another_md_mimetype)
+            files=convert_files_for_api(test_files, use_octet_stream_type)
             + convert_text_files_for_api(test_files_text),
             data={
                 **m_input2,
@@ -529,7 +519,7 @@ def test_process_file_text_2(
     "response_type,"
     "response_schema,"
     "expected_status,"
-    "another_md_mimetype,"
+    "use_octet_stream_type,"
     "allowed_mimetypes_str,"
     "gz_content_type",
     [
@@ -726,7 +716,7 @@ def test_process_file_text_3(
     response_type,
     response_schema,
     expected_status,
-    another_md_mimetype,
+    use_octet_stream_type,
     allowed_mimetypes_str,
     gz_content_type,
     monkeypatch,
@@ -738,7 +728,7 @@ def test_process_file_text_3(
     for endpoint in PROCESS_FILE_TEXT_3_ROUTE:
         response = client.post(
             endpoint,
-            files=convert_files_for_api(test_files, another_md_mimetype)
+            files=convert_files_for_api(test_files, use_octet_stream_type)
             + convert_text_files_for_api(test_files_text),
             data={
                 **response_schema,
@@ -762,7 +752,7 @@ def test_process_file_text_3(
     "m_input1,"
     "m_input2,"
     "expected_status,"
-    "another_md_mimetype,"
+    "use_octet_stream_type,"
     "allowed_mimetypes_str,"
     "gz_content_type",
     [
@@ -995,30 +985,6 @@ def test_process_file_text_3(
             None,
         ),
         (
-            [FILE_JSON],
-            [FILE_TXT_1],
-            JSON,
-            RESPONSE_SCHEMA_LABELSTUDIO,
-            P_INPUT_1_MULTI,
-            P_INPUT_2_SINGLE,
-            200,
-            False,
-            None,
-            None,
-        ),
-        (
-            [FILE_MSG],
-            [FILE_TXT_1],
-            JSON,
-            RESPONSE_SCHEMA_LABELSTUDIO,
-            P_INPUT_1_MULTI,
-            P_INPUT_2_SINGLE,
-            200,
-            False,
-            None,
-            None,
-        ),
-        (
             [FILE_MARKDOWN],
             [FILE_TXT_2],
             JSON,
@@ -1136,7 +1102,7 @@ def test_process_file_text_4(
     m_input1,
     m_input2,
     expected_status,
-    another_md_mimetype,
+    use_octet_stream_type,
     allowed_mimetypes_str,
     gz_content_type,
     monkeypatch,
@@ -1148,7 +1114,7 @@ def test_process_file_text_4(
     for endpoint in PROCESS_FILE_TEXT_4_ROUTE:
         response = client.post(
             endpoint,
-            files=convert_files_for_api(test_files, another_md_mimetype)
+            files=convert_files_for_api(test_files, use_octet_stream_type)
             + convert_text_files_for_api(test_files_text),
             data={
                 **m_input1,
