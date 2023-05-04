@@ -8,14 +8,27 @@ import os
 import gzip
 import mimetypes
 from typing import List, Union
-from fastapi import status, FastAPI, File, Form, Request, UploadFile, APIRouter, HTTPException
+from fastapi import (
+    status,
+    FastAPI,
+    File,
+    Form,
+    Request,
+    UploadFile,
+    APIRouter,
+    HTTPException,
+    Depends,
+)
 from fastapi.responses import PlainTextResponse
 import json
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, FileResponse
 from starlette.datastructures import Headers
 from starlette.types import Send
 from base64 import b64encode
 from typing import Optional, Mapping, Iterator, Tuple
+from tempfile import TemporaryDirectory
+from unstructured.staging.base import convert_to_csv
+from unstructured.partition.auto import partition
 import secrets
 
 
@@ -127,6 +140,41 @@ class MultipartMixedResponse(StreamingResponse):
         await send({"type": "http.response.body", "body": b"", "more_body": False})
 
 
+def get_temp_dir():
+    dir = TemporaryDirectory()
+    try:
+        yield dir.name
+    finally:
+        del dir
+
+
+def return_convert_csv(file: UploadFile, dir):
+    if isinstance(file.filename, str) and file.filename.endswith((".docx", ".pptx")):
+        _filename = os.path.join(dir, file.filename.split("/")[-1])
+        with open(_filename, "wb") as f:
+            f.write(file.file.read())
+        elements = partition(filename=_filename)
+    else:
+        try:
+            elements = partition(
+                file=file.file,
+                content_type=file.content_type,
+            )
+        except Exception as e:
+            if "Invalid file" in e.args[0]:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"{file.content_type} not currently supported",
+                )
+            raise e
+    result_elements = convert_to_csv(elements)
+
+    _filename = os.path.join(dir, "file.csv")
+    with open(_filename, "w") as f:
+        f.write(result_elements)
+    return _filename
+
+
 def ungz_file(file: UploadFile, gz_uncompressed_content_type=None) -> UploadFile:
     def return_content_type(filename):
         if gz_uncompressed_content_type:
@@ -154,6 +202,7 @@ def pipeline_1(
     gz_uncompressed_content_type: Optional[str] = Form(default=None),
     files: Union[List[UploadFile], None] = File(default=None),
     text_files: Union[List[UploadFile], None] = File(default=None),
+    dir=Depends(get_temp_dir),
 ):
     if files:
         for file_index in range(len(files)):
@@ -198,7 +247,7 @@ def pipeline_1(
                 status_code=status.HTTP_406_NOT_ACCEPTABLE,
             )
 
-        def response_generator(is_multipart):
+        def response_generator(content_type):
             for text_file in text_files_list:
                 text = text_file.file.read().decode("utf-8")
 
@@ -207,9 +256,13 @@ def pipeline_1(
                     file=None,
                 )
 
-                if is_multipart:
+                if content_type == "multipart/mixed":
                     if type(response) not in [str, bytes]:
                         response = json.dumps(response)
+                elif content_type == "text/csv":
+                    response = FileResponse(
+                        return_convert_csv(text_file, dir), media_type="text/csv"
+                    )
                 yield response
 
             for file in files_list:
@@ -224,20 +277,22 @@ def pipeline_1(
                     file_content_type=file_content_type,
                 )
 
-                if is_multipart:
+                if content_type == "multipart/mixed":
                     if type(response) not in [str, bytes]:
                         response = json.dumps(response)
+                elif content_type == "text/csv":
+                    response = FileResponse(return_convert_csv(file, dir), media_type="text/csv")
                 yield response
 
         if content_type == "multipart/mixed":
             return MultipartMixedResponse(
-                response_generator(is_multipart=True),
+                response_generator(content_type),
             )
         else:
             return (
-                list(response_generator(is_multipart=False))[0]
+                list(response_generator(content_type))[0]
                 if len(files_list + text_files_list) == 1
-                else response_generator(is_multipart=False)
+                else response_generator(content_type)
             )
     else:
         raise HTTPException(

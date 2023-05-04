@@ -213,9 +213,7 @@ def _assert_response_for_process_file_5(
         ([FILE_DOCX, FILE_IMAGE], P_INPUT_1_AND_2_MULTI, MIXED, 200, None),
         ([FILE_DOCX], P_INPUT_1_MULTI, MIXED, 200, None),
         # json returned though csv requested
-        pytest.param(
-            [FILE_IMAGE], P_INPUT_1_AND_2_MULTI, TEXT_CSV, 200, None, marks=pytest.mark.xfail
-        ),
+        ([FILE_IMAGE], P_INPUT_1_AND_2_MULTI, TEXT_CSV, 200, None),
         ([FILE_MSG], None, JSON, 200, None),
         ([FILE_JSON], None, JSON, 200, None),
         ([GZIP_FILE_IMAGE], P_INPUT_1_EMPTY, JSON, 200, None),
@@ -224,6 +222,7 @@ def _assert_response_for_process_file_5(
         ([], P_INPUT_1_EMPTY, JSON, 400, None),
         ([GZIP_FILE_DOCX], P_INPUT_1_EMPTY, JSON, 200, FILENAME_FORMATS[FILE_DOCX]),
         ([GZIP_FILE_DOCX], P_INPUT_1_EMPTY, JSON, 200, FILENAME_FORMATS[FILE_IMAGE]),
+        ([FILE_DOCX], P_INPUT_1_AND_2_MULTI, TEXT_CSV, 200, None)
     ],
 )
 def test_process_file_1(
@@ -247,7 +246,10 @@ def test_process_file_1(
             if test_type_header == MIXED:
                 assert response.headers["content-type"].startswith("multipart/mixed; boundary=")
             else:
-                assert response.headers["content-type"] == test_type_header
+                if test_type_header == TEXT_CSV:
+                    assert response.headers["content-type"].startswith("text/csv; charset=")
+                else:
+                    assert response.headers["content-type"] == test_type_header
             _assert_response_for_process_file_1(
                 test_files, test_params, test_type_header, response, gz_content_type
             )
