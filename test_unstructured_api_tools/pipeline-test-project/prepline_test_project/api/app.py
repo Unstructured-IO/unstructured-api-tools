@@ -5,6 +5,7 @@
 
 
 from fastapi import FastAPI, Request, status
+import logging
 
 from .process_file_1 import router as process_file_1_router
 from .process_file_2 import router as process_file_2_router
@@ -42,6 +43,15 @@ app.include_router(process_text_file_1_router)
 app.include_router(process_text_file_2_router)
 app.include_router(process_text_file_3_router)
 app.include_router(process_text_file_4_router)
+
+
+# Filter out /healthcheck noise
+class HealthCheckFilter(logging.Filter):
+    def filter(self, record: logging.LogRecord) -> bool:
+        return record.getMessage().find("/healthcheck") == -1
+
+
+logging.getLogger("uvicorn.access").addFilter(HealthCheckFilter())
 
 
 @app.get("/healthcheck", status_code=status.HTTP_200_OK, include_in_schema=False)

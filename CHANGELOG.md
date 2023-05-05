@@ -1,3 +1,7 @@
+# 0.10.4
+
+* Add filter on /healthcheck logs
+
 # 0.10.3
 
 * Add support for json and msg file types
