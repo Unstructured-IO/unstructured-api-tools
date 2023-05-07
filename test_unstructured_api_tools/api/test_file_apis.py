@@ -14,6 +14,8 @@ from functions_and_variables import (
     MIXED,
     FILE_DOCX,
     FILE_IMAGE,
+    FILE_JSON,
+    FILE_MSG,
     RESPONSE_SCHEMA_ISD,
     RESPONSE_SCHEMA_LABELSTUDIO,
     P_INPUT_1_SINGLE,
@@ -214,6 +216,8 @@ def _assert_response_for_process_file_5(
         pytest.param(
             [FILE_IMAGE], P_INPUT_1_AND_2_MULTI, TEXT_CSV, 200, None, marks=pytest.mark.xfail
         ),
+        ([FILE_MSG], None, JSON, 200, None),
+        ([FILE_JSON], None, JSON, 200, None),
         ([GZIP_FILE_IMAGE], P_INPUT_1_EMPTY, JSON, 200, None),
         ([GZIP_FILE_DOCX], P_INPUT_1_EMPTY, JSON, 200, None),
         ([GZIP_FILE_DOCX, FILE_IMAGE], P_INPUT_1_EMPTY, TEXT_CSV, 406, None),
@@ -254,7 +258,7 @@ def test_process_file_1(
     "response_type,"
     "expected_status,"
     "allowed_mimetypes_str,"
-    "another_md_mimetype,"
+    "use_octet_stream_type,"
     "gz_content_type",
     [
         ([FILE_DOCX], JSON, 200, FILENAME_FORMATS[FILE_DOCX], False, None),
@@ -269,6 +273,8 @@ def test_process_file_1(
         ([FILE_MARKDOWN, GZIP_FILE_IMAGE], JSON, 200, None, False, None),
         ([FILE_MARKDOWN], JSON, 200, None, False, None),
         ([FILE_MARKDOWN], JSON, 200, None, True, None),
+        ([FILE_MSG], JSON, 200, None, True, None),
+        ([FILE_JSON], JSON, 200, None, True, None),
         ([GZIP_FILE_DOCX], JSON, 200, None, False, FILENAME_FORMATS[FILE_DOCX]),
         ([GZIP_FILE_DOCX], JSON, 200, None, False, FILENAME_FORMATS[FILE_IMAGE]),
     ],
@@ -278,7 +284,7 @@ def test_process_file_2(
     response_type,
     expected_status,
     allowed_mimetypes_str,
-    another_md_mimetype,
+    use_octet_stream_type,
     gz_content_type,
     monkeypatch,
 ):
@@ -289,7 +295,7 @@ def test_process_file_2(
     for endpoint in PROCESS_FILE_2_ROUTE:
         response = client.post(
             endpoint,
-            files=convert_files_for_api(test_files, another_md_mimetype),
+            files=convert_files_for_api(test_files, use_octet_stream_type),
             data={"output_format": response_type, "gz_uncompressed_content_type": gz_content_type},
             **generate_header_kwargs(response_type),
         )
@@ -303,7 +309,7 @@ def test_process_file_2(
     "response_type,"
     "response_schema,"
     "expected_status,"
-    "another_md_mimetype,"
+    "use_octet_stream_type,"
     "allowed_mimetypes_str,"
     "gz_content_type",
     [
@@ -359,6 +365,8 @@ def test_process_file_2(
             marks=pytest.mark.xfail,
         ),
         ([FILE_DOCX, FILE_IMAGE], JSON, RESPONSE_SCHEMA_ISD, 200, False, None, None),
+        ([FILE_MSG], JSON, RESPONSE_SCHEMA_ISD, 200, True, None, None),
+        ([FILE_JSON], JSON, RESPONSE_SCHEMA_ISD, 200, False, None, None),
         ([FILE_DOCX, FILE_IMAGE], MIXED, RESPONSE_SCHEMA_ISD, 200, False, None, None),
         # endpoint fails because text/csv is not acceptable for multiple files
         pytest.param(
@@ -458,7 +466,7 @@ def test_process_file_3(
     response_type,
     response_schema,
     expected_status,
-    another_md_mimetype,
+    use_octet_stream_type,
     allowed_mimetypes_str,
     gz_content_type,
     monkeypatch,
@@ -470,7 +478,7 @@ def test_process_file_3(
     for endpoint in PROCESS_FILE_3_ROUTE:
         response = client.post(
             endpoint,
-            files=convert_files_for_api(test_files, another_md_mimetype),
+            files=convert_files_for_api(test_files, use_octet_stream_type),
             data={
                 **response_schema,
                 "output_format": response_type,
@@ -492,7 +500,7 @@ def test_process_file_3(
     "m_input1,"
     "expected_status,"
     "allowed_mimetypes_str,"
-    "another_md_mimetype,"
+    "use_octet_stream_type,"
     "gz_content_type",
     [
         ([FILE_DOCX], JSON, RESPONSE_SCHEMA_ISD, P_INPUT_1_EMPTY, 200, None, False, None),
@@ -593,6 +601,16 @@ def test_process_file_3(
             marks=pytest.mark.xfail,
         ),
         (
+            [FILE_MSG],
+            JSON,
+            RESPONSE_SCHEMA_ISD,
+            P_INPUT_1_SINGLE,
+            200,
+            FILENAME_FORMATS[FILE_MSG],
+            True,
+            None,
+        ),
+        (
             [FILE_DOCX],
             JSON,
             RESPONSE_SCHEMA_ISD,
@@ -654,7 +672,7 @@ def test_process_file_4(
     m_input1,
     expected_status,
     allowed_mimetypes_str,
-    another_md_mimetype,
+    use_octet_stream_type,
     gz_content_type,
     monkeypatch,
 ):
@@ -665,7 +683,7 @@ def test_process_file_4(
     for endpoint in PROCESS_FILE_4_ROUTE:
         response = client.post(
             endpoint,
-            files=convert_files_for_api(test_files, another_md_mimetype),
+            files=convert_files_for_api(test_files, use_octet_stream_type),
             data={
                 **response_schema,
                 **m_input1,
@@ -688,7 +706,7 @@ def test_process_file_4(
     "m_input1,"
     "m_input2,"
     "expected_status,"
-    "another_md_mimetype,"
+    "use_octet_stream_type,"
     "allowed_mimetypes_str,"
     "gz_content_type",
     [
@@ -837,6 +855,17 @@ def test_process_file_4(
             marks=pytest.mark.xfail,
         ),
         (
+            [FILE_MSG],
+            JSON,
+            RESPONSE_SCHEMA_LABELSTUDIO,
+            P_INPUT_1_MULTI,
+            P_INPUT_2_EMPTY,
+            200,
+            True,
+            None,
+            None,
+        ),
+        (
             [FILE_MARKDOWN],
             JSON,
             RESPONSE_SCHEMA_LABELSTUDIO,
@@ -955,7 +984,7 @@ def test_process_file_5(
     m_input1,
     m_input2,
     expected_status,
-    another_md_mimetype,
+    use_octet_stream_type,
     allowed_mimetypes_str,
     gz_content_type,
     monkeypatch,
@@ -967,7 +996,7 @@ def test_process_file_5(
     for endpoint in PROCESS_FILE_5_ROUTE:
         response = client.post(
             endpoint,
-            files=convert_files_for_api(test_files, another_md_mimetype),
+            files=convert_files_for_api(test_files, use_octet_stream_type),
             data={
                 **response_schema,
                 **m_input1,

@@ -39,9 +39,12 @@ def get_validated_mimetype(file):
     if not content_type or content_type == "application/octet-stream":
         content_type = mimetypes.guess_type(str(file.filename))[0]
 
-        # Markdown mimetype is too new for the library - just hardcode that one in for now
-        if not content_type and ".md" in file.filename:
-            content_type = "text/markdown"
+        # Some filetypes missing for this library, just hardcode them for now
+        if not content_type:
+            if file.filename.endswith(".md"):
+                content_type = "text/markdown"
+            elif file.filename.endswith(".msg"):
+                content_type = "message/rfc822"
 
     allowed_mimetypes_str = os.environ.get("UNSTRUCTURED_ALLOWED_MIMETYPES")
     if allowed_mimetypes_str is not None:
