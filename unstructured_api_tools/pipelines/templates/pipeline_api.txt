@@ -18,7 +18,7 @@ import secrets
 app = FastAPI()
 router = APIRouter()
 
-allowed_origins = os.environ.get("ALLOWED_ORIGINS")
+allowed_origins = os.environ.get("ALLOWED_ORIGINS", None)
 if allowed_origins:
     from fastapi.middleware.cors import CORSMiddleware
     app.add_middleware(
