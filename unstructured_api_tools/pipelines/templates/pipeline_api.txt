@@ -18,6 +18,17 @@ import secrets
 app = FastAPI()
 router = APIRouter()
 
+allowed_origins = os.environ.get("ALLOWED_ORIGINS")
+if allowed_origins:
+    from fastapi.middleware.cors import CORSMiddleware
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=allowed_origins,
+        allow_methods=["OPTIONS"],
+        allow_headers=["Content-Type"]
+        )
+
+
 {% set default_response_type = optional_param_value_map.pop("response_type", None) %}
 {% if default_response_type %}
 def is_expected_response_type(media_type, response_type):
