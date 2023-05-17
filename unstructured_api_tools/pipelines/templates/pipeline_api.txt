@@ -6,6 +6,7 @@ from typing import List, Union
 
 from fastapi import status, FastAPI, File, Form, Request, UploadFile, APIRouter, HTTPException
 from fastapi.responses import PlainTextResponse
+from fastapi.middleware.cors import CORSMiddleware
 
 import json
 from fastapi.responses import StreamingResponse
@@ -20,7 +21,6 @@ router = APIRouter()
 
 allowed_origins = os.environ.get("ALLOWED_ORIGINS", None)
 if allowed_origins:
-    from fastapi.middleware.cors import CORSMiddleware
     app.add_middleware(
         CORSMiddleware,
         allow_origins=allowed_origins,
