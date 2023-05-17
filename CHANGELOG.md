@@ -1,3 +1,7 @@
+# 0.10.5
+
+* Add optional CORS to api
+
 # 0.10.4
 
 * Add filter on /healthcheck logs

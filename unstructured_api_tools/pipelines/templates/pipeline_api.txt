@@ -18,6 +18,7 @@ import secrets
 app = FastAPI()
 router = APIRouter()
 
+
 {% set default_response_type = optional_param_value_map.pop("response_type", None) %}
 {% if default_response_type %}
 def is_expected_response_type(media_type, response_type):
