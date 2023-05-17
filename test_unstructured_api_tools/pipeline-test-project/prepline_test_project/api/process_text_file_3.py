@@ -10,7 +10,6 @@ import mimetypes
 from typing import List, Union
 from fastapi import status, FastAPI, File, Form, Request, UploadFile, APIRouter, HTTPException
 from fastapi.responses import PlainTextResponse
-from fastapi.middleware.cors import CORSMiddleware
 import json
 from fastapi.responses import StreamingResponse
 from starlette.datastructures import Headers
@@ -22,15 +21,6 @@ import secrets
 
 app = FastAPI()
 router = APIRouter()
-
-allowed_origins = os.environ.get("ALLOWED_ORIGINS", None)
-if allowed_origins:
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=allowed_origins,
-        allow_methods=["OPTIONS", "POST"],
-        allow_headers=["Content-Type"],
-    )
 
 
 def is_expected_response_type(media_type, response_type):

@@ -6,6 +6,7 @@
 
 from fastapi import FastAPI, Request, status
 import logging
+import os
 
 from .process_file_1 import router as process_file_1_router
 from .process_file_2 import router as process_file_2_router
@@ -29,6 +30,17 @@ app = FastAPI(
     docs_url="/test-project/docs",
     openapi_url="/test-project/openapi.json",
 )
+
+allowed_origins = os.environ.get("ALLOWED_ORIGINS", None)
+if allowed_origins:
+    from fastapi.middleware.cors import CORSMiddleware
+
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=allowed_origins,
+        allow_methods=["OPTIONS", "POST"],
+        allow_headers=["Content-Type"],
+    )
 
 app.include_router(process_file_1_router)
 app.include_router(process_file_2_router)
