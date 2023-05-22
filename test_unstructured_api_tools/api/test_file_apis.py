@@ -492,7 +492,7 @@ def test_process_file_2(
             RESPONSE_SCHEMA_LABELSTUDIO,
             400,
             False,
-            None, 
+            None,
             None,
         ),
     ],
@@ -707,7 +707,7 @@ def test_process_file_3(
             400,
             None,
             False,
-            None,    
+            None,
         ),
         (
             [FILE_TXT_1],
@@ -1050,7 +1050,7 @@ def test_process_file_4(
             400,
             False,
             None,
-            None    
+            None,
         ),
         (
             [FILE_TXT_1],

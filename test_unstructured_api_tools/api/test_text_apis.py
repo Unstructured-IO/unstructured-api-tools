@@ -378,7 +378,7 @@ def test_process_text_1(
             None,
             JSON,
             None,
-        )
+        ),
     ],
 )
 def test_process_text_2(
@@ -563,7 +563,15 @@ def test_process_text_3(
         ([FILE_DOCX], JSON, RESPONSE_SCHEMA_ISD, 400, False, None, None),
         ([FILE_TXT_1, FILE_DOCX], JSON, RESPONSE_SCHEMA_ISD, 400, False, None, None),
         ([GZIP_FILE_DOCX], JSON, RESPONSE_SCHEMA_LABELSTUDIO, 400, False, None, None),
-        ([FILE_TXT_1, GZIP_FILE_TXT_1, GZIP_FILE_DOCX], JSON, RESPONSE_SCHEMA_ISD, 400, False, None, None)
+        (
+            [FILE_TXT_1, GZIP_FILE_TXT_1, GZIP_FILE_DOCX],
+            JSON,
+            RESPONSE_SCHEMA_ISD,
+            400,
+            False,
+            None,
+            None,
+        ),
     ],
 )
 def test_process_text_4(

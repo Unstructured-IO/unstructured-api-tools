@@ -339,7 +339,7 @@ def _assert_response_for_process_file_text_4(
         ([GZIP_FILE_IMAGE], [], 200, JSON, False, None, FILENAME_FORMATS[FILE_IMAGE]),
         ([FILE_TXT_1], [], 400, JSON, False, None, None),
         ([], [FILE_DOCX], 400, JSON, False, None, None),
-        ([FILE_DOCX, FILE_IMAGE, FILE_MARKDOWN], [FILE_TXT_1], 400, JSON, False, None, None)
+        ([FILE_DOCX, FILE_IMAGE, FILE_MARKDOWN], [FILE_TXT_1], 400, JSON, False, None, None),
     ],
 )
 def test_process_file_text_1(
@@ -488,7 +488,7 @@ def test_process_file_text_1(
             400,
             False,
             None,
-            None
+            None,
         ),
         (
             [GZIP_FILE_DOCX],
@@ -507,7 +507,7 @@ def test_process_file_text_1(
             P_INPUT_2_EMPTY,
             200,
             True,
-            None, 
+            None,
             None,
         ),
         (
