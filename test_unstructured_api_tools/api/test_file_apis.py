@@ -31,6 +31,8 @@ from functions_and_variables import (
     GZIP_FILE_IMAGE,
     GZIP_FILE_DOCX,
     FILE_MARKDOWN,
+    FILE_TXT_1,
+    GZIP_FILE_TXT_1,
 )
 
 # accepts: files, input2
@@ -224,6 +226,9 @@ def _assert_response_for_process_file_5(
         ([], P_INPUT_1_EMPTY, JSON, 400, None),
         ([GZIP_FILE_DOCX], P_INPUT_1_EMPTY, JSON, 200, FILENAME_FORMATS[FILE_DOCX]),
         ([GZIP_FILE_DOCX], P_INPUT_1_EMPTY, JSON, 200, FILENAME_FORMATS[FILE_IMAGE]),
+        ([FILE_TXT_1], P_INPUT_1_EMPTY, JSON, 400, None),
+        ([FILE_DOCX, FILE_IMAGE, FILE_TXT_1], P_INPUT_1_EMPTY, JSON, 400, None),
+        ([FILE_DOCX, GZIP_FILE_TXT_1], P_INPUT_1_EMPTY, JSON, 400, None),
     ],
 )
 def test_process_file_1(
@@ -235,6 +240,8 @@ def test_process_file_1(
             data = test_params
         if gz_content_type:
             data["gz_uncompressed_content_type"] = gz_content_type
+        else:
+            data["gz_uncompressed_content_type"] = None
 
         response = client.post(
             endpoint,
@@ -270,13 +277,15 @@ def test_process_file_1(
         ([FILE_DOCX, GZIP_FILE_IMAGE], MIXED, 200, None, False, None),
         ([GZIP_FILE_DOCX, GZIP_FILE_IMAGE], MIXED, 200, None, False, None),
         ([GZIP_FILE_DOCX, GZIP_FILE_IMAGE], TEXT_CSV, 406, None, False, None),
-        ([FILE_MARKDOWN, GZIP_FILE_IMAGE], JSON, 200, None, False, None),
-        ([FILE_MARKDOWN], JSON, 200, None, False, None),
-        ([FILE_MARKDOWN], JSON, 200, None, True, None),
+        ([FILE_MARKDOWN, GZIP_FILE_IMAGE], JSON, 400, None, False, None),
+        ([FILE_MARKDOWN], JSON, 400, None, False, None),
+        ([FILE_MARKDOWN], JSON, 400, None, True, None),
         ([FILE_MSG], JSON, 200, None, True, None),
         ([FILE_JSON], JSON, 200, None, True, None),
         ([GZIP_FILE_DOCX], JSON, 200, None, False, FILENAME_FORMATS[FILE_DOCX]),
         ([GZIP_FILE_DOCX], JSON, 200, None, False, FILENAME_FORMATS[FILE_IMAGE]),
+        ([GZIP_FILE_DOCX, GZIP_FILE_TXT_1], JSON, 400, None, False, None),
+        ([FILE_TXT_1], JSON, 400, None, False, None),
     ],
 )
 def test_process_file_2(
@@ -421,12 +430,12 @@ def test_process_file_2(
             None,
             None,
         ),
-        ([FILE_MARKDOWN], JSON, RESPONSE_SCHEMA_LABELSTUDIO, 200, True, None, None),
+        ([FILE_MARKDOWN], JSON, RESPONSE_SCHEMA_LABELSTUDIO, 400, True, None, None),
         (
             [FILE_MARKDOWN],
             JSON,
             RESPONSE_SCHEMA_LABELSTUDIO,
-            200,
+            400,
             False,
             FILENAME_FORMATS[FILE_MARKDOWN],
             None,
@@ -458,6 +467,33 @@ def test_process_file_2(
             False,
             None,
             FILENAME_FORMATS[FILE_IMAGE],
+        ),
+        (
+            [GZIP_FILE_TXT_1],
+            JSON,
+            RESPONSE_SCHEMA_ISD,
+            400,
+            False,
+            None,
+            None,
+        ),
+        (
+            [FILE_DOCX, FILE_TXT_1],
+            JSON,
+            RESPONSE_SCHEMA_LABELSTUDIO,
+            400,
+            False,
+            None,
+            None,
+        ),
+        (
+            [FILE_TXT_1],
+            JSON,
+            RESPONSE_SCHEMA_LABELSTUDIO,
+            400,
+            False,
+            None, 
+            None,
         ),
     ],
 )
@@ -630,7 +666,7 @@ def test_process_file_3(
             False,
             None,
         ),
-        ([FILE_MARKDOWN], JSON, RESPONSE_SCHEMA_ISD, P_INPUT_1_SINGLE, 200, None, True, None),
+        ([FILE_MARKDOWN], JSON, RESPONSE_SCHEMA_ISD, P_INPUT_1_SINGLE, 400, None, True, None),
         (
             [GZIP_FILE_DOCX, GZIP_FILE_IMAGE],
             MIXED,
@@ -662,6 +698,36 @@ def test_process_file_3(
             None,
             False,
             FILENAME_FORMATS[FILE_IMAGE],
+        ),
+        (
+            [GZIP_FILE_TXT_1],
+            JSON,
+            RESPONSE_SCHEMA_ISD,
+            P_INPUT_1_EMPTY,
+            400,
+            None,
+            False,
+            None,    
+        ),
+        (
+            [FILE_TXT_1],
+            JSON,
+            RESPONSE_SCHEMA_LABELSTUDIO,
+            P_INPUT_1_EMPTY,
+            400,
+            None,
+            False,
+            None,
+        ),
+        (
+            [FILE_DOCX, FILE_MARKDOWN],
+            JSON,
+            RESPONSE_SCHEMA_ISD,
+            P_INPUT_1_EMPTY,
+            400,
+            None,
+            False,
+            None,
         ),
     ],
 )
@@ -871,7 +937,7 @@ def test_process_file_4(
             RESPONSE_SCHEMA_LABELSTUDIO,
             P_INPUT_1_MULTI,
             P_INPUT_2_EMPTY,
-            200,
+            400,
             False,
             None,
             None,
@@ -882,7 +948,7 @@ def test_process_file_4(
             RESPONSE_SCHEMA_LABELSTUDIO,
             P_INPUT_1_MULTI,
             P_INPUT_2_EMPTY,
-            200,
+            400,
             True,
             None,
             None,
@@ -893,7 +959,7 @@ def test_process_file_4(
             RESPONSE_SCHEMA_LABELSTUDIO,
             P_INPUT_1_MULTI,
             P_INPUT_2_EMPTY,
-            200,
+            400,
             False,
             FILENAME_FORMATS[FILE_MARKDOWN],
             None,
@@ -974,6 +1040,28 @@ def test_process_file_4(
             False,
             None,
             FILENAME_FORMATS[FILE_IMAGE],
+        ),
+        (
+            [GZIP_FILE_DOCX, FILE_TXT_1],
+            JSON,
+            RESPONSE_SCHEMA_ISD,
+            P_INPUT_1_EMPTY,
+            P_INPUT_2_EMPTY,
+            400,
+            False,
+            None,
+            None    
+        ),
+        (
+            [FILE_TXT_1],
+            JSON,
+            RESPONSE_SCHEMA_LABELSTUDIO,
+            P_INPUT_1_EMPTY,
+            P_INPUT_2_EMPTY,
+            400,
+            False,
+            None,
+            None,
         ),
     ],
 )

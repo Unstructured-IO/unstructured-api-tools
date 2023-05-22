@@ -229,6 +229,14 @@ def pipeline_1(
 
         def response_generator(is_multipart):
             for text_file in text_files_list:
+                file_content_type = get_validated_mimetype(text_file)
+
+                if file_content_type not in ["text/plain", "text/markdown", "text/csv"]:
+                    raise HTTPException(
+                        detail=f"Type {file_content_type} not supported for text files endpoint.",
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                    )
+
                 text = text_file.file.read().decode("utf-8")
 
                 response = pipeline_api(
@@ -264,6 +272,12 @@ def pipeline_1(
                 _file = file.file
 
                 file_content_type = get_validated_mimetype(file)
+
+                if file_content_type in ["text/plain", "text/markdown", "text/csv"]:
+                    raise HTTPException(
+                        detail=f"Type {file_content_type} not supported for file endpoint.",
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                    )
 
                 response = pipeline_api(
                     text=None,
