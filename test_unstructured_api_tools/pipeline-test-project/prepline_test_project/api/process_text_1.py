@@ -162,7 +162,7 @@ def pipeline_1(
             for file in text_files:
                 file_content_type = get_validated_mimetype(file)
 
-                if file_content_type not in ["text/plain", "text/markdown", "text/csv"]:
+                if not file_content_type.startswith("text/"):
                     raise HTTPException(
                         detail=f"Type {file_content_type} not supported for text files endpoint.",
                         status_code=status.HTTP_400_BAD_REQUEST,
