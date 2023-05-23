@@ -27,6 +27,8 @@ from test_unstructured_api_tools.api.functions_and_variables import (
     GZIP_FILE_TXT_2,
     FILE_MARKDOWN,
     FILENAME_FORMATS,
+    FILE_DOCX,
+    GZIP_FILE_DOCX,
 )
 
 # accepts: text files
@@ -164,6 +166,9 @@ def _assert_response_for_process_text_4(test_files, response, response_type, res
         ([], 400, False, None, JSON, None),
         ([GZIP_FILE_TXT_1], 200, False, None, JSON, None),
         ([GZIP_FILE_TXT_1], 200, False, None, JSON, FILENAME_FORMATS[FILE_TXT_1]),
+        ([FILE_DOCX], 400, False, None, JSON, None),
+        ([GZIP_FILE_DOCX], 400, False, None, JSON, None),
+        ([FILE_TXT_1, FILE_DOCX], 400, False, None, JSON, None),
     ],
 )
 def test_process_text_1(
@@ -344,6 +349,36 @@ def test_process_text_1(
             JSON,
             FILENAME_FORMATS[FILE_TXT_1],
         ),
+        (
+            [FILE_DOCX],
+            P_INPUT_1_EMPTY,
+            P_INPUT_2_EMPTY,
+            400,
+            False,
+            None,
+            JSON,
+            None,
+        ),
+        (
+            [GZIP_FILE_DOCX],
+            P_INPUT_1_EMPTY,
+            P_INPUT_2_EMPTY,
+            400,
+            False,
+            None,
+            JSON,
+            None,
+        ),
+        (
+            [FILE_TXT_1, GZIP_FILE_DOCX],
+            P_INPUT_1_EMPTY,
+            P_INPUT_2_EMPTY,
+            400,
+            False,
+            None,
+            JSON,
+            None,
+        ),
     ],
 )
 def test_process_text_2(
@@ -434,6 +469,9 @@ def test_process_text_2(
         ([FILE_TXT_2, FILE_MARKDOWN], None, 406, False, FILENAME_FORMATS[FILE_TXT_1], None),
         ([], None, 400, False, None, None),
         ([GZIP_FILE_TXT_1], JSON, 200, False, None, FILENAME_FORMATS[FILE_TXT_1]),
+        ([FILE_DOCX], JSON, 400, False, None, None),
+        ([FILE_TXT_1, GZIP_FILE_DOCX], JSON, 400, False, None, None),
+        ([FILE_TXT_1, FILE_TXT_1, FILE_DOCX], JSON, 400, False, None, None),
     ],
 )
 def test_process_text_3(
@@ -521,6 +559,18 @@ def test_process_text_3(
             False,
             None,
             FILENAME_FORMATS[FILE_TXT_1],
+        ),
+        ([FILE_DOCX], JSON, RESPONSE_SCHEMA_ISD, 400, False, None, None),
+        ([FILE_TXT_1, FILE_DOCX], JSON, RESPONSE_SCHEMA_ISD, 400, False, None, None),
+        ([GZIP_FILE_DOCX], JSON, RESPONSE_SCHEMA_LABELSTUDIO, 400, False, None, None),
+        (
+            [FILE_TXT_1, GZIP_FILE_TXT_1, GZIP_FILE_DOCX],
+            JSON,
+            RESPONSE_SCHEMA_ISD,
+            400,
+            False,
+            None,
+            None,
         ),
     ],
 )

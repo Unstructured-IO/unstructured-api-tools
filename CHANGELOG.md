@@ -1,3 +1,7 @@
+# 0.10.6
+
+* Refinement around handling of mixed text file / non-text file requests
+
 # 0.10.5
 
 * Add optional CORS to api
