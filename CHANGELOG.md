@@ -1,3 +1,7 @@
+# 0.10.6
+
+* Fix ENV variable processing for CORS
+
 # 0.10.5
 
 * Add optional CORS to api
