@@ -22,11 +22,10 @@ app = FastAPI(
 
 allowed_origins = os.environ.get("ALLOWED_ORIGINS", None)
 if allowed_origins:
-    allowed_origins = allowed_origins.split(",")
     from fastapi.middleware.cors import CORSMiddleware
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=allowed_origins,
+        allow_origins=allowed_origins.split(","),
         allow_methods=["OPTIONS", "POST"],
         allow_headers=["Content-Type"]
         )
