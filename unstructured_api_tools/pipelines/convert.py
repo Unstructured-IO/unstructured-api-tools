@@ -116,6 +116,7 @@ def _infer_params_from_pipeline_api(script: str) -> Dict[str, Optional[Any]]:
     accepts_file = False
 
     expect_text_or_file = True
+    expect_request_param = False
     expect_other_params = False
 
     supported_optional_params: Dict[str, Union[Type, Tuple]] = {
@@ -135,12 +136,16 @@ def _infer_params_from_pipeline_api(script: str) -> Dict[str, Optional[Any]]:
                 supported_optional_params["file_content_type"] = (str, type(None))
                 expect_other_params = True
                 continue
+            elif param == "request":
+                expect_request_param = True
+                continue
             elif not expect_other_params:
                 raise ValueError("The first parameter(s) must be named either text or file.")
 
-        elif param in ["text", "file"]:
+        elif param in ["text", "file", "request"]:
             raise ValueError(
-                "The parameters text or file must be specified before any keyword parameters."
+                "The parameters text, file, or request, must be "
+                "specified before any keyword parameters."
             )
 
         if expect_other_params:
@@ -175,6 +180,7 @@ def _infer_params_from_pipeline_api(script: str) -> Dict[str, Optional[Any]]:
         "optional_param_value_map": optional_param_value_map,
         "accepts_text": accepts_text,
         "accepts_file": accepts_file,
+        "expect_request_param": expect_request_param,
     }
 
 

@@ -35,7 +35,7 @@ PROCESS_TEXT_1_ROUTE = ["/test-project/v1.2.3/process-text-1", "/test-project/v1
 # accepts: text files, input1, input2
 PROCESS_TEXT_2_ROUTE = ["/test-project/v1.2.3/process-text-2", "/test-project/v1/process-text-2"]
 
-# accepts: text files, response_type
+# accepts: text files, request, response_type
 PROCESS_TEXT_3_ROUTE = ["/test-project/v1.2.3/process-text-3", "/test-project/v1/process-text-3"]
 
 # accepts: text files, response_type, response_schema

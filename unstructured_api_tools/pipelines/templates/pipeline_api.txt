@@ -206,6 +206,7 @@ gz_uncompressed_content_type: Optional[str] = Form(default=None),
                 response = pipeline_api(
                     text=text,
                     file=None,
+                    {% if expect_request_param %}request=request, {%endif%}
                     {% for param in multi_string_param_names %}m_{{param}}={{param}}, {% endfor %}
                     {% if default_response_type %}response_type=media_type, {% endif %}
                     {% if default_response_schema %}response_schema=default_response_schema, {% endif %}
@@ -249,6 +250,7 @@ gz_uncompressed_content_type: Optional[str] = Form(default=None),
                 response = pipeline_api(
                     text=None,
                     file=_file,
+                    {% if expect_request_param %}request=request, {%endif%}
                     {% for param in multi_string_param_names %}m_{{param}}={{param}}, {% endfor %}
                     {% if default_response_type %}response_type=media_type, {% endif %}
                     {% if default_response_schema %}response_schema=default_response_schema, {% endif %}
@@ -320,6 +322,7 @@ gz_uncompressed_content_type: Optional[str] = Form(default=None),
 
                 response = pipeline_api(
                     {% if accepts_text %}text, {% elif accepts_file%}_file, {% endif %}
+                    {% if expect_request_param %}request=request, {%endif%}
                     {% for param in multi_string_param_names %}m_{{param}}={{param}}, {% endfor %}
                     {% if default_response_type %}response_type=media_type, {% endif %}
                     {% if default_response_schema %}response_schema=default_response_schema, {% endif %}
