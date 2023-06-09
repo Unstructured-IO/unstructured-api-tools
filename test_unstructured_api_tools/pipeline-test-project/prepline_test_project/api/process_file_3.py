@@ -33,7 +33,7 @@ def is_expected_response_type(media_type, response_type):
 
 
 # pipeline-api
-def pipeline_api(file, response_type="text/csv", response_schema="isd"):
+def pipeline_api(file, request, response_type="text/csv", response_schema="isd"):
     return {
         "silly_result": " : ".join(
             [str(len(file.read())), str(response_type), str(response_schema)]
@@ -188,6 +188,7 @@ def pipeline_1(
 
                 response = pipeline_api(
                     _file,
+                    request=request,
                     response_type=media_type,
                     response_schema=default_response_schema,
                 )

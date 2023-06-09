@@ -147,8 +147,14 @@ def tests_notebook_to_script(sample_notebook):
             " response_schema, or begin with m_",
         ),
         (
+            "def pipeline_api(file, m_var=[], request=None): pass",
+            "The parameters text, file, or request, must be "
+            "specified before any keyword parameters.",
+        ),
+        (
             "def pipeline_api(text, m_var=[], file=None, m_var2=[], var3=[]): pass",
-            "The parameters text or file must be specified before any keyword parameters.",
+            "The parameters text, file, or request, must be "
+            "specified before any keyword parameters.",
         ),
     ],
 )
@@ -201,19 +207,21 @@ def test_infer_m_params():
         == {
             "accepts_text": True,
             "accepts_file": False,
+            "expect_request_param": False,
             "multi_string_param_names": ["var"],
             "optional_param_value_map": {},
         }
     )
     assert (
         convert._infer_params_from_pipeline_api(
-            """def pipeline_api(text, m_var=[], m_var2=[]):
+            """def pipeline_api(text, request, m_var=[], m_var2=[]):
         pass
         """
         )
         == {
             "accepts_text": True,
             "accepts_file": False,
+            "expect_request_param": True,
             "multi_string_param_names": ["var", "var2"],
             "optional_param_value_map": {},
         }
@@ -227,6 +235,7 @@ def test_infer_m_params():
         == {
             "accepts_text": True,
             "accepts_file": False,
+            "expect_request_param": False,
             "multi_string_param_names": ["var", "var2"],
             "optional_param_value_map": {"response_type": "text/csv"},
         }
@@ -234,13 +243,14 @@ def test_infer_m_params():
 
     assert (
         convert._infer_params_from_pipeline_api(
-            """def pipeline_api(text, m_var=[], m_var2=[], response_schema="label_studio"):
+            """def pipeline_api(text, request, m_var=[], m_var2=[], response_schema="label_studio"):
         pass
         """
         )
         == {
             "accepts_text": True,
             "accepts_file": False,
+            "expect_request_param": True,
             "multi_string_param_names": ["var", "var2"],
             "optional_param_value_map": {"response_schema": "label_studio"},
         }
@@ -256,6 +266,23 @@ def test_infer_m_params():
         == {
             "accepts_text": False,
             "accepts_file": True,
+            "expect_request_param": False,
+            "multi_string_param_names": ["var", "var2"],
+            "optional_param_value_map": {"response_type": "text/csv", "file_content_type": None},
+        }
+    )
+
+    assert (
+        convert._infer_params_from_pipeline_api(
+            """def pipeline_api(file, request, m_var=[], m_var2=[], response_type="text/csv",
+                                 file_content_type=None):
+        pass
+        """
+        )
+        == {
+            "accepts_text": False,
+            "accepts_file": True,
+            "expect_request_param": True,
             "multi_string_param_names": ["var", "var2"],
             "optional_param_value_map": {"response_type": "text/csv", "file_content_type": None},
         }
@@ -271,6 +298,23 @@ def test_infer_m_params():
         == {
             "accepts_text": True,
             "accepts_file": True,
+            "expect_request_param": False,
+            "multi_string_param_names": ["var2"],
+            "optional_param_value_map": {"response_type": "application/json", "filename": None},
+        }
+    )
+
+    assert (
+        convert._infer_params_from_pipeline_api(
+            """def pipeline_api(file, text, request, m_var2=[], response_type="application/json",
+                                 filename=None):
+        pass
+        """
+        )
+        == {
+            "accepts_text": True,
+            "accepts_file": True,
+            "expect_request_param": True,
             "multi_string_param_names": ["var2"],
             "optional_param_value_map": {"response_type": "application/json", "filename": None},
         }

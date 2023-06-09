@@ -35,6 +35,7 @@ def is_expected_response_type(media_type, response_type):
 # pipeline-api
 def pipeline_api(
     text,
+    request,
     file=None,
     filename=None,
     file_content_type=None,
@@ -228,6 +229,7 @@ def pipeline_1(
                 response = pipeline_api(
                     text=text,
                     file=None,
+                    request=request,
                     response_type=media_type,
                     response_schema=default_response_schema,
                 )
@@ -260,6 +262,7 @@ def pipeline_1(
                 response = pipeline_api(
                     text=None,
                     file=_file,
+                    request=request,
                     response_type=media_type,
                     response_schema=default_response_schema,
                     filename=file.filename,

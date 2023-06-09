@@ -1,3 +1,7 @@
+# 0.10.7
+
+* Add support for passing request into pipeline
+
 # 0.10.6
 
 * Fix ENV variable processing for CORS
