@@ -58,6 +58,7 @@ setup(
         "mypy>=0.99",
         "nbconvert",
         "python-multipart",
+        "pandas",
         "types-requests",
         "types-ujson",
         "uvicorn[standard]",
