@@ -14,6 +14,7 @@ from starlette.types import Send
 from base64 import b64encode
 from typing import Optional, Mapping, Iterator, Tuple
 import secrets
+import pandas as pd
 
 app = FastAPI()
 router = APIRouter()
@@ -273,6 +274,8 @@ gz_uncompressed_content_type: Optional[str] = Form(default=None),
                     if is_multipart:
                         if type(response) not in [str, bytes]:
                             response = json.dumps(response)
+                    elif media_type == "text/csv":
+                        response = PlainTextResponse(response)
                     yield response
                 else:
                     raise HTTPException(
@@ -285,13 +288,26 @@ gz_uncompressed_content_type: Optional[str] = Form(default=None),
                         response = json.dumps(response)
                 yield response
                 {% endif %}
+
+        {% if default_response_type %}
+        def join_responses(responses):
+            if media_type != "text/csv":
+                return responses
+            data = pd.read_csv(io.BytesIO(responses[0].body))
+            if len(responses) > 1:
+                for resp in responses[1:]:
+                    resp_data = pd.read_csv(io.BytesIO(resp.body))
+                    data = data.merge(resp_data, how="outer")
+            return PlainTextResponse(data.to_csv())
+        {% endif %}
+
         if content_type == "multipart/mixed":
             return MultipartMixedResponse(
                 response_generator(is_multipart=True),
                 {% if default_response_type %}content_type=media_type{% endif %}
             )
         else:
-            return list(response_generator(is_multipart=False))[0] if len(files_list + text_files_list) == 1 else response_generator(is_multipart=False)
+            return list(response_generator(is_multipart=False))[0] if len(files_list + text_files_list) == 1 else {% if default_response_type %}join_responses(list(response_generator(is_multipart=False))){% else %}response_generator(is_multipart=False){% endif %}
     else:
         raise HTTPException(
             detail='Request parameters "files" or "text_files" are required.\n',
@@ -348,6 +364,8 @@ gz_uncompressed_content_type: Optional[str] = Form(default=None),
                     if is_multipart:
                         if type(response) not in [str, bytes]:
                             response = json.dumps(response)
+                    elif media_type == "text/csv":
+                        response = PlainTextResponse(response)
                     yield response
                 else:
                     raise HTTPException(
@@ -361,13 +379,24 @@ gz_uncompressed_content_type: Optional[str] = Form(default=None),
                 yield response
                 {% endif %}
 
+        {% if default_response_type %}
+        def join_responses(responses):
+            if media_type != "text/csv":
+                return responses
+            data = pd.read_csv(io.BytesIO(responses[0].body))
+            if len(responses) > 1:
+                for resp in responses[1:]:
+                    resp_data = pd.read_csv(io.BytesIO(resp.body))
+                    data = data.merge(resp_data, how="outer")
+            return PlainTextResponse(data.to_csv())
+        {% endif %}
 
         if content_type == "multipart/mixed":
             return MultipartMixedResponse(
                 response_generator(is_multipart=True),
                 {% if default_response_type %}content_type=media_type{% endif %})
         else:
-            return list(response_generator(is_multipart=False))[0] if len({{var_name}}) == 1 else response_generator(is_multipart=False)
+            return list(response_generator(is_multipart=False))[0] if len({{var_name}}) == 1 else {% if default_response_type %}join_responses(list(response_generator(is_multipart=False))){% else %}response_generator(is_multipart=False){% endif %}
     else:
         raise HTTPException(
             detail="Request parameter \"{{var_name}}\" is required.\n",
