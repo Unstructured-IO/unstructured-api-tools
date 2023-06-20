@@ -1,3 +1,7 @@
+# 0.10.9
+
+* Fix output formatting for csv responses
+
 # 0.10.8
 
 * Add autoflake and duplicate import removal to linting steps
