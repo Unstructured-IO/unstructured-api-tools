@@ -41,9 +41,9 @@ def pipeline_api(
     response_type="application/json",
     response_schema="isd",
 ):
-    return {
-        "silly_result": " : ".join(
-            [
+    data = pd.DataFrame(
+        data={
+            "silly_result": [
                 str(len(text if text else "")),
                 str(text),
                 str(len(file.read()) if file else None),
@@ -52,8 +52,13 @@ def pipeline_api(
                 str(response_type),
                 str(response_schema),
             ]
-        )
-    }
+        }
+    )
+    if response_type == "text/csv":
+        return data.to_csv()
+    else:
+        text = " : ".join(list(data["silly_result"]))
+        return {"silly_result": text}
 
 
 def get_validated_mimetype(file):
