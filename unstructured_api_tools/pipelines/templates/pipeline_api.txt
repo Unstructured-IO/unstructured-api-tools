@@ -194,6 +194,7 @@ gz_uncompressed_content_type: Optional[str] = Form(default=None),
             "*/*",
             "multipart/mixed",
             "application/json",
+            "text/csv"
         ], len(files_list) + len(text_files_list) > 1]):
             raise HTTPException(
                 detail=(f"Conflict in media type {content_type}"
@@ -317,7 +318,7 @@ gz_uncompressed_content_type: Optional[str] = Form(default=None),
     {% if accepts_text%}{% set var_name = "text_files" %}{% elif accepts_file %}{% set var_name = "files" %}{% endif %}
     if isinstance({{var_name}}, list) and len({{var_name}}):
         if len({{var_name}}) > 1:
-            if content_type and content_type not in ["*/*", "multipart/mixed", "application/json"]:
+            if content_type and content_type not in ["*/*", "multipart/mixed", "application/json", "text/csv"]:
                 raise HTTPException(
                     detail=(f"Conflict in media type {content_type}"
                                 " with response type \"multipart/mixed\".\n"),

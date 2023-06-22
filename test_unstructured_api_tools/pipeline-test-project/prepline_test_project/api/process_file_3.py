@@ -32,13 +32,15 @@ def is_expected_response_type(media_type, response_type):
         return False
 
 
-# pipeline-api
-def pipeline_api(file, request, response_type="text/csv", response_schema="isd"):
-    return {
-        "silly_result": " : ".join(
-            [str(len(file.read())), str(response_type), str(response_schema)]
-        )
-    }
+def pipeline_api(file, response_type="text/csv", response_schema="isd"):
+    data = pd.DataFrame(
+        data={"silly_result": [str(len(file.read())), str(response_type), str(response_schema)]}
+    )
+    if response_type == "text/csv":
+        return data.to_csv()
+    else:
+        text = " : ".join(list(data["silly_result"]))
+        return {"silly_result": text}
 
 
 def get_validated_mimetype(file):
@@ -171,7 +173,12 @@ def pipeline_1(
 
     if isinstance(files, list) and len(files):
         if len(files) > 1:
-            if content_type and content_type not in ["*/*", "multipart/mixed", "application/json"]:
+            if content_type and content_type not in [
+                "*/*",
+                "multipart/mixed",
+                "application/json",
+                "text/csv",
+            ]:
                 raise HTTPException(
                     detail=(
                         f"Conflict in media type {content_type}"
@@ -188,7 +195,6 @@ def pipeline_1(
 
                 response = pipeline_api(
                     _file,
-                    request=request,
                     response_type=media_type,
                     response_schema=default_response_schema,
                 )

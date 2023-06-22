@@ -1,4 +1,5 @@
 import json
+import os
 from base64 import b64decode
 
 import pytest
@@ -72,12 +73,13 @@ def _assert_response_for_process_file_text_1(test_files, test_files_text, respon
             filename = test_file
         if test_text_file and test_text_file.endswith(".gz"):
             test_text_file = test_text_file[:-3]
+        files_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fixtures")
 
         if test_text_file:
-            with open(test_text_file, "r") as file:
+            with open(os.path.join(files_path, test_text_file), "r") as file:
                 text = file.read()
         if test_file:
-            with open(test_file, "rb") as file:
+            with open(os.path.join(files_path, test_file), "rb") as file:
                 file_read = file.read()
                 file_content_type = FILENAME_FORMATS[test_file]
 
@@ -129,11 +131,12 @@ def _assert_response_for_process_file_text_2(
         if test_text_file and test_text_file.endswith(".gz"):
             test_text_file = test_text_file[:-3]
 
+        files_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fixtures")
         if test_text_file:
-            with open(test_text_file, "r") as file:
+            with open(os.path.join(files_path, test_text_file), "r") as file:
                 text = file.read()
         if test_file:
-            with open(test_file, "rb") as file:
+            with open(os.path.join(files_path, test_file), "rb") as file:
                 file_read = file.read()
                 file_content_type = FILENAME_FORMATS[test_file]
 
@@ -187,11 +190,12 @@ def _assert_response_for_process_file_text_3(
         if test_text_file and test_text_file.endswith(".gz"):
             test_text_file = test_text_file[:-3]
 
+        files_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fixtures")
         if test_text_file:
-            with open(test_text_file, "r") as file:
+            with open(os.path.join(files_path, test_text_file), "r") as file:
                 text = file.read()
         if test_file:
-            with open(test_file, "rb") as file:
+            with open(os.path.join(files_path, test_file), "rb") as file:
                 file_read = file.read()
                 file_content_type = FILENAME_FORMATS[test_file]
 
@@ -245,11 +249,12 @@ def _assert_response_for_process_file_text_4(
         if test_text_file and test_text_file.endswith(".gz"):
             test_text_file = test_text_file[:-3]
 
+        files_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fixtures")
         if test_text_file:
-            with open(test_text_file, "r") as file:
+            with open(os.path.join(files_path, test_text_file), "r") as file:
                 text = file.read()
         if test_file:
-            with open(test_file, "rb") as file:
+            with open(os.path.join(files_path, test_file), "rb") as file:
                 file_read = file.read()
                 file_content_type = FILENAME_FORMATS[test_file]
 
@@ -327,7 +332,7 @@ def _assert_response_for_process_file_text_4(
         (
             [FILE_MARKDOWN, FILE_DOCX],
             [GZIP_FILE_TXT_1, FILE_TXT_2],
-            406,
+            200,
             TEXT_CSV,
             False,
             None,
@@ -429,7 +434,7 @@ def test_process_file_text_1(
             None,
         ),
         ([GZIP_FILE_IMAGE], [GZIP_FILE_TXT_1], JSON, P_INPUT_2_MULTI, 200, False, None, None),
-        ([], [FILE_TXT_1], TEXT_CSV, P_INPUT_2_EMPTY, 406, False, None, None),
+        ([], [FILE_TXT_1], TEXT_CSV, P_INPUT_2_EMPTY, 200, False, None, None),
         ([], [FILE_TXT_1], JSON, P_INPUT_2_EMPTY, 200, False, None, None),
         ([FILE_MARKDOWN], [FILE_TXT_1], JSON, P_INPUT_2_EMPTY, 200, True, None, None),
         (
@@ -453,9 +458,11 @@ def test_process_file_text_1(
             None,
         ),
         ([], [], JSON, P_INPUT_2_EMPTY, 400, False, None, None),
-        ([FILE_MARKDOWN], [FILE_TXT_1], TEXT_CSV, P_INPUT_2_MULTI, 406, False, None, None),
+        ([FILE_MARKDOWN], [FILE_TXT_1], TEXT_CSV, P_INPUT_2_MULTI, 200, False, None, None),
         ([], [FILE_TXT_1], JSON, P_INPUT_2_SINGLE, 200, False, None, None),
         ([FILE_DOCX], [], JSON, P_INPUT_2_SINGLE, 200, False, None, None),
+        ([FILE_DOCX], [], TEXT_CSV, P_INPUT_2_SINGLE, 200, False, None, None),
+        ([FILE_DOCX, FILE_DOCX], [], TEXT_CSV, P_INPUT_2_SINGLE, 200, False, None, None),
         ([], [FILE_TXT_1], MIXED, P_INPUT_2_EMPTY, 200, False, None, None),
         (
             [GZIP_FILE_DOCX],
@@ -687,6 +694,8 @@ def test_process_file_text_2(
         ),
         ([], [FILE_TXT_1], JSON, RESPONSE_SCHEMA_LABELSTUDIO, 200, False, None, None),
         ([FILE_DOCX], [], JSON, RESPONSE_SCHEMA_LABELSTUDIO, 200, False, None, None),
+        ([FILE_DOCX], [], TEXT_CSV, RESPONSE_SCHEMA_LABELSTUDIO, 406, False, None, None),
+        ([FILE_DOCX, FILE_DOCX], [], TEXT_CSV, RESPONSE_SCHEMA_LABELSTUDIO, 406, False, None, None),
         ([FILE_DOCX], [], MIXED, RESPONSE_SCHEMA_LABELSTUDIO, 200, False, None, None),
         (
             [GZIP_FILE_DOCX],
@@ -955,7 +964,7 @@ def test_process_file_text_3(
             RESPONSE_SCHEMA_ISD,
             P_INPUT_1_MULTI,
             P_INPUT_2_MULTI,
-            406,
+            200,
             False,
             None,
             None,
@@ -967,7 +976,7 @@ def test_process_file_text_3(
             RESPONSE_SCHEMA_ISD,
             P_INPUT_1_MULTI,
             P_INPUT_2_MULTI,
-            406,
+            200,
             False,
             None,
             None,
@@ -1069,6 +1078,30 @@ def test_process_file_text_3(
             None,
         ),
         (
+            [FILE_DOCX],
+            [],
+            TEXT_CSV,
+            RESPONSE_SCHEMA_LABELSTUDIO,
+            P_INPUT_1_EMPTY,
+            P_INPUT_2_EMPTY,
+            200,
+            False,
+            None,
+            None,
+        ),
+        (
+            [FILE_DOCX, FILE_DOCX],
+            [],
+            TEXT_CSV,
+            RESPONSE_SCHEMA_LABELSTUDIO,
+            P_INPUT_1_EMPTY,
+            P_INPUT_2_EMPTY,
+            200,
+            False,
+            None,
+            None,
+        ),
+        (
             [GZIP_FILE_DOCX],
             [],
             JSON,
@@ -1125,6 +1158,8 @@ def test_process_file_text_4(
             },
             **generate_header_kwargs(response_type),
         )
+        if response.status_code != expected_status:
+            print(f"TESTING: {response.content}")
         assert response.status_code == expected_status
         if response.status_code == 200:
             _assert_response_for_process_file_text_4(
