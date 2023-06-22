@@ -1,5 +1,6 @@
 PACKAGE_NAME := unstructured_api_tools
 PIP_VERSION := 22.2.1
+CURRENT_DIR := $(shell pwd)
 
 
 .PHONY: help
@@ -140,3 +141,27 @@ version-sync:
 check-coverage:
 	# TODO(crag): add coverage check for test_unstructured_api_tools/pipeline-test-project/prepline_test_project/api/
 	coverage report --fail-under=95
+
+##########
+# Docker #
+##########
+
+# Docker targets are provided for convenience only and are not required in a standard development environment
+
+DOCKER_IMAGE ?= unstructured-api-tools:dev
+
+.PHONY: docker-build
+docker-build:
+	PIP_VERSION=${PIP_VERSION} DOCKER_IMAGE_NAME=${DOCKER_IMAGE} ./scripts/docker-build.sh
+
+.PHONY: docker-start-bash
+docker-start-bash:
+	docker run -ti --rm ${DOCKER_IMAGE}
+
+.PHONY: docker-test
+docker-test:
+	docker run --rm \
+	-v ${CURRENT_DIR}/test_unstructured_api_tools:/home/test_unstructured_api_tools \
+	-v ${CURRENT_DIR}/unstructured_api_tools:/home/unstructured_api_tools \
+	$(DOCKER_IMAGE) \
+	bash -c "make test"
