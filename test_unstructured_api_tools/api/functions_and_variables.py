@@ -52,6 +52,7 @@ P_INPUT_1_AND_2_MULTI = {"input2": ["hello", "earth is better than mars"], "inpu
 JSON = "application/json"
 MIXED = "multipart/mixed"
 TEXT_CSV = "text/csv"
+INVALID = "invalid"
 
 RESPONSE_SCHEMA_ISD = {"output_schema": "isd"}
 RESPONSE_SCHEMA_LABELSTUDIO = {"output_schema": "labelstudio"}

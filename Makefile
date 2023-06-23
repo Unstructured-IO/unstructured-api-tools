@@ -159,7 +159,7 @@ docker-start-bash:
 	docker run -ti --rm ${DOCKER_IMAGE}
 
 .PHONY: docker-test
-docker-test:
+docker-test: docker-build
 	docker run --rm \
 	-v ${CURRENT_DIR}/test_unstructured_api_tools:/home/test_unstructured_api_tools \
 	-v ${CURRENT_DIR}/unstructured_api_tools:/home/unstructured_api_tools \

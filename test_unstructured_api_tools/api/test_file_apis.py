@@ -12,6 +12,7 @@ from functions_and_variables import (
     FILENAME_FORMATS,
     JSON,
     MIXED,
+    INVALID,
     FILE_DOCX,
     FILE_IMAGE,
     FILE_JSON,
@@ -314,6 +315,7 @@ def test_process_file_2(
     "gz_content_type",
     [
         ([FILE_DOCX], JSON, RESPONSE_SCHEMA_ISD, 200, False, None, None),
+        ([FILE_DOCX], INVALID, RESPONSE_SCHEMA_ISD, 406, False, None, None),
         ([FILE_DOCX], MIXED, RESPONSE_SCHEMA_ISD, 200, False, None, None),
         ([FILE_DOCX, FILE_DOCX], MIXED, RESPONSE_SCHEMA_ISD, 200, False, None, None),
         # endpoint fails because media type text/csv should have response type str
@@ -505,6 +507,7 @@ def test_process_file_3(
     "gz_content_type",
     [
         ([FILE_DOCX], JSON, RESPONSE_SCHEMA_ISD, P_INPUT_1_EMPTY, 200, None, False, None),
+        ([FILE_DOCX], INVALID, RESPONSE_SCHEMA_ISD, P_INPUT_1_EMPTY, 406, None, False, None),
         ([FILE_DOCX], JSON, RESPONSE_SCHEMA_ISD, P_INPUT_1_MULTI, 200, None, False, None),
         ([FILE_DOCX], JSON, RESPONSE_SCHEMA_LABELSTUDIO, P_INPUT_1_SINGLE, 200, None, False, None),
         (
