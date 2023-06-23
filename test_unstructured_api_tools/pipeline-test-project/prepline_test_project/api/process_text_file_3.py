@@ -9,6 +9,7 @@ import gzip
 import mimetypes
 from typing import List, Union
 from fastapi import status, FastAPI, File, Form, Request, UploadFile, APIRouter, HTTPException
+from fastapi.responses import PlainTextResponse
 import json
 from fastapi.responses import StreamingResponse
 from starlette.datastructures import Headers
@@ -32,9 +33,9 @@ def is_expected_response_type(media_type, response_type):
         return False
 
 
+# pipeline-api
 def pipeline_api(
     text,
-    request,
     file=None,
     filename=None,
     file_content_type=None,
@@ -228,7 +229,6 @@ def pipeline_1(
                 response = pipeline_api(
                     text=text,
                     file=None,
-                    request=request,
                     response_type=media_type,
                     response_schema=default_response_schema,
                 )
@@ -263,7 +263,6 @@ def pipeline_1(
                 response = pipeline_api(
                     text=None,
                     file=_file,
-                    request=request,
                     response_type=media_type,
                     response_schema=default_response_schema,
                     filename=file.filename,

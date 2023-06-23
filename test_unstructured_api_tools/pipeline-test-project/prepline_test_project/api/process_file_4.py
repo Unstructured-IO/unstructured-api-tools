@@ -9,6 +9,7 @@ import gzip
 import mimetypes
 from typing import List, Union
 from fastapi import status, FastAPI, File, Form, Request, UploadFile, APIRouter, HTTPException
+from fastapi.responses import PlainTextResponse
 import json
 from fastapi.responses import StreamingResponse
 from starlette.datastructures import Headers

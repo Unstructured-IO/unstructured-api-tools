@@ -16,13 +16,13 @@ from starlette.types import Send
 from base64 import b64encode
 from typing import Optional, Mapping
 import secrets
-import pandas as pd
 
 
 app = FastAPI()
 router = APIRouter()
 
 
+# pipeline-api
 def pipeline_api(
     text,
 ):

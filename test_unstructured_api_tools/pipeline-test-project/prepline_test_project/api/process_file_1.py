@@ -16,12 +16,13 @@ from starlette.types import Send
 from base64 import b64encode
 from typing import Optional, Mapping
 import secrets
-import pandas as pd
 
 
 app = FastAPI()
 router = APIRouter()
 
+
+# pipeline-api
 
 # test that a duplicate import gets handles correctly as this gets imported via the template as wel
 
