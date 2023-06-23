@@ -1,3 +1,7 @@
+# 0.10.8
+
+* Add autoflake and duplicate import removal to linting steps
+
 # 0.10.7
 
 * Add support for passing request into pipeline
