@@ -81,6 +81,8 @@ def generate_pipeline_api(
         + content
     )
     content = lint.format_black(content)
+    content = lint.format_autoflake(content)
+    content = lint.remove_duplicate_imports(content)
     lint.check_flake8(content, opts=flake8_opts)
     lint.check_mypy(content)
     return content
@@ -234,6 +236,8 @@ def build_root_app_module(
         version_name=get_api_name_from_config(config_filename),
     )
     content = lint.format_black(content)
+    content = lint.format_autoflake(content)
+    content = lint.remove_duplicate_imports(content)
     lint.check_flake8(content, opts=flake8_opts)
     lint.check_mypy(content)
 

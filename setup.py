@@ -61,6 +61,7 @@ setup(
         "types-requests",
         "types-ujson",
         "uvicorn[standard]",
+        "autoflake"
     ],
     extras_require={},
 )
