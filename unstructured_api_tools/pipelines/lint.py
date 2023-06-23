@@ -124,9 +124,14 @@ def format_autoflake(file_text: str) -> str:
     )
 
 
-# Autoflake only takes into account unused imports by checking for pyflakes.messages.UnusedImport but does not handle
-# duplicate imports which come out as pyflakes.messages.RedefinedWhileUnused from pyflakes. The following code is
-# an extension of autoflake to take duplicate imports into account
+"""
+Autoflake only takes into account unused imports by checking for pyflakes.messages.UnusedImport
+but does not handle duplicate imports which come out as pyflakes.messages.RedefinedWhileUnused
+from pyflakes. The following code is an extension of autoflake to take duplicate
+imports into account
+"""
+
+
 def duplicate_import_line_numbers(messages):
     """Yield line numbers of unused imports."""
     for message in messages:
@@ -134,7 +139,7 @@ def duplicate_import_line_numbers(messages):
             yield message.lineno
 
 
-def _remove_duplicate_imports(text: str) -> str:
+def _remove_duplicate_imports(text: str):
     messages = check(text)
     marked_import_line_numbers = frozenset(
         duplicate_import_line_numbers(messages),
