@@ -92,6 +92,10 @@ check-src:
 	black --line-length 100 ${PACKAGE_NAME} --check
 	flake8 ${PACKAGE_NAME}
 	mypy ${PACKAGE_NAME} --ignore-missing-imports --install-types --non-interactive
+	autoflake --remove-unused-variables --remove-duplicate-keys --expand-star-imports \
+		--remove-all-unused-imports -cd -r ${PACKAGE_NAME}  test_${PACKAGE_NAME} \
+		--exclude test_${PACKAGE_NAME}/pipeline-test-project
+
 
 .PHONY: check-tests
 check-tests:
@@ -113,9 +117,18 @@ check-version:
 
 ## tidy:                       run black
 .PHONY: tidy
-tidy:
+tidy: tidy-black tidy-autoflake
+
+tidy-autoflake:
+	autoflake --remove-unused-variables --remove-duplicate-keys --expand-star-imports \
+	--remove-all-unused-imports -i -r ${PACKAGE_NAME}  test_${PACKAGE_NAME} \
+	--exclude test_${PACKAGE_NAME}/pipeline-test-project
+
+
+tidy-black:
 	black --line-length 100 ${PACKAGE_NAME}
 	black --line-length 100 test_${PACKAGE_NAME} --exclude test_${PACKAGE_NAME}/pipeline-test-project
+
 
 ## version-sync:               update __version__.py with most recent version from CHANGELOG.md
 .PHONY: version-sync
