@@ -1,15 +1,17 @@
-FILE_DOCX = "test_unstructured_api_tools/api/fixtures/fake.docx"
-FILE_IMAGE = "test_unstructured_api_tools/api/fixtures/example.jpg"
-FILE_TXT_1 = "test_unstructured_api_tools/api/fixtures/text_file.txt"
-FILE_TXT_2 = "test_unstructured_api_tools/api/fixtures/text_file_2.txt"
-FILE_MARKDOWN = "test_unstructured_api_tools/api/fixtures/markdown.md"
-FILE_MSG = "test_unstructured_api_tools/api/fixtures/fake-email.msg"
-FILE_JSON = "test_unstructured_api_tools/api/fixtures/spring-weather.html.json"
+import os
 
-GZIP_FILE_DOCX = "test_unstructured_api_tools/api/fixtures/fake.docx.gz"
-GZIP_FILE_IMAGE = "test_unstructured_api_tools/api/fixtures/example.jpg.gz"
-GZIP_FILE_TXT_1 = "test_unstructured_api_tools/api/fixtures/text_file.txt.gz"
-GZIP_FILE_TXT_2 = "test_unstructured_api_tools/api/fixtures/text_file_2.txt.gz"
+FILE_DOCX = "fake.docx"
+FILE_IMAGE = "example.jpg"
+FILE_TXT_1 = "text_file.txt"
+FILE_TXT_2 = "text_file_2.txt"
+FILE_MARKDOWN = "markdown.md"
+FILE_MSG = "fake-email.msg"
+FILE_JSON = "spring-weather.html.json"
+
+GZIP_FILE_DOCX = "fake.docx.gz"
+GZIP_FILE_IMAGE = "example.jpg.gz"
+GZIP_FILE_TXT_1 = "text_file.txt.gz"
+GZIP_FILE_TXT_2 = "text_file_2.txt.gz"
 
 FILENAME_LENGTHS = {
     FILE_DOCX: 36602,
@@ -50,18 +52,20 @@ P_INPUT_1_AND_2_MULTI = {"input2": ["hello", "earth is better than mars"], "inpu
 JSON = "application/json"
 MIXED = "multipart/mixed"
 TEXT_CSV = "text/csv"
+INVALID = "invalid"
 
 RESPONSE_SCHEMA_ISD = {"output_schema": "isd"}
 RESPONSE_SCHEMA_LABELSTUDIO = {"output_schema": "labelstudio"}
 
 
 def convert_files_for_api(files, use_octet_stream_type=False):
+    files_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fixtures")
     return [
         (
             "files",
             (
                 test_file,
-                open(test_file, "rb"),
+                open(os.path.join(files_path, test_file), "rb"),
                 FILENAME_FORMATS["octet_stream" if use_octet_stream_type else test_file],
             ),
         )
@@ -70,12 +74,13 @@ def convert_files_for_api(files, use_octet_stream_type=False):
 
 
 def convert_text_files_for_api(files, use_octet_stream_type=False):
+    files_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fixtures")
     return [
         (
             "text_files",
             (
                 test_file,
-                open(test_file, "rb"),
+                open(os.path.join(files_path, test_file), "rb"),
                 FILENAME_FORMATS["octet_stream" if use_octet_stream_type else test_file],
             ),
         )

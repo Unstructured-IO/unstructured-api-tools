@@ -9,6 +9,7 @@ import gzip
 import mimetypes
 from typing import List, Union
 from fastapi import status, FastAPI, File, Form, Request, UploadFile, APIRouter, HTTPException
+from fastapi.responses import PlainTextResponse
 import json
 from fastapi.responses import StreamingResponse
 from starlette.datastructures import Headers
@@ -16,6 +17,7 @@ from starlette.types import Send
 from base64 import b64encode
 from typing import Optional, Mapping
 import secrets
+import pandas as pd
 
 
 app = FastAPI()
@@ -32,12 +34,15 @@ def is_expected_response_type(media_type, response_type):
 
 
 # pipeline-api
-def pipeline_api(file, request, response_type="text/csv", response_schema="isd"):
-    return {
-        "silly_result": " : ".join(
-            [str(len(file.read())), str(response_type), str(response_schema)]
-        )
-    }
+def pipeline_api(file, response_type="text/csv", response_schema="isd"):
+    data = pd.DataFrame(
+        data={"silly_result": [str(len(file.read())), str(response_type), str(response_schema)]}
+    )
+    if response_type == "text/csv":
+        return data.to_csv()
+    else:
+        text = " : ".join(list(data["silly_result"]))
+        return {"silly_result": text}
 
 
 def get_validated_mimetype(file):
@@ -170,7 +175,12 @@ def pipeline_1(
 
     if isinstance(files, list) and len(files):
         if len(files) > 1:
-            if content_type and content_type not in ["*/*", "multipart/mixed", "application/json"]:
+            if content_type and content_type not in [
+                "*/*",
+                "multipart/mixed",
+                "application/json",
+                "text/csv",
+            ]:
                 raise HTTPException(
                     detail=(
                         f"Conflict in media type {content_type}"
@@ -187,7 +197,6 @@ def pipeline_1(
 
                 response = pipeline_api(
                     _file,
-                    request=request,
                     response_type=media_type,
                     response_schema=default_response_schema,
                 )
@@ -206,12 +215,24 @@ def pipeline_1(
                     if is_multipart:
                         if type(response) not in [str, bytes]:
                             response = json.dumps(response)
+                    elif media_type == "text/csv":
+                        response = PlainTextResponse(response)
                     yield response
                 else:
                     raise HTTPException(
                         detail=f"Unsupported media type {media_type}.\n",
                         status_code=status.HTTP_406_NOT_ACCEPTABLE,
                     )
+
+        def join_responses(responses):
+            if media_type != "text/csv":
+                return responses
+            data = pd.read_csv(io.BytesIO(responses[0].body))
+            if len(responses) > 1:
+                for resp in responses[1:]:
+                    resp_data = pd.read_csv(io.BytesIO(resp.body))
+                    data = data.merge(resp_data, how="outer")
+            return PlainTextResponse(data.to_csv())
 
         if content_type == "multipart/mixed":
             return MultipartMixedResponse(
@@ -221,7 +242,7 @@ def pipeline_1(
             return (
                 list(response_generator(is_multipart=False))[0]
                 if len(files) == 1
-                else response_generator(is_multipart=False)
+                else join_responses(list(response_generator(is_multipart=False)))
             )
     else:
         raise HTTPException(

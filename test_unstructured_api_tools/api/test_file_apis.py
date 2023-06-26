@@ -12,6 +12,7 @@ from functions_and_variables import (
     FILENAME_FORMATS,
     JSON,
     MIXED,
+    INVALID,
     FILE_DOCX,
     FILE_IMAGE,
     FILE_JSON,
@@ -126,7 +127,7 @@ def _asert_response_for_process_file_3(
             )
         }
 
-    if response_type in [JSON, TEXT_CSV]:
+    if response_type == JSON:
         if len(test_files) == 1:
             assert response.json() == _json_for_one_file(test_files[0])
         else:
@@ -187,7 +188,7 @@ def _assert_response_for_process_file_5(
             )
         }
 
-    if response_type in [JSON, TEXT_CSV]:
+    if response_type == JSON:
         if len(test_files) == 1:
             assert response.json() == _json_for_one_file(test_files[0])
         else:
@@ -220,7 +221,7 @@ def _assert_response_for_process_file_5(
         ([FILE_JSON], None, JSON, 200, None),
         ([GZIP_FILE_IMAGE], P_INPUT_1_EMPTY, JSON, 200, None),
         ([GZIP_FILE_DOCX], P_INPUT_1_EMPTY, JSON, 200, None),
-        ([GZIP_FILE_DOCX, FILE_IMAGE], P_INPUT_1_EMPTY, TEXT_CSV, 406, None),
+        ([GZIP_FILE_DOCX, FILE_IMAGE], P_INPUT_1_EMPTY, JSON, 200, None),
         ([], P_INPUT_1_EMPTY, JSON, 400, None),
         ([GZIP_FILE_DOCX], P_INPUT_1_EMPTY, JSON, 200, FILENAME_FORMATS[FILE_DOCX]),
         ([GZIP_FILE_DOCX], P_INPUT_1_EMPTY, JSON, 200, FILENAME_FORMATS[FILE_IMAGE]),
@@ -269,7 +270,7 @@ def test_process_file_1(
         ([GZIP_FILE_DOCX, FILE_IMAGE], MIXED, 200, None, False, None),
         ([FILE_DOCX, GZIP_FILE_IMAGE], MIXED, 200, None, False, None),
         ([GZIP_FILE_DOCX, GZIP_FILE_IMAGE], MIXED, 200, None, False, None),
-        ([GZIP_FILE_DOCX, GZIP_FILE_IMAGE], TEXT_CSV, 406, None, False, None),
+        ([GZIP_FILE_DOCX, GZIP_FILE_IMAGE], TEXT_CSV, 200, None, False, None),
         ([FILE_MARKDOWN, GZIP_FILE_IMAGE], JSON, 200, None, False, None),
         ([FILE_MARKDOWN], JSON, 200, None, False, None),
         ([FILE_MARKDOWN], JSON, 200, None, True, None),
@@ -314,7 +315,9 @@ def test_process_file_2(
     "gz_content_type",
     [
         ([FILE_DOCX], JSON, RESPONSE_SCHEMA_ISD, 200, False, None, None),
+        ([FILE_DOCX], INVALID, RESPONSE_SCHEMA_ISD, 406, False, None, None),
         ([FILE_DOCX], MIXED, RESPONSE_SCHEMA_ISD, 200, False, None, None),
+        ([FILE_DOCX, FILE_DOCX], MIXED, RESPONSE_SCHEMA_ISD, 200, False, None, None),
         # endpoint fails because media type text/csv should have response type str
         pytest.param(
             [FILE_DOCX],
@@ -379,7 +382,7 @@ def test_process_file_2(
             None,
             marks=pytest.mark.xfail,
         ),
-        ([FILE_DOCX, FILE_IMAGE], None, RESPONSE_SCHEMA_ISD, 406, False, None, None),
+        ([FILE_DOCX, FILE_IMAGE], None, RESPONSE_SCHEMA_ISD, 200, False, None, None),
         ([FILE_DOCX, FILE_IMAGE], JSON, RESPONSE_SCHEMA_LABELSTUDIO, 200, False, None, None),
         ([FILE_DOCX, FILE_IMAGE], MIXED, RESPONSE_SCHEMA_LABELSTUDIO, 200, False, None, None),
         # endpoint fails because text/csv is not acceptable for multiple files
@@ -393,12 +396,12 @@ def test_process_file_2(
             None,
             marks=pytest.mark.xfail,
         ),
-        ([FILE_DOCX, FILE_IMAGE], None, RESPONSE_SCHEMA_LABELSTUDIO, 406, False, None, None),
+        ([FILE_DOCX, FILE_IMAGE], None, RESPONSE_SCHEMA_LABELSTUDIO, 200, False, None, None),
         (
             [FILE_DOCX, FILE_IMAGE, GZIP_FILE_IMAGE],
             None,
             RESPONSE_SCHEMA_LABELSTUDIO,
-            406,
+            200,
             False,
             None,
             None,
@@ -407,7 +410,7 @@ def test_process_file_2(
             [FILE_DOCX, FILE_IMAGE, GZIP_FILE_DOCX],
             None,
             RESPONSE_SCHEMA_LABELSTUDIO,
-            406,
+            200,
             False,
             None,
             None,
@@ -416,7 +419,7 @@ def test_process_file_2(
             [FILE_DOCX, FILE_IMAGE, GZIP_FILE_IMAGE, GZIP_FILE_DOCX],
             None,
             RESPONSE_SCHEMA_LABELSTUDIO,
-            406,
+            200,
             False,
             None,
             None,
@@ -504,6 +507,7 @@ def test_process_file_3(
     "gz_content_type",
     [
         ([FILE_DOCX], JSON, RESPONSE_SCHEMA_ISD, P_INPUT_1_EMPTY, 200, None, False, None),
+        ([FILE_DOCX], INVALID, RESPONSE_SCHEMA_ISD, P_INPUT_1_EMPTY, 406, None, False, None),
         ([FILE_DOCX], JSON, RESPONSE_SCHEMA_ISD, P_INPUT_1_MULTI, 200, None, False, None),
         ([FILE_DOCX], JSON, RESPONSE_SCHEMA_LABELSTUDIO, P_INPUT_1_SINGLE, 200, None, False, None),
         (
@@ -926,7 +930,18 @@ def test_process_file_4(
             RESPONSE_SCHEMA_LABELSTUDIO,
             P_INPUT_1_EMPTY,
             P_INPUT_2_EMPTY,
-            406,
+            200,
+            False,
+            None,
+            None,
+        ),
+        (
+            [FILE_DOCX],
+            TEXT_CSV,
+            RESPONSE_SCHEMA_LABELSTUDIO,
+            P_INPUT_1_EMPTY,
+            P_INPUT_2_EMPTY,
+            200,
             False,
             None,
             None,
@@ -1081,9 +1096,19 @@ def test_supported_mimetypes():
 
     # If the client doesn't set a mimetype, we may just see application/octet-stream
     # Here we get the mimetype from the file extension
+    files_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fixtures")
     response = client.post(
         process_file_endpoint,
-        files=[("files", (FILE_DOCX, open(FILE_DOCX, "rb"), "application/octet-stream"))],
+        files=[
+            (
+                "files",
+                (
+                    FILE_DOCX,
+                    open(os.path.join(files_path, FILE_DOCX), "rb"),
+                    "application/octet-stream",
+                ),
+            )
+        ],
     )
     assert (
         response.status_code == 400 and response.json()["detail"] == docx_unsupported_error_message

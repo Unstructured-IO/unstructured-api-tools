@@ -180,12 +180,7 @@ def pipeline_1(
         if all(
             [
                 content_type,
-                content_type
-                not in [
-                    "*/*",
-                    "multipart/mixed",
-                    "application/json",
-                ],
+                content_type not in ["*/*", "multipart/mixed", "application/json", "text/csv"],
                 len(files_list) + len(text_files_list) > 1,
             ]
         ):

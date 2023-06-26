@@ -1,4 +1,5 @@
 import json
+import os
 from base64 import b64decode
 
 import pytest
@@ -48,7 +49,8 @@ def _assert_response_for_process_text_1(test_files, response, response_type, gz_
     def _json_for_one_file(test_file):
         if test_file.endswith(".gz"):
             test_file = test_file[:-3]
-        with open(test_file, "r") as file:
+        files_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fixtures")
+        with open(os.path.join(files_path, test_file), "r") as file:
             return {
                 "silly_result": " : ".join([str(FILENAME_LENGTHS[test_file]), str(file.read())])
             }
@@ -69,7 +71,8 @@ def _assert_response_for_process_text_2(test_files, response, m_input1, m_input2
     def _json_for_one_file(test_file):
         if test_file.endswith(".gz"):
             test_file = test_file[:-3]
-        with open(test_file, "r") as file:
+        files_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fixtures")
+        with open(os.path.join(files_path, test_file), "r") as file:
             return {
                 "silly_result": " : ".join(
                     [
@@ -97,14 +100,16 @@ def _assert_response_for_process_text_3(test_files, response, response_type=TEXT
     def _json_for_one_file(test_file):
         if test_file.endswith(".gz"):
             test_file = test_file[:-3]
-        with open(test_file, "r") as file:
+
+        files_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fixtures")
+        with open(os.path.join(files_path, test_file), "r") as file:
             return {
                 "silly_result": " : ".join(
                     [str(FILENAME_LENGTHS[test_file]), str(file.read()), str(response_type)]
                 )
             }
 
-    if response_type in [JSON, TEXT_CSV]:
+    if response_type == JSON:
         if len(test_files) == 1:
             assert response.json() == _json_for_one_file(test_files[0])
         else:
@@ -120,7 +125,8 @@ def _assert_response_for_process_text_4(test_files, response, response_type, res
     def _json_for_one_file(test_file):
         if test_file.endswith(".gz"):
             test_file = test_file[:-3]
-        with open(test_file, "r") as file:
+        files_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fixtures")
+        with open(os.path.join(files_path, test_file), "r") as file:
             return {
                 "silly_result": " : ".join(
                     [
@@ -132,7 +138,7 @@ def _assert_response_for_process_text_4(test_files, response, response_type, res
                 )
             }
 
-    if response_type in [JSON, TEXT_CSV]:
+    if response_type == JSON:
         if len(test_files) == 1:
             assert response.json() == _json_for_one_file(test_files[0])
         else:
@@ -160,7 +166,7 @@ def _assert_response_for_process_text_4(test_files, response, response_type, res
         ([FILE_TXT_1, FILE_TXT_2], 200, False, FILENAME_FORMATS[FILE_TXT_1], JSON, None),
         ([FILE_TXT_1, FILE_TXT_2], 400, False, FILENAME_FORMATS[FILE_MARKDOWN], JSON, None),
         ([FILE_TXT_1, FILE_TXT_2], 200, False, None, MIXED, None),
-        ([FILE_TXT_1, FILE_TXT_2], 406, False, None, TEXT_CSV, None),
+        ([FILE_TXT_1, FILE_TXT_2], 200, False, None, TEXT_CSV, None),
         ([], 400, False, None, JSON, None),
         ([GZIP_FILE_TXT_1], 200, False, None, JSON, None),
         ([GZIP_FILE_TXT_1], 200, False, None, JSON, FILENAME_FORMATS[FILE_TXT_1]),
@@ -317,7 +323,7 @@ def test_process_text_1(
             [FILE_TXT_1, FILE_TXT_2],
             P_INPUT_1_SINGLE,
             P_INPUT_2_SINGLE,
-            406,
+            200,
             False,
             None,
             TEXT_CSV,
@@ -391,11 +397,9 @@ def test_process_text_2(
         ([FILE_TXT_1], JSON, 200, False, None, None),
         ([GZIP_FILE_TXT_1], JSON, 200, False, None, None),
         ([FILE_TXT_1], MIXED, 200, False, None, None),
-        # endpoint fails because media type text/csv should have response type str
-        pytest.param([FILE_TXT_1], TEXT_CSV, 200, False, None, None, marks=pytest.mark.xfail),
-        # endpoint fails because media type text/csv should have response type str
-        # because None response type has default text/csv value
-        pytest.param([FILE_TXT_1], None, 200, False, None, None, marks=pytest.mark.xfail),
+        ([FILE_TXT_1], TEXT_CSV, 200, False, None, None),
+        ([FILE_TXT_1, FILE_TXT_1], TEXT_CSV, 200, False, None, None),
+        ([FILE_TXT_1], None, 200, False, None, None),
         ([FILE_TXT_1, FILE_TXT_2], JSON, 200, False, None, None),
         ([FILE_TXT_1, FILE_TXT_2], MIXED, 200, False, None, None),
         ([GZIP_FILE_TXT_1, FILE_TXT_2], JSON, 200, False, None, None),
@@ -420,18 +424,15 @@ def test_process_text_2(
             None,
             marks=pytest.mark.xfail,
         ),
-        ([FILE_TXT_1, FILE_TXT_2], None, 406, False, None, None),
+        ([FILE_TXT_1, FILE_TXT_2], None, 200, False, None, None),
         ([FILE_TXT_2], JSON, 200, False, None, None),
         ([GZIP_FILE_TXT_2], JSON, 200, False, None, None),
         ([FILE_TXT_2], MIXED, 200, False, None, None),
-        # endpoint fails because media type text/csv should have response type str
         pytest.param([FILE_TXT_2], TEXT_CSV, 200, False, None, None, marks=pytest.mark.xfail),
-        # endpoint fails because media type text/csv should have response type str
-        # because None response type has default text/csv value
         pytest.param([FILE_TXT_2], None, 200, False, None, None, marks=pytest.mark.xfail),
-        ([FILE_TXT_2, FILE_MARKDOWN], None, 406, True, None, None),
-        ([FILE_TXT_2, FILE_TXT_1], None, 406, False, FILENAME_FORMATS[FILE_TXT_1], None),
-        ([FILE_TXT_2, FILE_MARKDOWN], None, 406, False, FILENAME_FORMATS[FILE_TXT_1], None),
+        ([FILE_TXT_2, FILE_MARKDOWN], None, 200, True, None, None),
+        ([FILE_TXT_2, FILE_TXT_1], None, 200, False, FILENAME_FORMATS[FILE_TXT_1], None),
+        ([FILE_TXT_2, FILE_MARKDOWN], None, 400, False, FILENAME_FORMATS[FILE_TXT_1], None),
         ([], None, 400, False, None, None),
         ([GZIP_FILE_TXT_1], JSON, 200, False, None, FILENAME_FORMATS[FILE_TXT_1]),
     ],
@@ -456,6 +457,9 @@ def test_process_text_3(
             data={"output_format": response_type, "gz_uncompressed_content_type": gz_content_type},
             **generate_header_kwargs(response_type),
         )
+        if response.status_code != expected_status:
+            print(f"[{response.status_code} {response.content} from {test_files}")
+        print(response.content)
         assert response.status_code == expected_status
         if response.status_code == 200:
             _assert_response_for_process_text_3(test_files, response, response_type)
@@ -490,7 +494,7 @@ def test_process_text_3(
             None,
             None,
         ),
-        ([GZIP_FILE_TXT_1], TEXT_CSV, RESPONSE_SCHEMA_LABELSTUDIO, 406, False, None, None),
+        ([GZIP_FILE_TXT_1], TEXT_CSV, RESPONSE_SCHEMA_LABELSTUDIO, 200, False, None, None),
         ([FILE_MARKDOWN, FILE_TXT_1], JSON, RESPONSE_SCHEMA_ISD, 200, True, None, None),
         (
             [GZIP_FILE_TXT_1, FILE_TXT_2],
@@ -510,7 +514,7 @@ def test_process_text_3(
             FILENAME_FORMATS[FILE_TXT_1],
             None,
         ),
-        ([FILE_TXT_1, FILE_TXT_2], TEXT_CSV, RESPONSE_SCHEMA_ISD, 406, False, None, None),
+        ([FILE_TXT_1, FILE_TXT_2], TEXT_CSV, RESPONSE_SCHEMA_ISD, 200, False, None, None),
         ([FILE_TXT_1], MIXED, RESPONSE_SCHEMA_ISD, 200, False, None, None),
         ([], JSON, RESPONSE_SCHEMA_ISD, 400, False, None, None),
         (

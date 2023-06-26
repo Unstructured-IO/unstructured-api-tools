@@ -22,6 +22,8 @@ app = FastAPI()
 router = APIRouter()
 
 
+# pipeline-api
+
 # test that a duplicate import gets handles correctly as this gets imported via the template as wel
 
 # test accessing os in a #pipeline-api cell does not break things
@@ -162,7 +164,12 @@ def pipeline_1(
 
     if isinstance(files, list) and len(files):
         if len(files) > 1:
-            if content_type and content_type not in ["*/*", "multipart/mixed", "application/json"]:
+            if content_type and content_type not in [
+                "*/*",
+                "multipart/mixed",
+                "application/json",
+                "text/csv",
+            ]:
                 raise HTTPException(
                     detail=(
                         f"Conflict in media type {content_type}"

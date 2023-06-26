@@ -147,7 +147,12 @@ def pipeline_1(
 
     if isinstance(files, list) and len(files):
         if len(files) > 1:
-            if content_type and content_type not in ["*/*", "multipart/mixed", "application/json"]:
+            if content_type and content_type not in [
+                "*/*",
+                "multipart/mixed",
+                "application/json",
+                "text/csv",
+            ]:
                 raise HTTPException(
                     detail=(
                         f"Conflict in media type {content_type}"
