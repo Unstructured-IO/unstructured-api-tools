@@ -33,6 +33,7 @@ def is_expected_response_type(media_type, response_type):
         return False
 
 
+# pipeline-api
 def pipeline_api(
     text,
     file=None,
