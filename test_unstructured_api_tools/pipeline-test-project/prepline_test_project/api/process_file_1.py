@@ -22,8 +22,6 @@ app = FastAPI()
 router = APIRouter()
 
 
-# pipeline-api
-
 # test that a duplicate import gets handles correctly as this gets imported via the template as wel
 
 # test accessing os in a #pipeline-api cell does not break things

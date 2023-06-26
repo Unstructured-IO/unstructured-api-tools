@@ -33,7 +33,6 @@ def is_expected_response_type(media_type, response_type):
         return False
 
 
-# pipeline-api
 def pipeline_api(
     file,
     file_content_type=None,
@@ -42,9 +41,9 @@ def pipeline_api(
     m_input1=[],
     m_input2=[],
 ):
-    return {
-        "silly_result": " : ".join(
-            [
+    data = pd.DataFrame(
+        data={
+            "silly_result": [
                 str(len(file.read())),
                 str(file_content_type),
                 str(response_type),
@@ -52,8 +51,13 @@ def pipeline_api(
                 str(m_input1),
                 str(m_input2),
             ]
-        )
-    }
+        }
+    )
+    if response_type == "text/csv":
+        return data.to_csv()
+    else:
+        text = " : ".join(list(data["silly_result"]))
+        return {"silly_result": text}
 
 
 def get_validated_mimetype(file):

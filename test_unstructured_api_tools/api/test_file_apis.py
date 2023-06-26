@@ -188,7 +188,7 @@ def _assert_response_for_process_file_5(
             )
         }
 
-    if response_type in [JSON, TEXT_CSV]:
+    if response_type == JSON:
         if len(test_files) == 1:
             assert response.json() == _json_for_one_file(test_files[0])
         else:
@@ -930,7 +930,18 @@ def test_process_file_4(
             RESPONSE_SCHEMA_LABELSTUDIO,
             P_INPUT_1_EMPTY,
             P_INPUT_2_EMPTY,
-            406,
+            200,
+            False,
+            None,
+            None,
+        ),
+        (
+            [FILE_DOCX],
+            TEXT_CSV,
+            RESPONSE_SCHEMA_LABELSTUDIO,
+            P_INPUT_1_EMPTY,
+            P_INPUT_2_EMPTY,
+            200,
             False,
             None,
             None,
