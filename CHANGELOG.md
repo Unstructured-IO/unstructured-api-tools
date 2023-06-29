@@ -1,3 +1,7 @@
+# 0.10.10
+
+* Filter out metrics endpoint requests from logs
+
 # 0.10.9
 
 * Fix output formatting for csv responses
