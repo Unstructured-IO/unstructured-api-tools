@@ -1,3 +1,7 @@
+# 0.10.11-dev0
+
+* Fix using metrics filter for logger
+
 # 0.10.10
 
 * Filter out metrics endpoint requests from logs
