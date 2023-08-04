@@ -1,4 +1,4 @@
-# 0.10.11-dev0
+# 0.10.11
 
 * Fix using metrics filter for logger
 
